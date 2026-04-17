@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Linux+ Quest — CompTIA XK0-005 Study Game</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #0f1730;
+    --fg: #d7f7d7;
+    --accent: #39ff14;
+    --accent2: #00e5ff;
+    --bad: #ff4d6d;
+    --good: #39ff14;
+    --dim: #7fa07f;
+    --warn: #ffd166;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(ellipse at top, #0e1a3a, #05070f 70%);
+    color: var(--fg);
+    font-family: "Fira Code", "Consolas", "Menlo", monospace;
+  }
+  .app {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: rgba(15, 23, 48, 0.85);
+    padding: 14px 18px;
+    box-shadow: 0 0 18px rgba(57,255,20,0.15);
+  }
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(57,255,20,0.6);
+  }
+  .subtitle { color: var(--dim); font-size: 13px; margin-top: 4px; }
+  .hud {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .chip {
+    background: #07112a;
+    border: 1px solid #1f3a6a;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  .chip b { color: var(--accent2); }
+  main {
+    flex: 1;
+    margin-top: 18px;
+    background: rgba(15, 23, 48, 0.9);
+    border: 1px solid #1f3a6a;
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 0 24px rgba(0,229,255,0.08);
+  }
+  .domain-tag {
+    display: inline-block;
+    font-size: 11px;
+    background: #102040;
+    color: var(--accent2);
+    border: 1px solid #204070;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .question {
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    margin: 6px 0 16px;
+  }
+  .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .answer-btn {
+    text-align: left;
+    background: #091428;
+    color: var(--fg);
+    border: 1px solid #24406a;
+    padding: 12px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.15s ease;
+  }
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #0d1c3a;
+    transform: translateX(2px);
+  }
+  .answer-btn:disabled { cursor: default; opacity: 0.9; }
+  .answer-btn.correct {
+    background: rgba(57,255,20,0.15);
+    border-color: var(--good);
+    color: var(--good);
+  }
+  .answer-btn.wrong {
+    background: rgba(255,77,109,0.15);
+    border-color: var(--bad);
+    color: var(--bad);
+  }
+  .feedback {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    display: none;
+  }
+  .feedback.good { background: rgba(57,255,20,0.08); border-left: 3px solid var(--good); display: block; }
+  .feedback.bad { background: rgba(255,77,109,0.08); border-left: 3px solid var(--bad); display: block; }
+  .controls {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  button.cmd {
+    background: #07112a;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  button.cmd:hover { background: rgba(57,255,20,0.1); }
+  button.cmd.secondary { color: var(--accent2); border-color: var(--accent2); }
+  button.cmd.secondary:hover { background: rgba(0,229,255,0.1); }
+  .lives { color: var(--bad); letter-spacing: 3px; }
+  .streak-fire { color: var(--warn); }
+  .game-over {
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .game-over h2 {
+    color: var(--accent);
+    font-size: 28px;
+    margin: 0 0 10px;
+    text-shadow: 0 0 10px rgba(57,255,20,0.5);
+  }
+  .score-big {
+    font-size: 48px;
+    color: var(--accent2);
+    margin: 10px 0;
+    text-shadow: 0 0 12px rgba(0,229,255,0.6);
+  }
+  .rank {
+    font-size: 18px;
+    color: var(--warn);
+    margin: 10px 0 20px;
+  }
+  footer {
+    margin-top: 14px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 11px;
+  }
+  .blink { animation: blink 1s steps(2) infinite; }
+  @keyframes blink { to { opacity: 0.3; } }
+  .cursor::after { content: "_"; color: var(--accent); animation: blink 1s steps(2) infinite; }
+  .progress {
+    height: 4px;
+    background: #07112a;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.3s ease;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>&gt; LINUX+ QUEST <span class="cursor"></span></h1>
+    <div class="subtitle">CompTIA XK0-005 prep — sudo your way to certification</div>
+    <div class="hud" id="hud">
+      <div class="chip">SCORE <b id="score">0</b></div>
+      <div class="chip">STREAK <span id="streak-fire"></span><b id="streak">0</b></div>
+      <div class="chip">LIVES <span class="lives" id="lives">♥♥♥</span></div>
+      <div class="chip">Q <b id="qnum">0</b>/<b id="qtotal">0</b></div>
+      <div class="chip">LEVEL <b id="level">1</b></div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progbar" style="width:0%"></div></div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer>
+    Study tip: Each explanation is worth reading — CompTIA loves <i>why</i>, not just <i>what</i>.
+  </footer>
+</div>
+
+<script>
+const QUESTIONS = [
+  // Domain 1: System Management
+  {
+    d: "1.0 System Management",
+    q: "You need to display the first 20 lines of /var/log/syslog. Which command?",
+    a: ["head -n 20 /var/log/syslog", "tail -n 20 /var/log/syslog", "cat -20 /var/log/syslog", "less 20 /var/log/syslog"],
+    c: 0,
+    e: "`head -n 20` shows the first 20 lines. `tail` shows the last lines. `cat -20` is invalid syntax."
+  },
+  {
+    d: "1.0 System Management",
+    q: "Which file defines mount points that are mounted at boot?",
+    a: ["/etc/mtab", "/etc/fstab", "/etc/mounts", "/proc/mounts"],
+    c: 1,
+    e: "/etc/fstab is the static file system table. /etc/mtab and /proc/mounts show currently mounted filesystems."
+  },
+  {
+    d: "1.0 System Management",
+    q: "What does `systemctl enable nginx` do?",
+    a: ["Starts nginx immediately", "Configures nginx to start at boot", "Reloads nginx config", "Shows nginx status"],
+    c: 1,
+    e: "`enable` creates symlinks so the unit starts at boot. Use `start` to run it immediately, or `enable --now` for both."
+  },
+  {
+    d: "1.0 System Management",
+    q: "A process is eating CPU. You know its PID is 4242. How do you politely terminate it?",
+    a: ["kill -9 4242", "kill -15 4242", "kill -HUP 4242", "pkill -KILL 4242"],
+    c: 1,
+    e: "Signal 15 (SIGTERM) lets the process clean up. SIGKILL (-9) is the nuclear option — use only if SIGTERM fails."
+  },
+  {
+    d: "1.0 System Management",
+    q: "Which command shows real-time kernel messages?",
+    a: ["dmesg -w", "journalctl -x", "tail /var/log/boot", "uname -a"],
+    c: 0,
+    e: "`dmesg -w` follows kernel ring buffer output live. `journalctl -kf` also works on systemd systems."
+  },
+  {
+    d: "1.0 System Management",
+    q: "You want to find all files over 100MB under /home. Which command?",
+    a: ["find /home -size +100M", "find /home -larger 100M", "ls -R /home | grep 100M", "du -h /home +100"],
+    c: 0,
+    e: "`find` uses `-size +100M` for files larger than 100 MiB. The `+` means 'greater than'."
+  },
+  {
+    d: "1.0 System Management",
+    q: "What does the 't' in drwxrwxrwt on /tmp mean?",
+    a: ["Temporary directory flag", "SUID bit set", "Sticky bit — only owners can delete their files", "SGID bit set"],
+    c: 2,
+    e: "The sticky bit on a directory prevents users from deleting files they don't own — critical for shared dirs like /tmp."
+  },
+  {
+    d: "1.0 System Management",
+    q: "Which directory contains user-installed executable binaries traditionally?",
+    a: ["/bin", "/sbin", "/usr/local/bin", "/var/bin"],
+    c: 2,
+    e: "/usr/local/bin holds locally-installed programs not managed by the distro's package manager."
+  },
+
+  // Domain 2: Security
+  {
+    d: "2.0 Security",
+    q: "chmod 750 report.txt — what are the permissions?",
+    a: ["rwxr-xr--", "rwxr-x---", "rwxrwx---", "rw-r-x---"],
+    c: 1,
+    e: "7=rwx (owner), 5=r-x (group), 0=--- (other). So rwxr-x---"
+  },
+  {
+    d: "2.0 Security",
+    q: "You want user 'bob' to run `systemctl restart nginx` without a password via sudo. What goes in /etc/sudoers?",
+    a: ["bob ALL=(ALL) NOPASSWD: /bin/systemctl restart nginx", "bob ALL=NOPASSWD", "bob nginx:restart", "bob: systemctl"],
+    c: 0,
+    e: "Syntax: USER HOSTS=(RUNAS) TAGS: COMMANDS. NOPASSWD skips the password prompt; specify the exact command for least privilege."
+  },
+  {
+    d: "2.0 Security",
+    q: "What's the safest way to generate an SSH key pair?",
+    a: ["ssh-keygen -t rsa -b 1024", "ssh-keygen -t ed25519", "ssh-keygen -t dsa", "openssl genrsa 512"],
+    c: 1,
+    e: "Ed25519 is modern, fast, and secure. RSA-1024 and DSA are deprecated; 512-bit is unsafe."
+  },
+  {
+    d: "2.0 Security",
+    q: "Which file lists public keys authorized to log into an account via SSH?",
+    a: ["~/.ssh/known_hosts", "~/.ssh/authorized_keys", "~/.ssh/config", "/etc/ssh/ssh_keys"],
+    c: 1,
+    e: "~/.ssh/authorized_keys holds public keys allowed to log in. known_hosts stores server fingerprints you've connected to."
+  },
+  {
+    d: "2.0 Security",
+    q: "Which tool hardens a system by enforcing MAC (Mandatory Access Control) with labels?",
+    a: ["iptables", "SELinux", "fail2ban", "AIDE"],
+    c: 1,
+    e: "SELinux uses labels and policies for mandatory access control. AppArmor uses paths. DAC (chmod) is the Linux default."
+  },
+  {
+    d: "2.0 Security",
+    q: "A user forgot their password. As root, how do you force them to change it next login?",
+    a: ["passwd -e alice", "chage -d 0 alice", "usermod -L alice", "Both A and B"],
+    c: 3,
+    e: "`passwd -e` expires the password immediately; `chage -d 0` sets last change to epoch — both force a reset."
+  },
+  {
+    d: "2.0 Security",
+    q: "What does `firewall-cmd --zone=public --add-port=8080/tcp --permanent` do?",
+    a: ["Temporarily opens port 8080", "Permanently opens 8080/tcp in the public zone, but not active until reload", "Closes port 8080", "Adds a service named 8080"],
+    c: 1,
+    e: "--permanent writes to config but doesn't apply to the runtime; run `firewall-cmd --reload` to activate."
+  },
+
+  // Domain 3: Scripting, Containers, Automation
+  {
+    d: "3.0 Scripting & Automation",
+    q: "What's the shebang for a Bash script?",
+    a: ["#!bash", "#!/bin/bash", "#bash!", "// bash"],
+    c: 1,
+    e: "The shebang `#!/bin/bash` tells the kernel which interpreter to use. Must be the first line."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "In Bash, what does $? contain?",
+    a: ["The PID of the last process", "The exit status of the last command", "The name of the script", "The number of arguments"],
+    c: 1,
+    e: "$? = exit status of the previous command (0 = success). $! = last background PID. $# = argument count."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "A cron entry `*/15 * * * * /usr/local/bin/backup.sh` runs…",
+    a: ["Once every 15 days", "Every 15 minutes", "At 15:00 every day", "On the 15th of every month"],
+    c: 1,
+    e: "*/15 in the minute field = every 15 minutes. Format: minute hour day month weekday."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "Which command lists running Docker containers?",
+    a: ["docker list", "docker ps", "docker show --running", "docker status"],
+    c: 1,
+    e: "`docker ps` shows running containers. `docker ps -a` shows all, including stopped."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "In an Ansible playbook, what does `become: yes` do?",
+    a: ["Runs the task as root (privilege escalation)", "Makes the task idempotent", "Runs on all hosts", "Enables verbose output"],
+    c: 0,
+    e: "`become` is privilege escalation — sudo by default. It's how Ansible runs tasks as another user (usually root)."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "What does `git reset --hard HEAD~1` do?",
+    a: ["Creates a new branch", "Discards the last commit and all local changes", "Pushes to remote", "Merges the last commit"],
+    c: 1,
+    e: "--hard resets both the index AND working tree. HEAD~1 = one commit back. Destructive — uncommitted changes are LOST."
+  },
+
+  // Domain 4: Troubleshooting
+  {
+    d: "4.0 Troubleshooting",
+    q: "`df -h` shows /var at 100% but `du -sh /var` reports only 2 GB. Why the mismatch?",
+    a: ["The filesystem is corrupted", "A deleted file is still held open by a process", "Disk quotas are maxed", "Inodes exhausted"],
+    c: 1,
+    e: "A process holding a deleted file keeps the blocks allocated. Use `lsof | grep deleted` to find it and restart that process."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "You can't create new files on a disk with plenty of free space. What might be exhausted?",
+    a: ["Swap", "Inodes", "RAM", "Sockets"],
+    c: 1,
+    e: "Check with `df -i`. Many tiny files can exhaust inodes before bytes run out — mail spools and cache dirs are classic offenders."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "A server is sluggish. `uptime` shows load average 12.00 on a 4-core box. What does that suggest?",
+    a: ["System is underutilized", "Runqueue is 3x cores — heavy load or I/O wait", "Memory leak", "Disk is failing"],
+    c: 1,
+    e: "Load > cores means processes are waiting. Check `top`/`iostat` — high %wa suggests I/O bottleneck, high %us suggests CPU."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "DNS resolution is failing on the host. Which file should you check first?",
+    a: ["/etc/hosts", "/etc/resolv.conf", "/etc/nsswitch.conf", "All of the above"],
+    c: 3,
+    e: "nsswitch.conf sets resolution order, resolv.conf lists DNS servers, and /etc/hosts can override. All three matter."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "Which command shows which process is listening on port 443?",
+    a: ["ss -tlnp | grep :443", "ps aux | grep 443", "ifconfig 443", "netcat -l 443"],
+    c: 0,
+    e: "`ss -tlnp` — TCP, listening, numeric, process. Modern replacement for `netstat -tlnp`."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "A service won't start. `systemctl status foo` shows 'code=exited, status=203/EXEC'. Likely cause?",
+    a: ["Config file syntax error", "ExecStart binary missing or not executable", "Port already in use", "SELinux denial"],
+    c: 1,
+    e: "Exit 203 (EXEC) means systemd couldn't exec the binary — check the ExecStart path and that the file is executable."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "Ping to 8.8.8.8 works, but `ping google.com` fails. What's broken?",
+    a: ["Default gateway", "DNS resolution", "Network interface", "Firewall"],
+    c: 1,
+    e: "IP works but hostname doesn't = DNS issue. Check /etc/resolv.conf and try `dig google.com @8.8.8.8`."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "You're out of memory but `free -h` shows gigabytes of 'cached'. Should you panic?",
+    a: ["Yes, run `echo 3 > /proc/sys/vm/drop_caches` immediately", "No — cached memory is reclaimed automatically when needed", "Reboot the server", "Kill random processes"],
+    c: 1,
+    e: "Linux uses free RAM for disk cache. It's reclaimed on demand. 'available' in `free -h` is what actually matters."
+  },
+
+  // Mixed / bonus
+  {
+    d: "1.0 System Management",
+    q: "Which command shows the current runlevel target under systemd?",
+    a: ["runlevel", "systemctl get-default", "who -r", "systemctl list-units --type=target"],
+    c: 1,
+    e: "`systemctl get-default` shows the default target (e.g., multi-user.target, graphical.target). Replaces old runlevels."
+  },
+  {
+    d: "2.0 Security",
+    q: "To encrypt a block device at rest, you'd most likely use:",
+    a: ["tar", "LUKS/cryptsetup", "gpg", "openssl"],
+    c: 1,
+    e: "LUKS (Linux Unified Key Setup) via `cryptsetup` is the standard for full-disk/partition encryption on Linux."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "In a Dockerfile, which instruction sets the default command when the container runs?",
+    a: ["RUN", "EXEC", "CMD", "ENTRYPOINT"],
+    c: 2,
+    e: "CMD sets a default that can be overridden at `docker run`. ENTRYPOINT is harder to override. RUN executes at build time."
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "You suspect a failing disk. Which tool reads S.M.A.R.T. data?",
+    a: ["fdisk", "smartctl", "lsblk", "badblocks"],
+    c: 1,
+    e: "`smartctl -a /dev/sda` dumps full SMART attributes. Look for reallocated sectors and pending/uncorrectable errors."
+  },
+  {
+    d: "1.0 System Management",
+    q: "Which package manager is native to RHEL/Rocky/Alma 9?",
+    a: ["apt", "dnf", "pacman", "zypper"],
+    c: 1,
+    e: "DNF replaced YUM on RHEL 8+. APT is Debian/Ubuntu; pacman is Arch; zypper is openSUSE."
+  },
+  {
+    d: "2.0 Security",
+    q: "`chattr +i /etc/passwd` does what?",
+    a: ["Makes it immutable — even root can't modify or delete until -i is removed", "Hides the file", "Encrypts the file", "Enables auditing"],
+    c: 0,
+    e: "The immutable attribute blocks ALL writes, including root. Remove with `chattr -i`. Great for locking critical files."
+  },
+  {
+    d: "3.0 Scripting & Automation",
+    q: "In Bash, `grep ERROR app.log | wc -l` prints…",
+    a: ["All lines containing ERROR", "The number of lines containing ERROR", "The first ERROR line", "A word count of the whole log"],
+    c: 1,
+    e: "Pipe sends grep's matches to `wc -l`, which counts lines. Classic one-liner for 'how many errors today?'"
+  },
+  {
+    d: "4.0 Troubleshooting",
+    q: "`strace -p 1234` would…",
+    a: ["Kill process 1234", "Trace system calls made by PID 1234", "Show network connections of 1234", "Attach a debugger"],
+    c: 1,
+    e: "strace shows syscalls and signals in real time. Invaluable when a program mysteriously hangs or fails on a file open."
+  },
+];
+
+// shuffle utility
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const state = {
+  queue: [],
+  idx: 0,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  lives: 3,
+  answered: false,
+  total: 0,
+};
+
+const $ = (id) => document.getElementById(id);
+const main = $("main");
+
+function renderHud() {
+  $("score").textContent = state.score;
+  $("streak").textContent = state.streak;
+  $("streak-fire").textContent = state.streak >= 3 ? "🔥" : "";
+  $("streak-fire").className = "streak-fire";
+  $("lives").textContent = "♥".repeat(state.lives) + "♡".repeat(3 - state.lives);
+  $("qnum").textContent = Math.min(state.idx + 1, state.total);
+  $("qtotal").textContent = state.total;
+  $("level").textContent = Math.floor(state.score / 500) + 1;
+  const pct = state.total ? (state.idx / state.total) * 100 : 0;
+  $("progbar").style.width = pct + "%";
+}
+
+function startGame() {
+  state.queue = shuffle(QUESTIONS);
+  state.idx = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.lives = 3;
+  state.total = state.queue.length;
+  renderHud();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (state.lives <= 0 || state.idx >= state.queue.length) {
+    return renderGameOver();
+  }
+  state.answered = false;
+  const q = state.queue[state.idx];
+  const shuffledIdx = shuffle(q.a.map((_, i) => i));
+  const correctNewIdx = shuffledIdx.indexOf(q.c);
+  const answers = shuffledIdx.map(i => q.a[i]);
+
+  main.innerHTML = `
+    <div class="domain-tag">${q.d}</div>
+    <div class="question">$ ${q.q}</div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="controls" id="controls"></div>
+  `;
+
+  const wrap = $("answers");
+  answers.forEach((text, i) => {
+    const btn = document.createElement("button");
+    btn.className = "answer-btn";
+    btn.textContent = String.fromCharCode(65 + i) + ") " + text;
+    btn.onclick = () => handleAnswer(i, correctNewIdx, q);
+    wrap.appendChild(btn);
+  });
+  renderHud();
+}
+
+function handleAnswer(picked, correctIdx, q) {
+  if (state.answered) return;
+  state.answered = true;
+  const buttons = document.querySelectorAll(".answer-btn");
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (i === correctIdx) b.classList.add("correct");
+    else if (i === picked) b.classList.add("wrong");
+  });
+
+  const fb = $("feedback");
+  const correct = picked === correctIdx;
+  if (correct) {
+    state.streak += 1;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+    const bonus = state.streak >= 3 ? 50 : 0;
+    const pts = 100 + bonus;
+    state.score += pts;
+    fb.className = "feedback good";
+    fb.innerHTML = `✓ <b>Correct!</b> +${pts}${bonus ? " (streak bonus!)" : ""}\n\n<b>Why:</b> ${q.e}`;
+  } else {
+    state.streak = 0;
+    state.lives -= 1;
+    fb.className = "feedback bad";
+    fb.innerHTML = `✗ <b>Incorrect.</b> Correct answer: <b>${q.a[q.c]}</b>\n\n<b>Why:</b> ${q.e}`;
+  }
+  renderHud();
+
+  const ctr = $("controls");
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "cmd";
+  const isLast = state.idx + 1 >= state.queue.length || state.lives <= 0;
+  nextBtn.textContent = isLast ? "> FINISH" : "> NEXT [Enter]";
+  nextBtn.onclick = nextQuestion;
+  ctr.appendChild(nextBtn);
+  nextBtn.focus();
+}
+
+function nextQuestion() {
+  state.idx += 1;
+  renderQuestion();
+}
+
+function rankFor(score, total) {
+  const pct = score / (total * 100);
+  if (pct >= 0.95) return { r: "ROOT GOD", msg: "You could teach this exam." };
+  if (pct >= 0.80) return { r: "SYSADMIN", msg: "You're exam-ready. Go book it." };
+  if (pct >= 0.60) return { r: "POWER USER", msg: "Close — drill weak domains and try again." };
+  if (pct >= 0.40) return { r: "APPRENTICE", msg: "Solid start. Review man pages and retry." };
+  return { r: "TUX HATCHLING", msg: "Keep studying — every Linux guru started here." };
+}
+
+function renderGameOver() {
+  const rank = rankFor(state.score, state.total);
+  const survived = state.lives > 0;
+  main.innerHTML = `
+    <div class="game-over">
+      <h2>${survived ? "&gt; SESSION COMPLETE" : "&gt; KERNEL PANIC"}</h2>
+      <div class="subtitle">${survived ? "You finished the run." : "Out of lives — filesystem check required."}</div>
+      <div class="score-big">${state.score}</div>
+      <div class="rank">Rank: ${rank.r}</div>
+      <div style="color:var(--dim); margin-bottom:6px;">${rank.msg}</div>
+      <div style="color:var(--dim); font-size:13px; margin-bottom:20px;">
+        Best streak: <b style="color:var(--warn)">${state.bestStreak}</b> &nbsp;·&nbsp;
+        Questions answered: <b style="color:var(--accent2)">${state.idx}/${state.total}</b>
+      </div>
+      <div class="controls" style="justify-content:center;">
+        <button class="cmd" id="restart">&gt; RESTART</button>
+      </div>
+    </div>
+  `;
+  $("restart").onclick = startGame;
+  $("restart").focus();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const btn = document.querySelector("#controls .cmd") || document.getElementById("restart");
+    if (btn) btn.click();
+  } else if (/^[1-9]$/.test(e.key)) {
+    if (state.answered) return;
+    const idx = parseInt(e.key, 10) - 1;
+    const btns = document.querySelectorAll(".answer-btn");
+    if (btns[idx]) btns[idx].click();
+  } else if (/^[a-dA-D]$/.test(e.key)) {
+    if (state.answered) return;
+    const idx = e.key.toLowerCase().charCodeAt(0) - 97;
+    const btns = document.querySelectorAll(".answer-btn");
+    if (btns[idx]) btns[idx].click();
+  }
+});
+
+startGame();
+</script>
+</body>
+</html>
