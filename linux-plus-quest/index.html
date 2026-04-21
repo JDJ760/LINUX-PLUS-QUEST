@@ -1,551 +1,1439 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#39ff14" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Linux+ Quest" />
-<link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="icon-192.png" />
-<title>Linux+ Quest — CompTIA XK0-005</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#39ff14"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TechQuest"/>
+<link rel="manifest" href="manifest.json"/>
+<title>TechQuest — Linux+ & C++ Study</title>
 <style>
-  :root {
-    --bg: #05070f;
-    --panel: #0f1730;
-    --fg: #d7f7d7;
-    --accent: #39ff14;
-    --accent2: #00e5ff;
-    --bad: #ff4d6d;
-    --good: #39ff14;
-    --dim: #6a8f6a;
-    --warn: #ffd166;
-    --border: #1a3050;
-    --safe: env(safe-area-inset-bottom, 0px);
-  }
-  *, *::before, *::after { box-sizing: border-box; }
-  html {
-    height: 100%;
-    scroll-behavior: smooth;
-  }
-  body {
-    margin: 0;
-    min-height: 100%;
-    min-height: 100dvh;
-    background: radial-gradient(ellipse at top, #0e1a3a 0%, #05070f 70%);
-    color: var(--fg);
-    font-family: "Fira Code", "SF Mono", "Consolas", "Menlo", monospace;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: none;
-  }
+:root{
+  --bg:#05070f;--panel:#0f1730;--fg:#d7f7d7;
+  --green:#39ff14;--cyan:#00e5ff;--red:#ff4d6d;
+  --yellow:#ffd166;--dim:#5a7f5a;--border:#1a3050;
+  --safe:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;scroll-behavior:smooth}
+body{
+  min-height:100dvh;
+  background:radial-gradient(ellipse at top,#0e1a3a 0%,#05070f 70%);
+  color:var(--fg);
+  font-family:"Fira Code","SF Mono","Consolas",monospace;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior:none;
+}
+.app{
+  display:flex;flex-direction:column;
+  min-height:100dvh;
+  padding:10px 10px calc(10px + var(--safe));
+  max-width:700px;margin:0 auto;
+}
 
-  /* ── Layout ── */
-  .app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-    padding: 12px 12px calc(12px + var(--safe));
-    max-width: 680px;
-    margin: 0 auto;
-  }
+/* ── Header ── */
+header{
+  flex-shrink:0;
+  border:1px solid var(--green);border-radius:10px;
+  background:rgba(15,23,48,.92);
+  padding:10px 14px 8px;
+  box-shadow:0 0 20px rgba(57,255,20,.1);
+}
+h1{font-size:clamp(14px,4vw,19px);letter-spacing:2px;color:var(--green);text-shadow:0 0 8px rgba(57,255,20,.5)}
+.subtitle{color:var(--dim);font-size:10px;margin-top:2px}
+.hud{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}
+.chip{background:#07112a;border:1px solid var(--border);border-radius:6px;padding:4px 5px;text-align:center}
+.chip-label{color:var(--dim);display:block;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.chip-val{color:var(--cyan);font-size:13px;font-weight:bold;display:block}
+.chip-val.lives{color:var(--red);font-size:10px}
+.progress{height:3px;background:#07112a;border-radius:2px;margin-top:7px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .4s ease;border-radius:2px}
+.timer-bar-wrap{height:4px;background:#1a1a2e;border-radius:2px;margin-top:4px;overflow:hidden;display:none}
+.timer-bar{height:100%;background:var(--yellow);transition:width 1s linear;border-radius:2px;width:100%}
+.timer-bar.urgent{background:var(--red)}
 
-  /* ── Header ── */
-  header {
-    flex-shrink: 0;
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    background: rgba(15,23,48,0.9);
-    padding: 12px 14px 10px;
-    box-shadow: 0 0 20px rgba(57,255,20,0.12);
-  }
-  h1 {
-    margin: 0 0 2px;
-    font-size: clamp(15px, 4vw, 20px);
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-shadow: 0 0 8px rgba(57,255,20,0.5);
-  }
-  .subtitle { color: var(--dim); font-size: 11px; }
+/* ── Main ── */
+main{
+  flex:1;margin-top:8px;
+  background:rgba(15,23,48,.92);
+  border:1px solid var(--border);border-radius:10px;
+  padding:14px;display:flex;flex-direction:column;
+  min-height:0;
+}
 
-  .hud {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    margin-top: 10px;
-  }
-  .chip {
-    background: #07112a;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 5px 6px;
-    text-align: center;
-    font-size: 11px;
-    line-height: 1.4;
-  }
-  .chip-label { color: var(--dim); display: block; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
-  .chip-val { color: var(--accent2); font-size: 14px; font-weight: bold; }
-  .chip-val.lives { color: var(--bad); font-size: 11px; letter-spacing: 1px; }
+/* ── Subject select ── */
+.subject-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:14px;text-align:center}
+.subject-screen h2{color:var(--green);font-size:clamp(16px,5vw,22px);text-shadow:0 0 10px rgba(57,255,20,.4)}
+.subject-screen p{color:var(--dim);font-size:12px;line-height:1.6;max-width:420px}
+.subject-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px}
+.subject-card{
+  background:#07112a;border:1px solid var(--border);border-radius:10px;
+  padding:18px 12px;cursor:pointer;text-align:center;
+  transition:border-color .15s,background .15s,transform .1s;
+  touch-action:manipulation;
+}
+.subject-card:hover{border-color:var(--cyan);background:#0d1c3a}
+.subject-card:active{transform:scale(.97)}
+.subject-card.linux:hover{border-color:var(--green)}
+.subject-card.cs1b:hover{border-color:var(--yellow)}
+.subject-cards.three{grid-template-columns:1fr 1fr 1fr}
+.subject-card .icon{font-size:28px;display:block;margin-bottom:8px}
+.subject-card .card-title{color:var(--green);font-size:14px;font-weight:bold;letter-spacing:1px}
+.subject-card.cs .card-title{color:var(--cyan)}
+.subject-card.cs1b .card-title{color:var(--yellow)}
+.subject-card .card-sub{color:var(--dim);font-size:10px;margin-top:4px}
+.subject-card .card-count{color:var(--yellow);font-size:11px;margin-top:6px}
 
-  .progress {
-    height: 3px;
-    background: #07112a;
-    border-radius: 2px;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    transition: width 0.4s ease;
-    border-radius: 2px;
-  }
+/* ── Difficulty select ── */
+.diff-screen{display:flex;flex-direction:column;flex:1;gap:10px}
+.diff-screen h2{color:var(--green);font-size:clamp(14px,4vw,18px);letter-spacing:1px;text-align:center;margin-bottom:2px}
+.diff-cards{display:flex;flex-direction:column;gap:8px;flex:1}
+.diff-card{
+  background:#07112a;border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px;cursor:pointer;
+  display:flex;align-items:center;gap:12px;
+  transition:border-color .12s,background .12s,transform .1s;
+  touch-action:manipulation;
+}
+.diff-card:hover{background:#0d1c3a}
+.diff-card:active{transform:scale(.98)}
+.diff-card.lvl1{border-left:3px solid #39ff14}.diff-card.lvl1:hover{border-color:#39ff14}
+.diff-card.lvl2{border-left:3px solid #00e5ff}.diff-card.lvl2:hover{border-color:#00e5ff}
+.diff-card.lvl3{border-left:3px solid #ffd166}.diff-card.lvl3:hover{border-color:#ffd166}
+.diff-card.lvl4{border-left:3px solid #ff4d6d}.diff-card.lvl4:hover{border-color:#ff4d6d}
+.diff-icon{font-size:22px;flex-shrink:0;width:30px;text-align:center}
+.diff-info{flex:1}
+.diff-name{font-size:14px;font-weight:bold;letter-spacing:1px;color:var(--fg)}
+.diff-desc{font-size:11px;color:var(--dim);margin-top:2px}
+.diff-badges{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.badge{font-size:10px;background:#0a1828;border:1px solid #1e3050;border-radius:4px;padding:2px 6px;color:var(--dim)}
+.badge.hot{color:var(--yellow);border-color:#3a3010}
+.badge.life{color:var(--red);border-color:#3a1020}
+.badge.pts{color:var(--green);border-color:#1a3010}
+.hi-badge{font-size:10px;color:var(--yellow);flex-shrink:0;text-align:right}
 
-  /* ── Main card ── */
-  main {
-    flex: 1;
-    margin-top: 10px;
-    background: rgba(15,23,48,0.92);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-  }
+/* ── Question ── */
+.domain-tag{display:inline-block;font-size:10px;background:#102040;color:var(--cyan);border:1px solid #1f4070;padding:2px 8px;border-radius:999px;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
+.lvl-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;margin-bottom:8px;margin-left:5px;letter-spacing:1px}
+.lvl-tag.l1{background:rgba(57,255,20,.08);color:#39ff14;border:1px solid #1a4010}
+.lvl-tag.l2{background:rgba(0,229,255,.08);color:#00e5ff;border:1px solid #0a3040}
+.lvl-tag.l3{background:rgba(255,209,102,.08);color:#ffd166;border:1px solid #3a3010}
+.lvl-tag.l4{background:rgba(255,77,109,.08);color:#ff4d6d;border:1px solid #3a1020}
+.question{font-size:clamp(13px,3.5vw,15px);line-height:1.6;margin:0 0 12px;white-space:pre-wrap;word-break:break-word}
+.answers{display:flex;flex-direction:column;gap:7px}
+.answer-btn{
+  text-align:left;background:#07112a;color:var(--fg);
+  border:1px solid var(--border);padding:12px 13px;border-radius:8px;
+  cursor:pointer;font-family:inherit;font-size:clamp(12px,3vw,13.5px);
+  line-height:1.4;transition:border-color .1s,background .1s,transform .1s;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+  min-height:46px;width:100%;
+}
+.answer-btn:hover:not(:disabled){border-color:var(--green);background:#0d1c3a}
+.answer-btn:active:not(:disabled){transform:scale(.98)}
+.answer-btn:disabled{cursor:default}
+.answer-btn.correct{background:rgba(57,255,20,.1);border-color:var(--green);color:var(--green)}
+.answer-btn.wrong{background:rgba(255,77,109,.1);border-color:var(--red);color:var(--red);text-decoration:line-through;opacity:.75}
+.answer-btn.eliminated{opacity:.3;text-decoration:line-through}
+.key-hint{display:inline-block;background:#0e1e3a;border:1px solid #2a4060;border-radius:3px;width:18px;height:18px;line-height:18px;text-align:center;font-size:9px;color:var(--dim);margin-right:7px;flex-shrink:0;vertical-align:middle}
+.feedback{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:clamp(11px,2.8vw,12.5px);line-height:1.6;display:none;white-space:pre-wrap;word-break:break-word}
+.feedback.good{background:rgba(57,255,20,.06);border-left:3px solid var(--green);display:block}
+.feedback.bad{background:rgba(255,77,109,.06);border-left:3px solid var(--red);display:block}
+.feedback strong{color:var(--cyan)}
 
-  .domain-tag {
-    display: inline-block;
-    font-size: 10px;
-    background: #102040;
-    color: var(--accent2);
-    border: 1px solid #1f4070;
-    padding: 3px 9px;
-    border-radius: 999px;
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
+/* ── Controls ── */
+.controls{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cmd{
+  background:#07112a;color:var(--green);border:1px solid var(--green);
+  padding:10px 14px;border-radius:8px;font-family:inherit;font-size:12px;
+  cursor:pointer;letter-spacing:1px;min-height:42px;
+  touch-action:manipulation;transition:background .1s;
+}
+.cmd:hover{background:rgba(57,255,20,.08)}
+.cmd:active{transform:scale(.97)}
+.cmd.cyan{color:var(--cyan);border-color:var(--cyan)}
+.cmd.cyan:hover{background:rgba(0,229,255,.08)}
+.cmd.red{color:var(--red);border-color:var(--red)}
+.cmd.red:hover{background:rgba(255,77,109,.08)}
+.cmd.yellow{color:var(--yellow);border-color:var(--yellow)}
+.cmd.yellow:hover{background:rgba(255,209,102,.08)}
+.hint-btn{font-size:11px;padding:8px 10px}
 
-  .question {
-    font-size: clamp(13px, 3.5vw, 15px);
-    line-height: 1.6;
-    white-space: pre-wrap;
-    margin: 0 0 14px;
-    color: var(--fg);
-  }
-  .question code {
-    background: #0a1428;
-    border: 1px solid #203050;
-    border-radius: 4px;
-    padding: 1px 5px;
-    font-size: 0.9em;
-    color: var(--accent);
-  }
+/* ── Game over ── */
+.over-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:6px;padding:10px 0}
+.over-screen h2{color:var(--green);font-size:clamp(16px,5vw,24px);text-shadow:0 0 10px rgba(57,255,20,.4)}
+.score-big{font-size:clamp(42px,13vw,68px);color:var(--cyan);text-shadow:0 0 16px rgba(0,229,255,.4);line-height:1;margin:6px 0}
+.hi-score-line{font-size:11px;color:var(--yellow)}
+.rank-label{font-size:clamp(13px,3.5vw,16px);color:var(--yellow);margin:4px 0}
+.rank-msg{color:var(--dim);font-size:12px;margin-bottom:8px}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:380px;margin:8px 0 14px}
+.stat-box{background:#07112a;border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center}
+.stat-box .sv{font-size:20px;color:var(--cyan);font-weight:bold}
+.stat-box .sl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-  /* ── Answer buttons ── */
-  .answers {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-  }
-  .answer-btn {
-    text-align: left;
-    background: #07112a;
-    color: var(--fg);
-    border: 1px solid var(--border);
-    padding: 13px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: clamp(12px, 3.2vw, 14px);
-    line-height: 1.4;
-    transition: border-color 0.12s, background 0.12s, transform 0.1s;
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    min-height: 48px;
-  }
-  .answer-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: #0d1c3a;
-  }
-  .answer-btn:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-  .answer-btn:disabled { cursor: default; }
-  .answer-btn.correct {
-    background: rgba(57,255,20,0.12);
-    border-color: var(--good);
-    color: var(--good);
-  }
-  .answer-btn.wrong {
-    background: rgba(255,77,109,0.12);
-    border-color: var(--bad);
-    color: var(--bad);
-    text-decoration: line-through;
-    opacity: 0.8;
-  }
-  .key-hint {
-    display: inline-block;
-    background: #0e1e3a;
-    border: 1px solid #2a4060;
-    border-radius: 4px;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-    font-size: 10px;
-    color: var(--dim);
-    margin-right: 8px;
-    flex-shrink: 0;
-    vertical-align: middle;
-  }
+/* ── Footer ── */
+footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shrink:0}
 
-  /* ── Feedback ── */
-  .feedback {
-    margin-top: 12px;
-    padding: 11px 13px;
-    border-radius: 8px;
-    font-size: clamp(11px, 3vw, 13px);
-    line-height: 1.6;
-    display: none;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .feedback.good {
-    background: rgba(57,255,20,0.07);
-    border-left: 3px solid var(--good);
-    display: block;
-  }
-  .feedback.bad {
-    background: rgba(255,77,109,0.07);
-    border-left: 3px solid var(--bad);
-    display: block;
-  }
-  .feedback strong { color: var(--accent2); }
+/* ── Misc ── */
+.cursor::after{content:"_";color:var(--green);animation:blink 1s steps(2) infinite}
+@keyframes blink{to{opacity:0}}
+.back-row{display:flex;align-items:center;margin-bottom:10px}
+.back-btn{background:none;border:none;color:var(--dim);font-family:inherit;font-size:12px;cursor:pointer;padding:4px 0;letter-spacing:1px}
+.back-btn:hover{color:var(--cyan)}
 
-  /* ── Controls ── */
-  .controls {
-    margin-top: 12px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .cmd {
-    background: #07112a;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 11px 16px;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    min-height: 44px;
-    touch-action: manipulation;
-    transition: background 0.12s;
-  }
-  .cmd:hover { background: rgba(57,255,20,0.1); }
-  .cmd:active { transform: scale(0.97); }
-  .cmd.secondary { color: var(--accent2); border-color: var(--accent2); }
-  .cmd.secondary:hover { background: rgba(0,229,255,0.1); }
-
-  /* ── Game Over ── */
-  .game-over {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    flex: 1;
-    padding: 10px 0;
-  }
-  .game-over h2 {
-    color: var(--accent);
-    font-size: clamp(18px, 5vw, 26px);
-    margin: 0 0 6px;
-    text-shadow: 0 0 10px rgba(57,255,20,0.5);
-  }
-  .score-big {
-    font-size: clamp(42px, 14vw, 68px);
-    color: var(--accent2);
-    margin: 8px 0;
-    text-shadow: 0 0 16px rgba(0,229,255,0.5);
-    line-height: 1;
-  }
-  .rank { font-size: clamp(14px, 4vw, 18px); color: var(--warn); margin: 6px 0 4px; }
-  .rank-msg { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
-  .stats-row { color: var(--dim); font-size: 12px; margin-bottom: 18px; line-height: 2; }
-  .stats-row b { color: var(--accent2); }
-
-  /* ── Start screen ── */
-  .start-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    text-align: center;
-    gap: 12px;
-  }
-  .start-screen .big { font-size: clamp(36px, 12vw, 56px); }
-  .start-screen h2 {
-    color: var(--accent);
-    font-size: clamp(18px, 5vw, 24px);
-    margin: 0;
-    text-shadow: 0 0 10px rgba(57,255,20,0.5);
-  }
-  .start-screen p { color: var(--dim); font-size: 13px; line-height: 1.6; margin: 4px 0; }
-  .domain-list {
-    list-style: none;
-    padding: 0;
-    margin: 6px 0;
-    text-align: left;
-    display: inline-block;
-  }
-  .domain-list li { font-size: 12px; color: var(--fg); padding: 3px 0; }
-  .domain-list li::before { content: "$ "; color: var(--accent); }
-
-  /* ── Footer ── */
-  footer {
-    margin-top: 8px;
-    text-align: center;
-    color: var(--dim);
-    font-size: 10px;
-    flex-shrink: 0;
-  }
-
-  /* cursor blink */
-  .cursor::after { content: "_"; color: var(--accent); animation: blink 1s steps(2) infinite; }
-  @keyframes blink { to { opacity: 0; } }
-
-  /* desktop tweaks */
-  @media (min-width: 600px) {
-    .app { padding: 20px 20px calc(20px + var(--safe)); }
-    .key-hint { display: inline-block; }
-    .hud { grid-template-columns: repeat(5, 1fr); }
-  }
-  @media (max-width: 599px) {
-    .key-hint { display: none; }
-  }
+@media(max-width:480px){
+  .key-hint{display:none}
+  .subject-cards{grid-template-columns:1fr 1fr}
+  .subject-cards.three{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:481px) and (max-width:599px){
+  .subject-cards.three{grid-template-columns:1fr 1fr}
+}
+@media(min-width:600px){
+  .app{padding:16px 20px calc(16px + var(--safe))}
+  .diff-cards{display:grid;grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <h1>&gt;&nbsp;LINUX+&nbsp;QUEST<span class="cursor"></span></h1>
-    <div class="subtitle">CompTIA XK0-005 · 37 questions · 4 domains</div>
-    <div class="hud" id="hud">
-      <div class="chip"><span class="chip-label">Score</span><span class="chip-val" id="score">0</span></div>
-      <div class="chip"><span class="chip-label">Streak</span><span class="chip-val" id="streak">0</span></div>
-      <div class="chip"><span class="chip-label">Lives</span><span class="chip-val lives" id="lives">♥♥♥</span></div>
-      <div class="chip"><span class="chip-label">Q</span><span class="chip-val" id="qnum">0/0</span></div>
-      <div class="chip" style="display:none" id="level-chip"><span class="chip-label">Level</span><span class="chip-val" id="level">1</span></div>
+    <h1>&gt;&nbsp;TECHQUEST<span class="cursor"></span></h1>
+    <div class="subtitle" id="subtitle">Linux+ · C++ Fundamentals · CMPR 121 — Select a subject</div>
+    <div class="hud" id="hud" style="display:none">
+      <div class="chip"><span class="chip-label">Score</span><span class="chip-val" id="h-score">0</span></div>
+      <div class="chip"><span class="chip-label">Streak</span><span class="chip-val" id="h-streak">0</span></div>
+      <div class="chip"><span class="chip-label">Lives</span><span class="chip-val lives" id="h-lives">♥♥♥</span></div>
+      <div class="chip"><span class="chip-label">Q</span><span class="chip-val" id="h-qnum">0/0</span></div>
+      <div class="chip"><span class="chip-label">Hi</span><span class="chip-val" id="h-hi" style="color:var(--yellow)">0</span></div>
     </div>
     <div class="progress"><div class="progress-bar" id="progbar" style="width:0%"></div></div>
+    <div class="timer-bar-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
   </header>
-
   <main id="main"></main>
-
-  <footer id="footer">Tap A–D or keyboard keys to answer &nbsp;·&nbsp; Enter to advance</footer>
+  <footer id="footer">Tap A–D · keyboard 1–4 or A–D · Enter to advance</footer>
 </div>
 
 <script>
-// ── Questions ───────────────────────────────────────────────────────────────
-const Q = [
-  // Domain 1: System Management
-  { d:"1.0 System Management", q:"Display the first 20 lines of /var/log/syslog:", a:["head -n 20 /var/log/syslog","tail -n 20 /var/log/syslog","cat -20 /var/log/syslog","less -20 /var/log/syslog"], c:0, e:"`head -n 20` reads from the top. `tail` reads from the bottom. Neither `cat` nor `less` take a bare number like that." },
-  { d:"1.0 System Management", q:"Which file defines filesystems mounted automatically at boot?", a:["/etc/mtab","/etc/fstab","/etc/mounts","/proc/mounts"], c:1, e:"/etc/fstab is the static filesystem table. /etc/mtab and /proc/mounts show currently-mounted filesystems at runtime." },
-  { d:"1.0 System Management", q:"`systemctl enable nginx` — what does it do?", a:["Starts nginx now","Configures nginx to start at boot","Reloads nginx configuration","Shows nginx status"], c:1, e:"`enable` creates symlinks so the unit auto-starts at boot. Use `start` to run immediately, or `enable --now` for both." },
-  { d:"1.0 System Management", q:"PID 4242 is eating CPU. How do you terminate it gracefully?", a:["kill -9 4242","kill -15 4242","kill -HUP 4242","kill -STOP 4242"], c:1, e:"Signal 15 (SIGTERM) lets the process clean up and exit. SIGKILL (-9) is forceful — use only if SIGTERM fails." },
-  { d:"1.0 System Management", q:"Which command follows kernel ring buffer messages in real time?", a:["dmesg -w","journalctl -x","tail /var/log/boot","uname -r"], c:0, e:"`dmesg -w` streams new kernel messages. On systemd systems `journalctl -kf` also works." },
-  { d:"1.0 System Management", q:"Find all files over 100 MB under /home:", a:["find /home -size +100M","find /home -larger 100M","ls -lhR /home","du -h /home | grep 100M"], c:0, e:"`-size +100M` means 'more than 100 mebibytes'. The `+` prefix is 'greater than' in find." },
-  { d:"1.0 System Management", q:"The permissions on /tmp are drwxrwxrwt — what does the 't' mean?", a:["Temporary filesystem flag","SUID bit is set","Sticky bit — users can only delete their own files","SGID bit is set"], c:2, e:"The sticky bit on a directory prevents users from deleting files they don't own. Essential for shared dirs like /tmp." },
-  { d:"1.0 System Management", q:"Where do user-installed executables (not managed by the package manager) go?", a:["/bin","/sbin","/usr/local/bin","/var/bin"], c:2, e:"/usr/local/bin is the FHS location for local admin-installed programs that aren't part of the base OS." },
-  { d:"1.0 System Management", q:"Which command shows the default systemd target?", a:["runlevel","systemctl get-default","who -r","systemctl list-units"], c:1, e:"`systemctl get-default` prints the default target (e.g., multi-user.target). Replaces the old SysV runlevel concept." },
-  { d:"1.0 System Management", q:"Which package manager is native to RHEL / Rocky Linux 9?", a:["apt","dnf","pacman","zypper"], c:1, e:"DNF replaced YUM starting with RHEL 8. APT = Debian/Ubuntu; pacman = Arch; zypper = openSUSE." },
+// ─────────────────────────────────────────────────────────────
+// QUESTION BANK  sub: linux|cs  lvl: 1–4  c: index of correct answer
+// ─────────────────────────────────────────────────────────────
+const BANK = [
 
-  // Domain 2: Security
-  { d:"2.0 Security", q:"chmod 750 report.txt — what are the resulting permissions?", a:["rwxr-xr--","rwxr-x---","rwxrwx---","rw-r-x---"], c:1, e:"7=rwx (owner), 5=r-x (group), 0=--- (other). So: rwxr-x---" },
-  { d:"2.0 Security", q:"Let user 'bob' run `systemctl restart nginx` without a password via sudo. The sudoers entry is:", a:["bob ALL=(ALL) NOPASSWD: /bin/systemctl restart nginx","bob ALL=NOPASSWD:ALL","bob nginx=restart","ALL bob=(ALL) NOPASSWD:nginx"], c:0, e:"Syntax: USER HOST=(RUNAS) TAGS: COMMAND. NOPASSWD skips the prompt; specify the exact command for least privilege." },
-  { d:"2.0 Security", q:"What is the recommended modern SSH key type?", a:["ssh-keygen -t rsa -b 1024","ssh-keygen -t ed25519","ssh-keygen -t dsa","openssl genrsa 512"], c:1, e:"Ed25519 is modern, fast, and cryptographically strong. RSA-1024 and DSA are deprecated. Never use 512-bit." },
-  { d:"2.0 Security", q:"Which file holds public keys authorized to SSH into an account?", a:["~/.ssh/known_hosts","~/.ssh/authorized_keys","~/.ssh/config","/etc/ssh/ssh_keys"], c:1, e:"~/.ssh/authorized_keys stores allowed public keys. known_hosts records server fingerprints you've seen before." },
-  { d:"2.0 Security", q:"Which technology enforces Mandatory Access Control (MAC) using labels on RHEL?", a:["iptables","SELinux","fail2ban","AIDE"], c:1, e:"SELinux uses labels and type enforcement. AppArmor uses filesystem paths. Regular Unix permissions (chmod) are DAC." },
-  { d:"2.0 Security", q:"Force user 'alice' to change her password at next login:", a:["passwd -e alice","chage -d 0 alice","usermod -L alice","Both A and B work"], c:3, e:"`passwd -e` and `chage -d 0` both expire the password immediately. usermod -L locks (disables) the account instead." },
-  { d:"2.0 Security", q:"`firewall-cmd --zone=public --add-port=8080/tcp --permanent` — when does the rule become active?", a:["Immediately","After `firewall-cmd --reload`","After a reboot only","Never — syntax is wrong"], c:1, e:"--permanent writes to disk config but doesn't touch the live runtime. Run `firewall-cmd --reload` to activate it." },
-  { d:"2.0 Security", q:"`chattr +i /etc/passwd` — what does it do?", a:["Makes the file immutable — even root can't modify it until removed","Hides the file","Encrypts the file","Enables auditing"], c:0, e:"The immutable attribute blocks all writes including root. Remove with `chattr -i`. Used to protect critical system files." },
-  { d:"2.0 Security", q:"To encrypt an entire block device at rest, you would use:", a:["tar + gzip","LUKS / cryptsetup","gpg","openssl enc"], c:1, e:"LUKS (Linux Unified Key Setup) via `cryptsetup luksFormat` is the standard for full-disk/partition encryption on Linux." },
+// ══════════════════════════════════════════
+//  LINUX+  BEGINNER  (lvl 1)
+// ══════════════════════════════════════════
+{sub:"linux",lvl:1,d:"Commands",
+ q:"Which command shows your current directory path?",
+ a:["pwd","ls","cd","dir"],c:0,
+ e:"`pwd` (Print Working Directory) shows your full absolute path like /home/user/docs."},
 
-  // Domain 3: Scripting, Containers, Automation
-  { d:"3.0 Scripting & Automation", q:"What's the correct shebang line for a Bash script?", a:["#!bash","#!/bin/bash","#bash!","// /bin/bash"], c:1, e:"The shebang `#!/bin/bash` tells the kernel which interpreter to use. It must be the very first line." },
-  { d:"3.0 Scripting & Automation", q:"In Bash, what does `$?` contain after a command runs?", a:["PID of the last background process","Exit status of the last command","Name of the script","Number of arguments"], c:1, e:"$? = exit code of the previous command (0 = success, non-zero = error). $! = last background PID. $# = arg count." },
-  { d:"3.0 Scripting & Automation", q:"A cron entry `*/15 * * * * /usr/local/bin/backup.sh` runs:", a:["Once every 15 days","Every 15 minutes","At 15:00 daily","On the 15th of every month"], c:1, e:"*/15 in the minute field means 'every 15 minutes'. Cron format: minute hour mday month wday command." },
-  { d:"3.0 Scripting & Automation", q:"Which command lists only running Docker containers?", a:["docker list","docker ps","docker show --running","docker status"], c:1, e:"`docker ps` shows running containers. Add `-a` to see all including stopped ones." },
-  { d:"3.0 Scripting & Automation", q:"In an Ansible playbook, `become: yes` means:", a:["Escalate privileges (sudo to root)","Make the task idempotent","Target all hosts","Enable verbose logging"], c:0, e:"`become` is Ansible's privilege escalation — sudo by default. It runs the task as another user (usually root)." },
-  { d:"3.0 Scripting & Automation", q:"`git reset --hard HEAD~1` does what?", a:["Creates a new branch from HEAD","Discards the last commit AND all working tree changes","Pushes one commit to remote","Reverts only staged changes"], c:1, e:"--hard resets both the index and working tree. HEAD~1 = one commit back. Uncommitted changes are permanently lost." },
-  { d:"3.0 Scripting & Automation", q:"In a Dockerfile, which instruction sets the default command when the container starts?", a:["RUN","EXEC","CMD","ENTRYPOINT"], c:2, e:"CMD provides defaults that can be overridden at `docker run`. ENTRYPOINT is less overridable. RUN executes at build time." },
-  { d:"3.0 Scripting & Automation", q:"`grep ERROR app.log | wc -l` outputs:", a:["All lines containing ERROR","The count of lines containing ERROR","Just the first ERROR line","Total word count of the log"], c:1, e:"grep passes matching lines to `wc -l` which counts them. Classic one-liner: 'how many errors today?'" },
+{sub:"linux",lvl:1,d:"Commands",
+ q:"Which command lists files in the current directory?",
+ a:["ls","cd","cat","grep"],c:0,
+ e:"`ls` lists directory contents. `-l` for details, `-a` to show hidden files (dotfiles), `-h` for human-readable sizes."},
 
-  // Domain 4: Troubleshooting
-  { d:"4.0 Troubleshooting", q:"`df -h` shows /var at 100% but `du -sh /var` reports only 2 GB. Why?", a:["Filesystem corruption","A deleted file still held open by a running process","Disk quotas maxed","Inodes exhausted"], c:1, e:"A process holding an open file descriptor keeps its blocks allocated even after `rm`. Use `lsof | grep deleted`." },
-  { d:"4.0 Troubleshooting", q:"You can't create new files despite plenty of free disk space. What's likely exhausted?", a:["Swap space","Inodes","RAM","Sockets"], c:1, e:"Check `df -i`. Many tiny files (mail spools, caches) can exhaust inodes while bytes remain. Each file needs one inode." },
-  { d:"4.0 Troubleshooting", q:"`uptime` shows load average 12.00 on a 4-core machine. What does this suggest?", a:["System is underutilized","Run queue is 3× cores — likely CPU or I/O saturation","Memory leak in progress","Failing disk drive"], c:1, e:"Load > number of cores means processes wait for CPU or I/O. Check `iostat` for %wa (I/O wait) or `top` for %us." },
-  { d:"4.0 Troubleshooting", q:"DNS resolution is failing. Which THREE files should you check?", a:["/etc/hosts only","/etc/resolv.conf and /etc/hosts","/etc/nsswitch.conf, /etc/resolv.conf, and /etc/hosts","Only /etc/resolv.conf"], c:2, e:"nsswitch.conf sets resolution order, resolv.conf lists DNS servers, /etc/hosts can override them all. Check all three." },
-  { d:"4.0 Troubleshooting", q:"Which command shows which process is listening on port 443?", a:["ss -tlnp | grep :443","ps aux | grep 443","ifconfig | grep 443","netcat -l 443"], c:0, e:"`ss -tlnp` — TCP, Listening, Numeric (no DNS), Process names. The modern replacement for `netstat -tlnp`." },
-  { d:"4.0 Troubleshooting", q:"`systemctl status foo` shows `code=exited, status=203/EXEC`. Likely cause?", a:["Config file syntax error","ExecStart binary missing or not executable","Port already in use","SELinux denial"], c:1, e:"Exit 203/EXEC means systemd couldn't exec the binary. Check the ExecStart= path and file permissions." },
-  { d:"4.0 Troubleshooting", q:"Ping to 8.8.8.8 works, but `ping google.com` fails. What's broken?", a:["Default gateway","DNS resolution","/etc/hosts missing entry","Network interface down"], c:1, e:"IP reachability works = routing is fine. Hostname resolution fails = DNS. Check /etc/resolv.conf and `dig google.com`." },
-  { d:"4.0 Troubleshooting", q:"`free -h` shows gigabytes of 'cached' memory. Should you be concerned?", a:["Yes — run `echo 3 > /proc/sys/vm/drop_caches`","No — cached memory is reclaimed automatically when needed","Restart the server","Kill unused processes"], c:1, e:"Linux aggressively caches disk reads in free RAM. It's reclaimed on demand. Check the 'available' column, not 'cached'." },
-  { d:"4.0 Troubleshooting", q:"You suspect a failing disk. Which tool reads S.M.A.R.T. data?", a:["fdisk","smartctl","lsblk","badblocks"], c:1, e:"`smartctl -a /dev/sda` dumps SMART attributes. Watch for reallocated sectors, pending sectors, and uncorrectable errors." },
-  { d:"4.0 Troubleshooting", q:"`strace -p 1234` will:", a:["Kill process 1234","Trace system calls made by PID 1234 in real time","Show open network sockets","Step through code in gdb"], c:1, e:"strace attaches to a running process and logs every syscall and signal — invaluable when a process mysteriously hangs." },
+{sub:"linux",lvl:1,d:"Commands",
+ q:"How do you view the contents of a text file called notes.txt?",
+ a:["cat notes.txt","read notes.txt","view notes.txt","open notes.txt"],c:0,
+ e:"`cat` prints file contents. For large files use `less notes.txt` to scroll — press q to quit."},
+
+{sub:"linux",lvl:1,d:"Navigation",
+ q:"What does `cd ..` do?",
+ a:["Goes up one directory level","Lists the parent directory","Copies a directory","Deletes the current directory"],c:0,
+ e:"`..` means the parent directory. `cd ~` goes to your home. `cd -` goes to the previous directory."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"How do you create a new directory called projects?",
+ a:["mkdir projects","newdir projects","create projects","touch projects"],c:0,
+ e:"`mkdir` = Make Directory. Use `mkdir -p a/b/c` to create nested directories at once."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"Which command copies a file?",
+ a:["cp","mv","ln","dd"],c:0,
+ e:"`cp source dest` copies files. `cp -r` copies directories. `mv` moves/renames. `ln` creates links."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"`rm file.txt` — what happens?",
+ a:["Permanently deletes file.txt — no trash","Moves it to Trash","Renames it","Hides it"],c:0,
+ e:"`rm` deletes immediately with no recycle bin. `-r` removes directories. `rm -rf` is irreversible — be careful."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"How do you print 'Hello World' in the terminal?",
+ a:["echo Hello World","print Hello World","say Hello World","write Hello World"],c:0,
+ e:"`echo` writes text to stdout. In scripts: `echo $HOME` prints a variable's value."},
+
+{sub:"linux",lvl:1,d:"Help",
+ q:"What does `man ls` display?",
+ a:["The manual page for ls","A list of man commands","System logs","Linux admin notes"],c:0,
+ e:"`man` opens the manual for any command. Press q to quit, / to search, n for next match."},
+
+{sub:"linux",lvl:1,d:"Users",
+ q:"The root user's home directory is:",
+ a:["/root","/home/root","/usr/root","/admin"],c:0,
+ e:"Root's home is /root. Regular users get /home/username. Root has unrestricted system access."},
+
+{sub:"linux",lvl:1,d:"Users",
+ q:"What does `whoami` print?",
+ a:["Your current username","Your hostname","Your IP address","Your shell"],c:0,
+ e:"`whoami` prints the effective username. Useful in scripts to verify who is running them."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"How do you move file.txt from /tmp/ into /home/user/?",
+ a:["mv /tmp/file.txt /home/user/","cp /tmp/file.txt /home/user/","rm /tmp/file.txt /home/user/","cd /tmp/file.txt"],c:0,
+ e:"`mv` moves or renames. If the destination is a directory, the filename is kept. `cp` would copy but leave the original."},
+
+{sub:"linux",lvl:1,d:"Filesystem",
+ q:"Which directory holds user home directories by default?",
+ a:["/home","/users","/var/home","/usr"],c:0,
+ e:"/home contains personal directories for regular users (e.g., /home/alice). Root's home is the exception: /root."},
+
+{sub:"linux",lvl:1,d:"Commands",
+ q:"Which command shows how much space is left on your disks?",
+ a:["df -h","du -h","ls -s","free -h"],c:0,
+ e:"`df -h` = disk free, human-readable. Shows each mounted filesystem's total, used, and available space."},
+
+// ══════════════════════════════════════════
+//  LINUX+  EASY  (lvl 2)
+// ══════════════════════════════════════════
+{sub:"linux",lvl:2,d:"Commands",
+ q:"Which flag makes `ls` show hidden (dot) files?",
+ a:["ls -a","ls -h","ls -l","ls -r"],c:0,
+ e:"Files starting with `.` are hidden from `ls` by default. `-a` shows them. `-la` combines long format with all files."},
+
+{sub:"linux",lvl:2,d:"Text Processing",
+ q:"`grep 'ERROR' app.log` — what does it output?",
+ a:["Lines containing ERROR","Deletes matching lines","Counts of ERROR occurrences","Replaces ERROR with nothing"],c:0,
+ e:"`grep` searches for patterns. `-i` case-insensitive, `-r` recursive through dirs, `-n` shows line numbers, `-c` counts matches."},
+
+{sub:"linux",lvl:2,d:"Shell",
+ q:"What does the pipe `|` do in `ls -l | grep .txt`?",
+ a:["Sends ls output as input to grep","Runs both commands at the same time","Saves output to a file","Compares two commands"],c:0,
+ e:"A pipe connects stdout of the left command to stdin of the right. One of Linux's most powerful features."},
+
+{sub:"linux",lvl:2,d:"Permissions",
+ q:"chmod 644 file.txt — what are the permissions?",
+ a:["rw-r--r--","rwxr--r--","rw-rw-rw-","rwxrwxrwx"],c:0,
+ e:"6=rw-, 4=r--, 4=r--. Owner read+write, group and others read-only. Standard for config/data files."},
+
+{sub:"linux",lvl:2,d:"Permissions",
+ q:"How do you run a command with root privileges without switching users?",
+ a:["sudo command","su command","root command","elevate command"],c:0,
+ e:"`sudo` runs a single command elevated. `su -` switches to the root shell. Use sudo for auditing — it logs actions."},
+
+{sub:"linux",lvl:2,d:"Processes",
+ q:"Which command shows all running processes for all users?",
+ a:["ps aux","jobs -l","ls /proc","plist"],c:0,
+ e:"`ps aux` — a=all users, u=user-oriented format, x=no terminal required. `top`/`htop` give live updating views."},
+
+{sub:"linux",lvl:2,d:"Archiving",
+ q:"`tar -czf backup.tar.gz /home/user` — what does this create?",
+ a:["A gzip-compressed tar archive","A zip file","An encrypted backup","A symlink"],c:0,
+ e:"-c create, -z gzip compress, -f filename. Extract later with `tar -xzf backup.tar.gz`. Use -v for verbose output."},
+
+{sub:"linux",lvl:2,d:"Disk",
+ q:"Which command shows the disk usage of the current directory?",
+ a:["du -sh .","df -h","ls -ls","stat ."],c:0,
+ e:"`du -sh` = disk usage, summary, human-readable. `df -h` shows filesystem-level free space (different thing)."},
+
+{sub:"linux",lvl:2,d:"Users",
+ q:"How do you change the owner of file.txt to user alice?",
+ a:["chown alice file.txt","chmod alice file.txt","usermod alice file.txt","chgrp alice file.txt"],c:0,
+ e:"`chown user:group file` changes owner and optionally group. `chgrp` changes group only. Both require root/sudo."},
+
+{sub:"linux",lvl:2,d:"Shell",
+ q:"What does `history` show?",
+ a:["Previously run commands","System boot log","File modification log","Login events"],c:0,
+ e:"`history` lists recent commands. `!42` re-runs command #42. `!!` repeats the last command. `Ctrl+R` searches history."},
+
+{sub:"linux",lvl:2,d:"Packages",
+ q:"Which package manager installs software on Debian/Ubuntu?",
+ a:["apt","dnf","pacman","rpm"],c:0,
+ e:"apt = Debian/Ubuntu. dnf = RHEL/Rocky/Fedora. pacman = Arch. rpm = low-level RPM tool (not dependency-aware)."},
+
+{sub:"linux",lvl:2,d:"Networking",
+ q:"Which command tests basic network connectivity to a host?",
+ a:["ping","curl","dig","traceroute"],c:0,
+ e:"`ping` sends ICMP echo requests. If ping to an IP works but hostname doesn't, DNS is the issue."},
+
+{sub:"linux",lvl:2,d:"Processes",
+ q:"You know a process PID is 5000. How do you send it SIGTERM to gracefully stop it?",
+ a:["kill 5000","kill -9 5000","stop 5000","pause 5000"],c:0,
+ e:"`kill PID` sends SIGTERM (15) by default — asks the process to exit cleanly. `-9` (SIGKILL) is the forceful last resort."},
+
+{sub:"linux",lvl:2,d:"Redirection",
+ q:"What does `command > output.txt` do?",
+ a:["Writes stdout to output.txt, overwriting it","Appends stdout to output.txt","Reads from output.txt","Redirects errors"],c:0,
+ e:"`>` redirects stdout, overwriting. `>>` appends. `2>` redirects stderr. `2>&1` merges stderr into stdout."},
+
+// ══════════════════════════════════════════
+//  LINUX+  MEDIUM  (lvl 3)
+// ══════════════════════════════════════════
+{sub:"linux",lvl:3,d:"System Management",
+ q:"An /etc/fstab entry has `defaults` in the options column. What does that include?",
+ a:["rw, suid, dev, exec, auto, nouser, async","Read-only mode only","Only auto-mount on boot","User-mountable only"],c:0,
+ e:"`defaults` is shorthand for the 7 standard mount options. Knowing this matters for fstab troubleshooting on the exam."},
+
+{sub:"linux",lvl:3,d:"System Management",
+ q:"`systemctl enable --now nginx` — what two things does this do?",
+ a:["Creates boot symlinks AND starts nginx immediately","Only starts for this session","Only configures boot start","Reloads nginx config"],c:0,
+ e:"`enable` creates symlinks for boot. `--now` also calls `start`. Equivalent to running `enable` and `start` separately."},
+
+{sub:"linux",lvl:3,d:"Automation",
+ q:"A cron expression `0 2 * * 1-5` — when does it run?",
+ a:["2:00 AM Monday–Friday","Every 2 minutes on weekdays","At 02:00 on the 1st–5th of each month","Every hour on weekdays"],c:0,
+ e:"Fields: min=0, hour=2, day=*, month=*, weekday=1-5 (Mon-Fri). Always check field order: min hour day month weekday."},
+
+{sub:"linux",lvl:3,d:"System Management",
+ q:"`find /etc -name '*.conf' -mtime -7` — what does -mtime -7 mean?",
+ a:["Modified less than 7 days ago","Modified more than 7 days ago","Modified exactly 7 days ago","Modified 7 times"],c:0,
+ e:"-mtime -7 = within last 7 days. -mtime +7 = older than 7 days. -mtime 7 = exactly 7 days (rarely what you want)."},
+
+{sub:"linux",lvl:3,d:"Text Processing",
+ q:"`grep -rn 'TODO' ./src` — what do the flags do?",
+ a:["Recursive search with line numbers shown","Reverse match with null output","Random order with newlines","Read-only with no output"],c:0,
+ e:"-r searches subdirectories recursively, -n prints line numbers. Common for finding TODOs or error patterns in codebases."},
+
+{sub:"linux",lvl:3,d:"Logging",
+ q:"`journalctl -u nginx --since '1 hour ago'` shows:",
+ a:["nginx service logs from the past hour","All system logs from 1 hour ago","nginx config file","Network traffic logs"],c:0,
+ e:"-u filters by unit (service). --since limits time range. `journalctl -f` follows live. Replaces tailing /var/log files."},
+
+{sub:"linux",lvl:3,d:"Troubleshooting",
+ q:"Which command shows all open files and which processes hold them?",
+ a:["lsof","fuser","openfiles","ps -ef"],c:0,
+ e:"`lsof` (list open files) shows files, sockets, devices. `lsof -i :80` finds what's using port 80. Key troubleshooting tool."},
+
+{sub:"linux",lvl:3,d:"Networking",
+ q:"`ss -tlnp` — what does each flag mean?",
+ a:["TCP, Listening, Numeric, show Process info","Show sockets, TCP only, Local, no ports","List network, ports, show","Sockets stats, TCP, listener, ports"],c:0,
+ e:"-t=TCP, -l=listening, -n=numeric (skip DNS), -p=show process. Modern replacement for `netstat -tlnp`."},
+
+{sub:"linux",lvl:3,d:"Security",
+ q:"What does `ssh-copy-id user@server` do?",
+ a:["Copies your public key to server's authorized_keys","Copies SSH config to server","Downloads SSH keys from server","Creates a new key pair on server"],c:0,
+ e:"Appends your ~/.ssh/id_*.pub to the remote ~/.ssh/authorized_keys, enabling password-free SSH login."},
+
+{sub:"linux",lvl:3,d:"Security",
+ q:"In SELinux, the type field in a label (ending in _t) determines:",
+ a:["What access rules apply to the resource","Who owns it","What role can access it","Its security level"],c:0,
+ e:"SELinux policy is mostly type-based. Wrong type = access denied even for root. Use `chcon` or `restorecon` to fix labels."},
+
+{sub:"linux",lvl:3,d:"Text Processing",
+ q:"`awk '{print $2}' file.txt` prints:",
+ a:["The second field of each line","The second line of the file","Lines containing 2","The file twice"],c:0,
+ e:"awk splits lines into fields ($1, $2...) on whitespace. `awk -F: '{print $1}' /etc/passwd` extracts usernames."},
+
+{sub:"linux",lvl:3,d:"Networking",
+ q:"What controls whether Linux routes packets between interfaces?",
+ a:["/proc/sys/net/ipv4/ip_forward","The default gateway entry","The firewall ruleset","The routing table alone"],c:0,
+ e:"Set to 1 to enable IP forwarding — required for routers, VPNs, and container networking. Persist via /etc/sysctl.conf."},
+
+{sub:"linux",lvl:3,d:"Security",
+ q:"`firewall-cmd --add-port=8080/tcp --permanent` — when does the rule take effect?",
+ a:["After running `firewall-cmd --reload`","Immediately","After reboot only","It's invalid without a zone"],c:0,
+ e:"--permanent writes to disk config but NOT the running ruleset. Run `--reload` to activate. Omit --permanent for a one-time change."},
+
+{sub:"linux",lvl:3,d:"Users",
+ q:"How do you force user alice to change her password at next login?",
+ a:["chage -d 0 alice","passwd alice","usermod -L alice","passwd -l alice"],c:0,
+ e:"`chage -d 0` sets the last-change date to epoch, forcing a reset. `passwd -e alice` also works. `-L` locks the account instead."},
+
+// ══════════════════════════════════════════
+//  LINUX+  HARD  (lvl 4)
+// ══════════════════════════════════════════
+{sub:"linux",lvl:4,d:"Permissions",
+ q:"A file is `-rwsr-xr-x` owned by root. A regular user runs it. What effective UID does the process get?",
+ a:["Root's UID (SUID is set)","The calling user's UID","It fails — SUID is deprecated","It prompts for root password"],c:0,
+ e:"The 's' in owner-execute position is SUID. The process runs as the file's owner (root). Classic example: /usr/bin/passwd."},
+
+{sub:"linux",lvl:4,d:"Processes",
+ q:"What is a zombie process?",
+ a:["Exited process whose parent hasn't called wait()","Process at 100% CPU","Process running as a different user","Process with no terminal"],c:0,
+ e:"Zombies hold a PID but no CPU/RAM. Fix by restarting the parent or sending SIGCHLD. Many zombies indicate a buggy parent."},
+
+{sub:"linux",lvl:4,d:"Signals",
+ q:"Which signal CANNOT be caught, blocked, or ignored by a process?",
+ a:["SIGKILL (9)","SIGTERM (15)","SIGHUP (1)","SIGUSR1 (10)"],c:0,
+ e:"SIGKILL is handled by the kernel — the process never sees it. SIGSTOP also cannot be intercepted. Always terminates."},
+
+{sub:"linux",lvl:4,d:"Scripting",
+ q:"`x=5; (x=10; echo $x); echo $x` — what are the two outputs?",
+ a:["10 then 5 — subshell changes don't propagate to parent","5 then 10 — parent inherits","10 then 10 — both change","5 then 5 — subshell can't read parent vars"],c:0,
+ e:"A subshell `(...)` copies the parent's environment but changes are isolated. Classic Bash gotcha in scripts."},
+
+{sub:"linux",lvl:4,d:"Scripting",
+ q:"What does `set -euo pipefail` do in a Bash script?",
+ a:["Exit on error, treat unset vars as errors, fail on any pipe stage failure","Enable extended globbing, unicode, and pipeline","Set environment variables e, u, o, and pipefail","Enable verbose debugging mode"],c:0,
+ e:"-e = exit on error, -u = error on unset variables, -o pipefail = catch pipe failures. Together they make scripts robust."},
+
+{sub:"linux",lvl:4,d:"Storage",
+ q:"After `lvextend -L +10G /dev/vg0/data`, the ext4 filesystem is still the old size. Why, and how do you fix it?",
+ a:["lvextend only grows the LV block device — run `resize2fs /dev/vg0/data` to grow the filesystem","It auto-grows on next mount","Run `fsck` to trigger the grow","Reboot — it resizes at boot"],c:0,
+ e:"Growing an LV and growing the filesystem are two separate steps. For XFS use `xfs_growfs` instead of resize2fs."},
+
+{sub:"linux",lvl:4,d:"Networking",
+ q:"`ip route add 192.168.10.0/24 via 10.0.0.1` — what does this configure?",
+ a:["A static route sending that subnet's traffic via gateway 10.0.0.1","A firewall rule blocking 192.168.10.0/24","A VPN tunnel endpoint","A secondary IP address"],c:0,
+ e:"Adds to the kernel routing table. This change is not persistent — to survive reboots add it to interface config or sysctl."},
+
+{sub:"linux",lvl:4,d:"Troubleshooting",
+ q:"`df -h` shows /var at 100% but `du -sh /var` reports only 2 GB. Why?",
+ a:["A deleted file is still held open by a running process, keeping blocks allocated","Filesystem corruption","Disk quotas are maxed","Inodes exhausted"],c:0,
+ e:"When a process holds an open fd to a deleted file, blocks stay allocated until the process closes it. Use `lsof | grep deleted`."},
+
+{sub:"linux",lvl:4,d:"Troubleshooting",
+ q:"You can't create new files despite gigabytes of free disk space. Most likely cause?",
+ a:["Inode table exhausted","Swap space full","RAM exhausted","Socket limit hit"],c:0,
+ e:"Each file needs one inode. Check `df -i`. Mail spools and cache dirs with millions of tiny files are classic culprits."},
+
+{sub:"linux",lvl:4,d:"Troubleshooting",
+ q:"A script runs fine interactively but fails in cron with 'command not found'. Most likely cause?",
+ a:["Cron's PATH is minimal — /usr/bin:/bin only","Syntax error in the script","Cron is disabled","Script lacks execute permission"],c:0,
+ e:"Always use absolute paths in cron, or set PATH= at the top of the crontab. Also redirect output: `>/tmp/out.log 2>&1`."},
+
+{sub:"linux",lvl:4,d:"Troubleshooting",
+ q:"`systemctl status foo` shows `code=exited, status=203/EXEC`. Most likely cause?",
+ a:["ExecStart binary not found or not executable","Config file syntax error","Port already in use","SELinux denial"],c:0,
+ e:"Exit 203/EXEC = systemd couldn't exec the binary. Check the ExecStart= path exists and the file is executable (`chmod +x`)."},
+
+{sub:"linux",lvl:4,d:"Troubleshooting",
+ q:"`strace -p 1234` attaches to PID 1234 and:",
+ a:["Traces every system call and signal in real time","Kills the process","Shows open network connections","Steps through source code"],c:0,
+ e:"strace shows syscalls (open, read, write, etc.) and signals live. Essential when a process mysteriously hangs or fails on file access."},
+
+{sub:"linux",lvl:4,d:"Security",
+ q:"`chattr +i /etc/hosts` does what?",
+ a:["Makes the file immutable — root cannot modify or delete it until `chattr -i` is run","Hides the file from ls","Encrypts the file","Enables audit logging"],c:0,
+ e:"The immutable attribute is enforced by the filesystem driver, not permissions — even root and sudo can't bypass it."},
+
+// ══════════════════════════════════════════
+//  C++  BEGINNER  (lvl 1)
+// ══════════════════════════════════════════
+{sub:"cs",lvl:1,d:"Output",
+ q:"What is the correct way to print 'Hello' to the console in C++?",
+ a:['cout << "Hello";','print("Hello");',"printf Hello;","Console.Write(Hello);"],c:0,
+ e:"`cout` with `<<` is C++ stream output. You need `#include <iostream>` and either `using namespace std;` or `std::cout`."},
+
+{sub:"cs",lvl:1,d:"Data Types",
+ q:"Which C++ data type stores a whole number?",
+ a:["int","float","char","string"],c:0,
+ e:"`int` stores integers. `float`/`double` store decimals. `char` stores a single character. `string` stores text (needs <string>)."},
+
+{sub:"cs",lvl:1,d:"Syntax",
+ q:"What symbol ends every C++ statement?",
+ a:["; (semicolon)",". (period)",": (colon)",", (comma)"],c:0,
+ e:"Every statement ends with `;`. Forgetting it is the most common beginner error — it causes confusing compiler messages."},
+
+{sub:"cs",lvl:1,d:"Variables",
+ q:"Which correctly declares an integer variable x with value 10?",
+ a:["int x = 10;","integer x = 10;","x int = 10;","declare int x 10;"],c:0,
+ e:"C++ declaration syntax: `type name = value;`. Type comes first, then name, then optional initialization with `=`."},
+
+{sub:"cs",lvl:1,d:"Input",
+ q:"What does `cin >> x;` do?",
+ a:["Reads a value from the keyboard into x","Prints x to the console","Declares x","Computes x from a formula"],c:0,
+ e:"`cin` with `>>` reads from stdin (keyboard). It stops at whitespace. `cin >> a >> b;` reads two values in one line."},
+
+{sub:"cs",lvl:1,d:"Headers",
+ q:"Which header do you need to use cout and cin?",
+ a:["<iostream>","<stdio.h>","<string>","<cmath>"],c:0,
+ e:"`<iostream>` provides cout, cin, cerr, clog. It's the most fundamental C++ header for console I/O."},
+
+{sub:"cs",lvl:1,d:"Loops",
+ q:"How many times does `for(int i=0; i<5; i++)` run its body?",
+ a:["5 times (i = 0,1,2,3,4)","4 times","6 times","Infinitely"],c:0,
+ e:"Init: i=0. Body runs while i<5. Increment i++ after each run. Stops when i reaches 5. Classic 0-indexed loop."},
+
+{sub:"cs",lvl:1,d:"Functions",
+ q:"`return 0;` in main() signals:",
+ a:["Successful program execution","An error occurred","The function returns nothing","The program restarts"],c:0,
+ e:"0 = success by convention (POSIX standard). Non-zero = error. Shell scripts and CI systems check this exit code."},
+
+{sub:"cs",lvl:1,d:"Syntax",
+ q:"How do you write a single-line comment in C++?",
+ a:["// This is a comment","# This is a comment","/* comment */","-- This is a comment"],c:0,
+ e:"`//` comments to end of line. `/* ... */` is multi-line. `#` is the preprocessor — `#include`, `#define` etc., not comments."},
+
+{sub:"cs",lvl:1,d:"Math",
+ q:"What is the value of `int x = 7 / 2;` in C++?",
+ a:["3 (integer division truncates)","3.5","4 (rounds up)","0"],c:0,
+ e:"Integer division drops the remainder. 7/2 = 3. For 3.5, use `double x = 7.0 / 2;` or cast: `(double)7 / 2`."},
+
+{sub:"cs",lvl:1,d:"Conditionals",
+ q:"Which keyword starts a conditional statement in C++?",
+ a:["if","when","check","cond"],c:0,
+ e:"`if (condition) { ... } else { ... }`. The condition can be any expression that evaluates to true or false (non-zero = true)."},
+
+{sub:"cs",lvl:1,d:"Loops",
+ q:"Which loop checks its condition BEFORE each iteration?",
+ a:["while","do...while","Both are identical","Neither — C++ has no while loop"],c:0,
+ e:"`while(cond)` checks first — may never run. `do { } while(cond)` runs at least once. Choose based on your use case."},
+
+// ══════════════════════════════════════════
+//  C++  EASY  (lvl 2)
+// ══════════════════════════════════════════
+{sub:"cs",lvl:2,d:"Arrays",
+ q:"Declare an array of 5 integers named scores:",
+ a:["int scores[5];","array<int> scores(5);","int scores = [5];","scores int[5];"],c:0,
+ e:"C-style arrays: `type name[size];`. First element is scores[0], last is scores[4]. Going past scores[4] is undefined behavior."},
+
+{sub:"cs",lvl:2,d:"Strings",
+ q:"How do you get the number of characters in `std::string s`?",
+ a:["s.length() or s.size()","strlen(s)","s.count()","sizeof(s)"],c:0,
+ e:"`.length()` and `.size()` are identical for strings. `strlen()` is for C-style char arrays. `sizeof` returns memory bytes, not length."},
+
+{sub:"cs",lvl:2,d:"Operators",
+ q:"What is the difference between `=` and `==` in C++?",
+ a:["= assigns a value; == tests equality","= tests equality; == assigns","Both compare values","= is for strings; == is for numbers"],c:0,
+ e:"Using `=` inside an `if` is a classic bug — it assigns, then evaluates the value. `if(x = 5)` is always true for non-zero values."},
+
+{sub:"cs",lvl:2,d:"Functions",
+ q:"A function declared as `void doTask()` returns:",
+ a:["Nothing — it performs an action","The number 0 by default","Its own name","An empty string"],c:0,
+ e:"`void` means no return value. You can use `return;` to exit early but not `return value;`. Good for procedures/actions."},
+
+{sub:"cs",lvl:2,d:"Loops",
+ q:"Which loop guarantees the body runs at least once?",
+ a:["do...while","while","for","All loops"],c:0,
+ e:"`do { body } while(condition)` checks the condition AFTER the first run. Useful for menus: show once, then repeat if needed."},
+
+{sub:"cs",lvl:2,d:"Operators",
+ q:"What is the difference between `++i` and `i++`?",
+ a:["++i increments first then returns new value; i++ returns old value then increments","They are identical in all situations","++i is C++ style; i++ is C style","i++ is faster than ++i"],c:0,
+ e:"In `int a = i++;` — a gets the OLD value. In `int a = ++i;` — a gets the NEW value. As standalone statements, they're equivalent."},
+
+{sub:"cs",lvl:2,d:"Control Flow",
+ q:"What does `break` do inside a for loop?",
+ a:["Exits the loop immediately","Skips to the next iteration","Pauses the program","Exits the function"],c:0,
+ e:"`break` exits the innermost loop or switch. `continue` skips to the next iteration. Neither exits the function — use `return` for that."},
+
+{sub:"cs",lvl:2,d:"Input",
+ q:"How do you read a full line including spaces into `std::string s`?",
+ a:["getline(cin, s);","cin >> s;","scanf(\"%s\", s);","cin.readline(s);"],c:0,
+ e:"`cin >> s` stops at the first space — only reads one word. `getline(cin, s)` reads the entire line including spaces."},
+
+{sub:"cs",lvl:2,d:"Operators",
+ q:"What does `10 % 3` evaluate to?",
+ a:["1 (remainder of 10 ÷ 3)","3 (quotient)","0 (no remainder)","3.33"],c:0,
+ e:"`%` is modulo — the remainder after integer division. 10 / 3 = 3 remainder 1. Use `n % 2 == 0` to check if n is even."},
+
+{sub:"cs",lvl:2,d:"Scope",
+ q:"A variable declared inside a function is accessible:",
+ a:["Only within that function (local scope)","Everywhere in the program","Only within the current file","Everywhere after the declaration"],c:0,
+ e:"Local variables exist within their `{}` block and are destroyed when it exits. Global variables (outside functions) exist program-wide."},
+
+{sub:"cs",lvl:2,d:"Functions",
+ q:"Which is a valid function prototype for a function that takes two ints and returns an int?",
+ a:["int add(int a, int b);","add(int, int) -> int;","function add(int a, int b);","int add{int a, int b}"],c:0,
+ e:"C++ prototype: `return_type name(param_type param, ...);`. Prototypes tell the compiler about functions defined elsewhere or later."},
+
+{sub:"cs",lvl:2,d:"Booleans",
+ q:"What value does `5 > 3` evaluate to in C++?",
+ a:["true (1)","false (0)","5","3"],c:0,
+ e:"Comparison operators return `bool`. true is stored as 1, false as 0. `cout << (5 > 3)` prints 1 by default."},
+
+// ══════════════════════════════════════════
+//  C++  MEDIUM  (lvl 3)
+// ══════════════════════════════════════════
+{sub:"cs",lvl:3,d:"Pointers",
+ q:"What does `int* p = &x;` do?",
+ a:["Makes p store the memory address of x","Makes p a copy of x","Creates a new integer","Declares p as an array"],c:0,
+ e:"`&x` is the address-of operator — gives x's memory location. `*p` dereferences p (reads the value at that address). Fundamentals of C++ memory model."},
+
+{sub:"cs",lvl:3,d:"References",
+ q:"What is the key difference between passing by value and passing by reference?",
+ a:["By value copies the argument; by reference allows the function to modify the original","By reference is always slower","They behave identically","By value is only for primitives"],c:0,
+ e:"`void f(int x)` — changes don't affect caller. `void f(int& x)` — changes DO affect caller. Use `const int&` for read-only large objects."},
+
+{sub:"cs",lvl:3,d:"Memory",
+ q:"What does `int* p = new int(42);` do?",
+ a:["Allocates an int on the heap, initializes to 42, returns pointer","Creates a new integer on the stack","Initializes a global variable","Declares a pointer array of size 42"],c:0,
+ e:"`new` allocates on the heap. You MUST call `delete p;` when done or you'll leak memory. Prefer `std::unique_ptr` in modern C++."},
+
+{sub:"cs",lvl:3,d:"OOP",
+ q:"What is a constructor in C++?",
+ a:["A function with the class's name that runs automatically when an object is created","A function that destroys objects","A function that copies the class","A static utility method"],c:0,
+ e:"Constructors initialize objects. They have the class name and no return type. If you don't write one, the compiler generates a default."},
+
+{sub:"cs",lvl:3,d:"OOP",
+ q:"In a class, what is the difference between public and private members?",
+ a:["public is accessible from outside the class; private is only accessible within the class","public is global; private is local","private members are faster","public is for data; private is for functions"],c:0,
+ e:"Encapsulation: hide implementation with private, expose interface with public. Default access in `class` is private; in `struct` it's public."},
+
+{sub:"cs",lvl:3,d:"Headers",
+ q:"What is the purpose of `#ifndef MYHEADER_H / #define MYHEADER_H / #endif` in a header file?",
+ a:["Include guard — prevents the header being processed multiple times","Debug mode check","Namespace declaration","Conditional compilation for platforms"],c:0,
+ e:"Without include guards, including a header twice causes duplicate symbol errors. `#pragma once` is the modern alternative."},
+
+{sub:"cs",lvl:3,d:"STL",
+ q:"How is `std::vector<int>` better than a plain `int arr[100]`?",
+ a:["Vector resizes dynamically at runtime; plain arrays have fixed compile-time size","Vectors are always faster","Arrays support more types","Arrays auto-initialize to zero"],c:0,
+ e:"`vector<int> v;` grows with `.push_back()`. Access with `.at(i)` for bounds checking or `[i]` for speed. Prefer vectors over raw arrays."},
+
+{sub:"cs",lvl:3,d:"OOP",
+ q:"What does the destructor `~MyClass()` do?",
+ a:["Runs automatically when an object goes out of scope, releasing resources","Copies the object","Compares two objects","Initializes member variables"],c:0,
+ e:"Destructors are called automatically — RAII (Resource Acquisition Is Initialization). Free heap memory, close file handles, release locks here."},
+
+{sub:"cs",lvl:3,d:"Const",
+ q:"What does `const int MAX = 100;` prevent?",
+ a:["Modifying MAX after initialization","Using MAX in functions","Declaring MAX globally","Assigning MAX to another const variable"],c:0,
+ e:"`const` makes a variable read-only after initialization. The compiler enforces it. Use const liberally — it prevents bugs and communicates intent."},
+
+{sub:"cs",lvl:3,d:"Arrays",
+ q:"`int arr[] = {10, 20, 30}; cout << arr[1];` — what prints?",
+ a:["20","10","30","Undefined — index 1 is invalid"],c:0,
+ e:"Arrays are 0-indexed: arr[0]=10, arr[1]=20, arr[2]=30. Accessing arr[3] or beyond is undefined behavior — no automatic bounds check."},
+
+{sub:"cs",lvl:3,d:"OOP",
+ q:"What does `this` refer to inside a class method?",
+ a:["A pointer to the current object the method was called on","The parent class","The class definition itself","The first constructor argument"],c:0,
+ e:"`this` is an implicit pointer to the invoking object. Used to disambiguate `this->name = name;` when parameter and member share a name."},
+
+{sub:"cs",lvl:3,d:"Memory",
+ q:"What is the difference between stack and heap memory?",
+ a:["Stack is automatic/fast but limited in size; heap is manually managed but larger","Stack is slower; heap is automatic","They are the same region","Stack is for globals; heap is for locals"],c:0,
+ e:"Stack allocation/deallocation is automatic (function scope). Heap requires `new`/`delete` or smart pointers. Stack overflow = recursion too deep."},
+
+// ══════════════════════════════════════════
+//  C++  HARD  (lvl 4)
+// ══════════════════════════════════════════
+{sub:"cs",lvl:4,d:"Polymorphism",
+ q:"Why are virtual functions needed in C++?",
+ a:["Without virtual, calling through a base pointer always invokes the base version — virtual enables runtime dispatch to the correct derived version","Virtual functions run faster than regular ones","Virtual prevents a function from being overridden","They allow calling private methods"],c:0,
+ e:"Static dispatch (no virtual) uses compile-time type. Dynamic dispatch (virtual) uses runtime type. Essential for polymorphism in OOP design."},
+
+{sub:"cs",lvl:4,d:"Memory",
+ q:"What is the Rule of Three (pre-C++11)?",
+ a:["If you define a destructor, copy constructor, or copy assignment operator, you likely need all three","A class should have at most 3 base classes","Always write 3 constructors","A function may not have more than 3 parameters"],c:0,
+ e:"If you manage raw resources, all three must handle them correctly or you get double-frees or shallow copies. C++11 extends this to the Rule of Five."},
+
+{sub:"cs",lvl:4,d:"Smart Pointers",
+ q:"`std::unique_ptr<int> p = std::make_unique<int>(42);` — what happens when p goes out of scope?",
+ a:["The heap int is automatically freed — no manual delete needed","You must still call delete","The value is moved to the next scope","A copy is made on the stack"],c:0,
+ e:"`unique_ptr` owns the resource exclusively. RAII destroys it automatically. Prefer `make_unique` over `new` — it's exception-safe and clear."},
+
+{sub:"cs",lvl:4,d:"Undefined Behavior",
+ q:"Signed integer overflow in C++ is:",
+ a:["Undefined behavior — compiler may assume it never happens and optimize accordingly","Defined to wrap around like unsigned","A runtime exception","A compile-time error"],c:0,
+ e:"UB lets the compiler make assumptions that produce surprising, non-obvious bugs. Use `unsigned` for wrap-around. In C++20, use `std::bit_cast` or safe math libraries."},
+
+{sub:"cs",lvl:4,d:"Undefined Behavior",
+ q:"What is wrong with: `int& foo() { int x = 5; return x; }`",
+ a:["Returns a reference to a local variable that's destroyed on return — dangling reference (UB)","Missing return type","int& is not a valid return type","x must be declared static"],c:0,
+ e:"Returning a reference/pointer to a local variable is UB — the memory is reclaimed immediately. Fix: return by value, or allocate on the heap."},
+
+{sub:"cs",lvl:4,d:"Move Semantics",
+ q:"What does `std::move(x)` actually do at runtime?",
+ a:["Casts x to an rvalue reference, enabling a move constructor/assignment to be called instead of a copy","Moves x to a different memory address","Destroys x after the statement","Swaps x with another object"],c:0,
+ e:"`std::move` is a cast — it doesn't move anything itself. It signals 'you may steal this object's resources'. The actual transfer happens in the move constructor."},
+
+{sub:"cs",lvl:4,d:"Templates",
+ q:"What is a function template in C++?",
+ a:["A blueprint that generates type-specific functions at compile time for any type that satisfies the template's requirements","A design pattern for inheritance","A virtual function factory","A runtime generic function"],c:0,
+ e:"`template<typename T> T max(T a, T b)` compiles to separate versions for each type used. Zero runtime overhead — polymorphism at compile time."},
+
+{sub:"cs",lvl:4,d:"OOP",
+ q:"What does `static` mean for a class member variable?",
+ a:["Shared across all instances — only one copy exists regardless of how many objects are created","The variable cannot be changed","It's stored on the stack","It's file-private"],c:0,
+ e:"`static` members belong to the class, not instances. Access with `ClassName::member`. Useful for counters, singletons, and shared config."},
+
+{sub:"cs",lvl:4,d:"Lambdas",
+ q:"`auto fn = [&x](int y){ return x + y; };` — what does `[&x]` mean?",
+ a:["Capture x from the enclosing scope by reference","Capture all variables by value","Dereference x","Capture nothing — x is a parameter"],c:0,
+ e:"The capture list defines what the lambda 'closes over'. `[&]` captures all by reference. `[=]` captures all by value. `[&x]` captures only x by reference."},
+
+{sub:"cs",lvl:4,d:"OOP",
+ q:"When is the copy constructor called instead of the copy assignment operator?",
+ a:["Copy constructor: initialization from existing object (`MyClass b = a;`). Copy assignment: assigning to an already-constructed object (`b = a;`)","Copy constructor is only called for primitives","They're the same function","Copy assignment is called on initialization"],c:0,
+ e:"Knowing the difference matters for implementing them correctly. The copy constructor takes a `const MyClass&` parameter and initializes a new object."},
+
+{sub:"cs",lvl:4,d:"Inheritance",
+ q:"A base class has `virtual void speak()`. A derived class overrides it with `void speak() override`. You call it via `Base* ptr = new Derived(); ptr->speak();`. Which version runs?",
+ a:["Derived::speak() — virtual dispatch selects the runtime type","Base::speak() — pointer is typed as Base","Undefined — mixing base and derived is invalid","Both run in order"],c:0,
+ e:"This is runtime polymorphism. `virtual` + base pointer/reference enables calling the correct subclass version. `override` keyword helps catch typos at compile time."},
+
+
+// ══════════════════════════════════════════
+//  CMPR 121 (CS1B)  BEGINNER  (lvl 1)
+//  Lec 1–4, 7 — basic definitions & syntax
+// ══════════════════════════════════════════
+{sub:"cs1b",lvl:1,d:"Lec 1 · Functions",
+ q:"Where do function prototypes appear in a C++ program?",
+ a:["Before main(), to inform the compiler about functions defined later","After main()","Inside main()","Only in header files"],c:0,
+ e:"Prototypes are declarations without a body. They tell the compiler a function's name, return type, and parameters before the function is defined."},
+
+{sub:"cs1b",lvl:1,d:"Lec 1 · Functions",
+ q:"A void-returning function…",
+ a:["Performs an action and returns nothing","Must always have a return statement","Returns 0 by default","Can return multiple values"],c:0,
+ e:"void functions perform an action without returning a value. Value-returning functions MUST have a return statement that matches their return type."},
+
+{sub:"cs1b",lvl:1,d:"Lec 1 · Functions",
+ q:"What is a formal parameter?",
+ a:["A variable declared in the function prototype or heading","The value passed in the function call","A global variable used by the function","The function's return value"],c:0,
+ e:"Formal parameters appear in the prototype/heading. Actual parameters (arguments) are the values passed at the call site. They must match in count and type."},
+
+{sub:"cs1b",lvl:1,d:"Lec 2 · Arrays",
+ q:"Which correctly declares and initializes an int array of size 3 with values 10, 20, 30?",
+ a:["int arr[3] = {10, 20, 30};","int arr = {10,20,30};","int arr[3] = (10,20,30);","array arr[3] = {10,20,30};"],c:0,
+ e:"Syntax: type name[size] = {values}; Square brackets for size, curly braces for the initialization list."},
+
+{sub:"cs1b",lvl:1,d:"Lec 2 · Arrays",
+ q:"What index does the FIRST element of an array have?",
+ a:["0 (arrays are 0-indexed)","1","The array's size - 1","It depends on the data type"],c:0,
+ e:"C++ arrays are zero-indexed. An array of size 5 has valid indices 0 through 4. Accessing index 5 is out of bounds — undefined behavior."},
+
+{sub:"cs1b",lvl:1,d:"Lec 2 · Arrays",
+ q:"Arrays are always passed to functions…",
+ a:["By reference — the function receives the array's address","By value — a full copy is made","By constant value only","Using a special keyword"],c:0,
+ e:"When you pass an array, the function receives the address of element [0]. Any changes inside the function affect the original array in the caller."},
+
+{sub:"cs1b",lvl:1,d:"Lec 3 · enum",
+ q:"Given `enum colors { RED, GREEN, BLUE };` — what integer value does GREEN have?",
+ a:["1","0","2","It has no integer value"],c:0,
+ e:"enum values default to 0, 1, 2,... RED=0, GREEN=1, BLUE=2. You can override: `enum colors { RED=5, GREEN=10 };`"},
+
+{sub:"cs1b",lvl:1,d:"Lec 3 · enum",
+ q:"Which is a VALID enum declaration?",
+ a:["enum days { SUN, MON, TUE };","enum days { 'S', 'M', 'T' };","enum { 1, 2, 3 };","enum days = { SUN, MON };"],c:0,
+ e:"enum values must be identifiers (names), not character literals or numbers. No `=` between the name and `{`."},
+
+{sub:"cs1b",lvl:1,d:"Lec 3 · typedef",
+ q:"What does `typedef unsigned short int USHORT;` do?",
+ a:["Creates an alias USHORT for unsigned short int","Creates a brand-new data type","Declares a variable named USHORT","Defines a constant"],c:0,
+ e:"typedef creates an alternative name (alias) for an existing type — NOT a new type. It makes code easier to read and write."},
+
+{sub:"cs1b",lvl:1,d:"Lec 4 · Pointers",
+ q:"A pointer variable holds…",
+ a:["A memory address of another variable","The value of another variable","A copy of another variable","A file path"],c:0,
+ e:"Pointers store addresses, not values. `int *ptr = &x;` stores x's address in ptr. `*ptr` then dereferences it to access the value."},
+
+{sub:"cs1b",lvl:1,d:"Lec 4 · Pointers",
+ q:"What does the `&` operator do when applied to a variable?",
+ a:["Returns the memory address of that variable","Creates a reference copy","Allocates memory on the heap","Deallocates the variable"],c:0,
+ e:"`&x` is the address-of operator — it returns the memory location where x is stored. Used to assign an address to a pointer: `ptr = &x;`"},
+
+{sub:"cs1b",lvl:1,d:"Lec 4 · Structs",
+ q:"How do you access data member `width` of a struct object `box` using the dot operator?",
+ a:["box.width","box->width","box::width","box[width]"],c:0,
+ e:"Dot operator (.) accesses struct/class members directly on an object. Arrow operator (->) is used when you have a POINTER to a struct."},
+
+{sub:"cs1b",lvl:1,d:"Lec 7 · Classes",
+ q:"By default, are class data members public or private in C++?",
+ a:["Private — only accessible through class member functions","Public — accessible anywhere","Protected — accessible in derived classes","It depends on the compiler"],c:0,
+ e:"class members default to private. struct members default to public. Private members protect data from accidental modification outside the class."},
+
+{sub:"cs1b",lvl:1,d:"Lec 7 · Classes",
+ q:"A constructor in C++ has the same name as the class and…",
+ a:["No return type — not even void","Return type void","Return type int","Can have any return type"],c:0,
+ e:"Constructors have no return type whatsoever. They run automatically when an object is instantiated (declared). If you write no constructor, the compiler provides a default one."},
+
+{sub:"cs1b",lvl:1,d:"Lec 5 · Linked Lists",
+ q:"What does a NULL pointer indicate?",
+ a:["The pointer points to nothing — used to mark the end of a list","The pointer is uninitialized","The pointer holds value 0","The pointer was just deleted"],c:0,
+ e:"NULL (nullptr in C++11) means no valid address. The last node in a linked list has `next = nullptr` to mark the end. The head of an empty list is nullptr."},
+
+// ══════════════════════════════════════════
+//  CMPR 121  EASY  (lvl 2)
+//  Lec 1–5, 7–9 — practical application
+// ══════════════════════════════════════════
+{sub:"cs1b",lvl:2,d:"Lec 1 · Pass by Reference",
+ q:"Which function prototype passes an integer BY REFERENCE?",
+ a:["void getVal(int & num);","void getVal(int num);","void getVal(int* num);","int getVal(int num);"],c:0,
+ e:"The `&` in the parameter list makes it a reference parameter. Changes to `num` inside the function WILL affect the original variable. Without `&` it's pass by value (a copy)."},
+
+{sub:"cs1b",lvl:2,d:"Lec 1 · Functions",
+ q:"A value-returning function call must appear in what context?",
+ a:["An expression — assigned to a variable or used in output","A standalone statement only","Only inside a loop","Only inside another function"],c:0,
+ e:"Because a value is returned it must be used: `result = calcSum(a, b);` or `cout << calcSum(a, b);`. A void function call stands alone."},
+
+{sub:"cs1b",lvl:2,d:"Lec 2 · 2D Arrays",
+ q:"How do you access the element at row 1, column 2 of a 2D array named `table`?",
+ a:["table[1][2]","table[2][1]","table(1,2)","table[1,2]"],c:0,
+ e:"2D arrays use [row][col] syntax. Both are 0-indexed. `table[0][0]` is top-left. Think: row first, column second."},
+
+{sub:"cs1b",lvl:2,d:"Lec 2 · 2D Arrays",
+ q:"When passing a 2D array to a function, what MUST be specified in the parameter?",
+ a:["The number of columns","The number of rows","Both rows and columns","Neither — the compiler figures it out"],c:0,
+ e:"The compiler calculates element offsets using column count. `void showData(int arr[][COLS])` — COLS is required; rows can be omitted."},
+
+{sub:"cs1b",lvl:2,d:"Lec 3 · Runtime Stack",
+ q:"The runtime stack is LIFO. What does LIFO stand for?",
+ a:["Last In, First Out","Last In, Forever Out","Linked In, Freed Out","Linear Input, Function Output"],c:0,
+ e:"LIFO: the most recently pushed item is the first popped. Function calls are LIFO — the most recent call is the first to return."},
+
+{sub:"cs1b",lvl:2,d:"Lec 4 · Dereference",
+ q:"Given `int x = 5; int *ptr = &x;` — what does `*ptr` return?",
+ a:["5 — the value stored at the address ptr holds","The address of x","The address of ptr itself","An error — ptr must be cast first"],c:0,
+ e:"`*ptr` dereferences — it follows the address to get the stored value. Since ptr holds x's address, `*ptr == x == 5`. Writing `*ptr = 10` changes x to 10."},
+
+{sub:"cs1b",lvl:2,d:"Lec 4 · Arrow Operator",
+ q:"Given `Box *ptr = &shoebox;` — how do you access `shoebox.width` through the pointer?",
+ a:["ptr->width","*ptr.width","ptr.width","(*ptr)->width"],c:0,
+ e:"Arrow operator (->) dereferences a pointer AND accesses a member in one step. `ptr->width` is shorthand for `(*ptr).width`. Both are valid."},
+
+{sub:"cs1b",lvl:2,d:"Lec 5 · Dynamic Memory",
+ q:"What does `int *ptr = new int;` do?",
+ a:["Allocates an int on the heap and stores its address in ptr","Creates an int on the stack","Initializes ptr to 0","Calls a constructor for int"],c:0,
+ e:"`new` allocates heap memory at runtime. Unlike stack variables, heap memory persists until you explicitly call `delete ptr;`. Forgetting delete causes a memory leak."},
+
+{sub:"cs1b",lvl:2,d:"Lec 5 · Dynamic Memory",
+ q:"What does `delete ptr;` do?",
+ a:["Frees the heap memory ptr points to — the pointer itself still exists","Destroys both the memory and the pointer variable","Sets ptr to nullptr automatically","Frees stack memory"],c:0,
+ e:"`delete` frees the allocation. The pointer variable still exists and holds the old (now dangling) address. Best practice: set `ptr = nullptr;` after delete."},
+
+{sub:"cs1b",lvl:2,d:"Lec 7 · Accessors",
+ q:"What is an accessor (getter) function?",
+ a:["A public function that returns the value of a private data member","A function that sets (modifies) a private member","A constructor","A function that deletes an object"],c:0,
+ e:"Accessors provide read-only access: `int getAge() const { return age; }`. Mutators (setters) modify private data: `void setAge(int a) { age = a; }`"},
+
+{sub:"cs1b",lvl:2,d:"Lec 7 · Constructors",
+ q:"What is an OVERLOADED constructor?",
+ a:["A constructor with the same name as the default but WITH one or more parameters","A constructor with a different name","A constructor that calls another constructor","A virtual constructor"],c:0,
+ e:"Classes can have multiple constructors. `Cat()` is default; `Cat(int age, float wt)` is overloaded. The compiler picks the right one based on how the object is declared."},
+
+{sub:"cs1b",lvl:2,d:"Lec 8 · Inheritance",
+ q:"In `class Dog : public Animal` — what is the role of Animal?",
+ a:["Base class (parent) — Dog inherits Animal's members","Derived class (child) — Animal extends Dog","An interface","A namespace"],c:0,
+ e:"The class after `:` is the base class (superclass). Dog is the derived class (subclass). Dog inherits Animal's public and protected members plus adds its own."},
+
+{sub:"cs1b",lvl:2,d:"Lec 9 · Static Members",
+ q:"A static class member variable is…",
+ a:["Shared by ALL objects of the class — only one copy exists regardless of how many objects are created","Unique to each object instance","Stored on the stack","Faster to access than regular members"],c:0,
+ e:"`static int count` belongs to the class, not to individual objects. Increment it in the constructor and you get a count of how many objects exist."},
+
+{sub:"cs1b",lvl:2,d:"Lec 9 · Friend",
+ q:"A friend function of a class…",
+ a:["Is NOT a member of the class but has access to its private members","Is a private member function","Must be defined inside main()","Is automatically inherited by derived classes"],c:0,
+ e:"Declared with `friend` inside the class spec but defined outside. It breaks encapsulation intentionally — useful when two unrelated classes need to share data."},
+
+{sub:"cs1b",lvl:2,d:"Lec 8 · Inline",
+ q:"When a function is declared `inline`, what does the compiler do?",
+ a:["Copies the function code directly into the call site — no function call overhead","Makes the function run twice as fast always","Makes it thread-safe","Moves it to the heap"],c:0,
+ e:"inline avoids the jump-to-function-and-return overhead. Best for tiny functions (1-2 lines). For large functions it increases code size with little gain. The compiler may ignore the hint."},
+
+// ══════════════════════════════════════════
+//  CMPR 121  MEDIUM  (lvl 3)
+//  Lec 3–5, 7–10 — deeper understanding
+// ══════════════════════════════════════════
+{sub:"cs1b",lvl:3,d:"Lec 3 · Runtime Stack",
+ q:"When a function is called, which of the following is NOT stored in the activation record?",
+ a:["The function's compiled machine code","The return address","Local variables","Actual parameter values"],c:0,
+ e:"Compiled code lives in the code segment (text segment), not the stack. The activation record holds: return address, actual parameters, local variables, and return value storage."},
+
+{sub:"cs1b",lvl:3,d:"Lec 3 · Runtime Stack",
+ q:"What is the PURPOSE of the return address pushed when a function is called?",
+ a:["It holds the memory address of the next instruction to execute AFTER the function returns","It stores where the function is defined in memory","It is the function's return value","It identifies the function by name"],c:0,
+ e:"Without the return address the CPU wouldn't know where to resume after the function returns. It's the address of the instruction immediately after the function call in the caller."},
+
+{sub:"cs1b",lvl:3,d:"Lec 4 · Pointer Arithmetic",
+ q:"Given `int arr[] = {6,8,9}; int *ptr = arr;` — what does `ptr++` do?",
+ a:["Advances ptr to the next int — moves forward sizeof(int) bytes to point to arr[1]","Increments the value at ptr by 1","Moves ptr back one element","Pointer arithmetic is not allowed on array pointers"],c:0,
+ e:"Pointer arithmetic is type-aware. `ptr++` on an `int*` moves forward by 4 bytes (sizeof int), landing on the next array element. This is how pointer-based array traversal works."},
+
+{sub:"cs1b",lvl:3,d:"Lec 5 · Linked List Node",
+ q:"In `struct Song { string title; string artist; Song *next; };` — what does the `next` pointer do?",
+ a:["Links this Song node to the next node in the list","Points to the previous node","Stores the total song count","Points back to the head"],c:0,
+ e:"`next` creates the chain. To traverse: `current = current->next;`. The last node has `next = nullptr` to mark the end. A `head` pointer (outside the struct) points to the first node."},
+
+{sub:"cs1b",lvl:3,d:"Lec 5 · Heap vs Stack",
+ q:"Which statement about the heap is TRUE?",
+ a:["Memory allocated with `new` persists until `delete` is called — it is NOT tied to function scope","Heap memory is automatically freed when a function returns","Stack memory outlasts heap memory","Heap memory is always faster than stack"],c:0,
+ e:"Stack is scope-managed (automatic). Heap persists until explicitly freed. This is why heap memory can be shared across functions, but forgetting `delete` causes leaks."},
+
+{sub:"cs1b",lvl:3,d:"Lec 7 · Destructor",
+ q:"When is a class destructor automatically called?",
+ a:["When the object goes out of scope, or when `delete` is called on a heap object","When the object is created","When the object is copied","Only when the programmer explicitly calls it"],c:0,
+ e:"Destructors are RAII in action — automatic cleanup. `~Cat()` runs when a stack Cat leaves scope or when `delete catPtr;` is called on a heap Cat."},
+
+{sub:"cs1b",lvl:3,d:"Lec 7 · OOP",
+ q:"In OOP, what does ENCAPSULATION mean?",
+ a:["Grouping data and functions together in a class and hiding implementation details from the outside","Inheriting from a base class","Overloading operators","Creating generic templates"],c:0,
+ e:"Encapsulation = data hiding + bundling. Private data members + public interface. Users call the public functions without knowing (or needing to know) how they work internally."},
+
+{sub:"cs1b",lvl:3,d:"Lec 8 · Protected Access",
+ q:"In the Lec 8 Animal/Dog example, `id` is declared `protected` in Animal. What does `protected` allow?",
+ a:["Derived class functions can access `id` directly, but it is hidden from code outside the class","Only Animal's own functions can access it","Any code anywhere can access it","Same behavior as public"],c:0,
+ e:"`protected` is like private EXCEPT derived classes can access it directly. Without it, Dog would need Animal's public getter to read `id`."},
+
+{sub:"cs1b",lvl:3,d:"Lec 8 · this Pointer",
+ q:"What is the `this` pointer inside a class member function?",
+ a:["An implicit pointer to the object that called the member function","A pointer to the base class","A pointer to a static member","A global pointer to the most recent object"],c:0,
+ e:"`this->weight = weight;` disambiguates when the parameter and data member share a name. Every non-static member function gets `this` as a hidden parameter."},
+
+{sub:"cs1b",lvl:3,d:"Lec 10a · Templates",
+ q:"In `template <typename T>` — what does T represent?",
+ a:["A placeholder for any data type, resolved when the function/class is instantiated","The type int by default","A keyword equal to 'template'","A specific class name"],c:0,
+ e:"T is a type parameter. Call `calcSquare(5)` and T becomes `int`. Call `calcSquare(3.14)` and T becomes `double`. The compiler generates a separate version for each type used."},
+
+{sub:"cs1b",lvl:3,d:"Lec 10a · Exceptions",
+ q:"In a try-throw-catch block, what happens when `throw` executes inside a called function?",
+ a:["The function aborts immediately and control jumps to the matching catch block","The exception is silently ignored","The program always terminates","The function returns 0"],c:0,
+ e:"throw unwinds the call stack until a matching catch is found. All code after throw in that function is skipped. This is the exception handler pattern covered in Lec 10a."},
+
+{sub:"cs1b",lvl:3,d:"Lec 10b · STL Vector",
+ q:"What is the difference between `vector::size()` and `vector::capacity()`?",
+ a:["size() = number of elements stored; capacity() = total allocated space (can be larger than size)","They are identical","size() counts bytes; capacity() counts elements","capacity() is always equal to size()"],c:0,
+ e:"Vectors pre-allocate extra space to avoid reallocating on every push_back. size() is what you've added; capacity() is what's been reserved. Reallocation copies the entire array (O(n))."},
+
+{sub:"cs1b",lvl:3,d:"Lec 10b · Iterators",
+ q:"In `vector<int>::iterator it = numbers.begin();` — what does `*it` return?",
+ a:["The value of the first element (dereferencing the iterator)","The iterator object itself","The index position (0)","The memory address as an integer"],c:0,
+ e:"Iterators work like pointers. `*it` dereferences to get the element value. `it++` advances to the next. `numbers.end()` points one past the last element — never dereference end()."},
+
+{sub:"cs1b",lvl:3,d:"Lec 11 · Multithreading",
+ q:"What does `workerThread.join()` do?",
+ a:["Blocks the calling thread (e.g., main) until workerThread finishes","Starts the worker thread","Terminates the worker thread immediately","Creates a second copy of the thread"],c:0,
+ e:"`join()` is a synchronization point. main() waits here until workerThread completes. Without join() (or detach()), the program may terminate before the thread finishes — undefined behavior."},
+
+// ══════════════════════════════════════════
+//  CMPR 121  HARD  (lvl 4)
+//  Lec 1–12 — tricky details & edge cases
+// ══════════════════════════════════════════
+{sub:"cs1b",lvl:4,d:"Lec 1 · Pass by Value",
+ q:"`void swap(int a, int b)` is called as `swap(x, y)`. After the call, are x and y actually swapped?",
+ a:["No — a and b are copies (pass by value); x and y in main() are unchanged","Yes — all function parameters share memory with their arguments","Only if x and y are global","Yes — the runtime stack synchronizes them on return"],c:0,
+ e:"Pass by value copies the arguments. To actually swap: `void swap(int &a, int &b)` — the `&` makes them aliases for x and y, so changes propagate back to main()."},
+
+{sub:"cs1b",lvl:4,d:"Lec 2 · Sequential Search",
+ q:"In the Lec 2 sequential search, the function returns -1 when…",
+ a:["The target number is NOT found in the array — -1 is used as a sentinel for 'not found'","The array is empty","The number is at index 0","The search reaches the middle"],c:0,
+ e:"-1 is used as a sentinel return value because it's never a valid array index. The caller checks: `if (index != -1) { found } else { not found }`."},
+
+{sub:"cs1b",lvl:4,d:"Lec 3 · enum",
+ q:"Why can you NOT perform math operations on enum types? (e.g., `popularSport = mySport + 1;`)",
+ a:["enums are a discrete ordered set — arithmetic is not defined; you can only use comparison operators and assignment","You can — it compiles fine","You can with a cast only","You can only add, not subtract"],c:0,
+ e:"From your notes: `popularSport = mySport + 1; // Wrong`. Enums support relational operators (==, !=, <, >) but not arithmetic. Use a cast `(sports)(mySport + 1)` if you must."},
+
+{sub:"cs1b",lvl:4,d:"Lec 4 · Pointer Type Mismatch",
+ q:"`int *ptr = &num1; float *amtPtr = ptr;` — why does this cause a compile error?",
+ a:["Pointers must match their pointed-to type — you cannot assign an int* to a float*","Pointer assignments always require a cast","float* is incompatible with all types","&num1 is not a valid address"],c:0,
+ e:"Each pointer type is tied to its data type. Assigning a mismatched pointer type is a type error. `float *amtPtr = (float*)ptr;` would compile but likely produces wrong values."},
+
+{sub:"cs1b",lvl:4,d:"Lec 5 · Memory Leak",
+ q:"`Car *carPtr = new Car; carPtr = new Car;` — what is the problem?",
+ a:["The first Car's address is overwritten and lost — it can never be deleted (memory leak)","The second new automatically deletes the first","Both objects are freed when the function returns","new can only be called once per pointer"],c:0,
+ e:"Before reassigning a pointer, always `delete` the old allocation. Once the address is lost, the memory is leaked — allocated but inaccessible for the lifetime of the program."},
+
+{sub:"cs1b",lvl:4,d:"Lec 7 · Constructor Selection",
+ q:"Given `class Cat { public: Cat(); Cat(int age, float wt); };` — which constructor does `Cat myCat;` call?",
+ a:["Cat() — the default constructor (no arguments match the overloaded one)","Cat(int, float) — the overloaded constructor","Both constructors run in order","A compile error — ambiguous constructor call"],c:0,
+ e:"The compiler selects based on argument count and types. `Cat myCat;` has no arguments → default. `Cat myCat(3, 5.2f);` has two args → overloaded. This is constructor overloading."},
+
+{sub:"cs1b",lvl:4,d:"Lec 8 · Private Inheritance",
+ q:"If Animal has a `private` member `id`, can Dog's member functions access `id` directly?",
+ a:["No — private members are inaccessible to derived classes; use `protected` or a public getter","Yes — because Dog inherits all of Animal","Yes — because the inheritance is public","Only if Dog is defined in the same .cpp file"],c:0,
+ e:"private = class-only access. Not even derived classes can touch it. Change `private` to `protected` in Animal, and Dog's functions gain direct access."},
+
+{sub:"cs1b",lvl:4,d:"Lec 9 · Friend Definition",
+ q:"A friend function is declared inside the class with `friend`, but where is it DEFINED?",
+ a:["Outside the class (e.g., in main.cpp) — WITHOUT the `friend` keyword in the definition","Inside the class like a normal member function","In a special friend.cpp file","It has no definition — only the declaration exists"],c:0,
+ e:"`friend` in the class spec grants access; it doesn't define the function. The definition is a normal standalone function. `friend` keyword only appears in the class declaration."},
+
+{sub:"cs1b",lvl:4,d:"Lec 10a · Class Template",
+ q:"`Stack<int, 5> intStack;` — given `template <class T, int MAX_ITEMS>`, what are T and MAX_ITEMS?",
+ a:["T = int (type parameter), MAX_ITEMS = 5 (non-type integer parameter)","T = Stack, MAX_ITEMS = int","T = 5, MAX_ITEMS = int","T = template, MAX_ITEMS = class"],c:0,
+ e:"Class templates can have both type parameters (T) and non-type parameters (MAX_ITEMS). The actual parameter `5` sets the array size at compile time — no runtime overhead."},
+
+{sub:"cs1b",lvl:4,d:"Lec 10a · throw Type Matching",
+ q:"In Lec 10a, push() throws `throw 3;` when the stack is full. Which catch matches?",
+ a:["catch(int errorNum) — because an int was thrown","catch(string msg) — all throws become strings","catch(exception& e) — all throws are exceptions","catch(FullStack&) — objects match integer throws"],c:0,
+ e:"The catch type MUST match the thrown type exactly. `throw 3` is an int. `catch(int e)` matches. `catch(FullStack&)` would only match if you `throw FullStack()`."},
+
+{sub:"cs1b",lvl:4,d:"Lec 10b · Vector Reallocation",
+ q:"When does a std::vector reallocate its internal array?",
+ a:["When size() reaches capacity() and a new element is added — the entire array is copied to a new, larger allocation","Every time push_back() is called","Only when pop_back() is called","When the vector goes out of scope"],c:0,
+ e:"Reallocation is O(n) — all elements are copied. To avoid it for known sizes, use `v.reserve(n)` upfront. This is why push_back to the FRONT is O(n) but to the BACK is amortized O(1)."},
+
+{sub:"cs1b",lvl:4,d:"Lec 10d · std::array vs vector",
+ q:"When should you prefer `std::array` over `std::vector` (from Lec 10d)?",
+ a:["When size is fixed and known at compile time — std::array has zero heap overhead and no reallocation","When you need dynamic resizing","When you want automatic memory management","When you need more than 100 elements"],c:0,
+ e:"std::array is a lightweight wrapper — stored on the stack, no constructor/destructor overhead. vector is heap-allocated with dynamic resizing. Trade-off: flexibility vs. performance."},
+
+{sub:"cs1b",lvl:4,d:"Lec 11 · Data Race",
+ q:"Two threads modify the same global variable simultaneously without synchronization. The result is…",
+ a:["A data race — undefined behavior; the interleaved reads/writes produce unpredictable results","An automatic mutex lock is applied","A compile error","Both threads queue their updates safely"],c:0,
+ e:"Shared mutable state requires synchronization (std::mutex, std::atomic). Without it you get a data race — one of the most insidious bugs in concurrent programming."},
+
+{sub:"cs1b",lvl:4,d:"Lec 12 · Linked List Insert",
+ q:"To insert a new node at the FRONT of a linked list, in what order must the pointers be updated?",
+ a:["Set newNode->next = head FIRST, then update head = newNode","Update head = newNode FIRST, then set newNode->next = head","Both operations can happen in any order","Only the head pointer needs to change"],c:0,
+ e:"Order matters! If you set `head = newNode` first, you lose the address of the rest of the list. Always link the new node to the existing list BEFORE moving head."},
+
+]; // end BANK
+
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
+const MODES = [
+  {lvl:1,name:"BEGINNER",icon:"🌱",lives:5,pts:75, timer:0, hint:true,  hintCost:0,  col:"var(--green)", desc:"Foundational concepts"},
+  {lvl:2,name:"EASY",    icon:"💡",lives:4,pts:100,timer:0, hint:true,  hintCost:50, col:"var(--cyan)",  desc:"Standard questions"},
+  {lvl:3,name:"MEDIUM",  icon:"⚡",lives:3,pts:150,timer:0, hint:false, hintCost:0,  col:"var(--yellow)",desc:"Deeper understanding"},
+  {lvl:4,name:"HARD",    icon:"☠️", lives:2,pts:200,timer:30,hint:false, hintCost:0,  col:"var(--red)",   desc:"Expert level + 30s timer"},
 ];
+const SUBS = {
+  linux:{name:"Linux+",icon:"🐧",color:"var(--green)",desc:"CompTIA XK0-005 prep"},
+  cs:{name:"C++ / CS",icon:"💻",color:"var(--cyan)",desc:"Fundamentals & OOP"},
+  cs1b:{name:"CMPR 121",icon:"📚",color:"var(--yellow)",desc:"CS1B — your actual lectures"}
+};
 
-// ── State ────────────────────────────────────────────────────────────────────
-const S = { queue:[], idx:0, score:0, streak:0, best:0, lives:3, done:false };
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+const S = {
+  screen:"subject",
+  sub:null,lvl:null,
+  queue:[],idx:0,
+  score:0,streak:0,best:0,lives:3,
+  answered:false,hintUsed:false,
+  timerSecs:0,timerInterval:null,timerPct:100,
+  mode:null,
+};
 
-// ── Utils ────────────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-function shuffle(a) {
-  a = a.slice();
-  for (let i = a.length-1; i > 0; i--) { const j = Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
+// ─────────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function hi(sub,lvl){return parseInt(localStorage.getItem(`tq_${sub}_${lvl}`)||"0");}
+function saveHi(sub,lvl,score){if(score>hi(sub,lvl))localStorage.setItem(`tq_${sub}_${lvl}`,score);}
+
+// ─────────────────────────────────────────────────────────────
+// HUD
+// ─────────────────────────────────────────────────────────────
+function updateHud(){
+  const m=S.mode;
+  $("h-score").textContent=S.score;
+  $("h-streak").textContent=(S.streak>=3?"🔥":"")+S.streak;
+  $("h-lives").textContent="♥".repeat(S.lives)+"♡".repeat(m.lives-S.lives);
+  $("h-qnum").textContent=`${Math.min(S.idx+1,S.queue.length)}/${S.queue.length}`;
+  $("h-hi").textContent=hi(S.sub,S.lvl);
+  const pct=S.queue.length?(S.idx/S.queue.length)*100:0;
+  $("progbar").style.width=pct+"%";
 }
 
-// ── Render HUD ───────────────────────────────────────────────────────────────
-function hud() {
-  $("score").textContent = S.score;
-  $("streak").textContent = (S.streak >= 3 ? "🔥" : "") + S.streak;
-  $("lives").textContent = "♥".repeat(S.lives) + "♡".repeat(3 - S.lives);
-  $("qnum").textContent = `${Math.min(S.idx+1, S.queue.length)}/${S.queue.length}`;
-  $("level").textContent = Math.floor(S.score/500) + 1;
-  const pct = S.queue.length ? (S.idx / S.queue.length) * 100 : 0;
-  $("progbar").style.width = pct + "%";
+// ─────────────────────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────────────────────
+function startTimer(){
+  const wrap=$("timer-wrap"),bar=$("timer-bar");
+  wrap.style.display="block";
+  S.timerSecs=S.mode.timer;
+  S.timerPct=100;
+  bar.style.width="100%";
+  bar.className="timer-bar";
+  bar.style.transition="none";
+  requestAnimationFrame(()=>{
+    bar.style.transition=`width ${S.mode.timer}s linear`;
+    bar.style.width="0%";
+  });
+  S.timerInterval=setInterval(()=>{
+    S.timerSecs--;
+    if(S.timerSecs<=8)bar.className="timer-bar urgent";
+    if(S.timerSecs<=0){
+      clearInterval(S.timerInterval);
+      if(!S.answered)timeUp();
+    }
+  },1000);
+}
+function stopTimer(){
+  clearInterval(S.timerInterval);
+  S.timerInterval=null;
+}
+function timeUp(){
+  S.answered=true;
+  S.streak=0;
+  S.lives--;
+  const btns=document.querySelectorAll(".answer-btn");
+  btns.forEach((b,i)=>{b.disabled=true;if(i===S._correctPos)b.classList.add("correct");});
+  const fb=$("fb");
+  fb.className="feedback bad";
+  fb.innerHTML=`⏱ <b>Time's up!</b> Correct: <b style="color:var(--green)">${S.queue[S.idx].a[S.queue[S.idx].c]}</b>\n\n<strong>Why:</strong> ${S.queue[S.idx].e}`;
+  updateHud();
+  showNext();
 }
 
-// ── Start ────────────────────────────────────────────────────────────────────
-function start() {
-  Object.assign(S, { queue: shuffle(Q), idx:0, score:0, streak:0, best:0, lives:3, done:false });
-  hud();
+// ─────────────────────────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────────────────────────
+function showSubjectSelect(){
+  S.screen="subject";
+  $("hud").style.display="none";
+  $("timer-wrap").style.display="none";
+  $("progbar").style.width="0%";
+  $("subtitle").textContent="Linux+ · C++ Fundamentals · CMPR 121 — Select a subject";
+  $("footer").textContent="Choose a subject to begin";
+
+  const linux_q=BANK.filter(q=>q.sub==="linux").length;
+  const cs_q=BANK.filter(q=>q.sub==="cs").length;
+  const cs1b_q=BANK.filter(q=>q.sub==="cs1b").length;
+
+  $("main").innerHTML=`
+    <div class="subject-screen">
+      <h2>&gt; SELECT SUBJECT</h2>
+      <p>Pick your study focus. Each subject has 4 difficulty levels with tailored question banks.</p>
+      <div class="subject-cards three">
+        <div class="subject-card linux" id="btn-linux">
+          <span class="icon">🐧</span>
+          <div class="card-title">LINUX+</div>
+          <div class="card-sub">CompTIA XK0-005</div>
+          <div class="card-count">${linux_q} questions</div>
+        </div>
+        <div class="subject-card cs" id="btn-cs">
+          <span class="icon">💻</span>
+          <div class="card-title">C++ / CS</div>
+          <div class="card-sub">Fundamentals &amp; OOP</div>
+          <div class="card-count">${cs_q} questions</div>
+        </div>
+        <div class="subject-card cs1b" id="btn-cs1b">
+          <span class="icon">📚</span>
+          <div class="card-title" style="color:var(--yellow)">CMPR 121</div>
+          <div class="card-sub">Your CS1B lectures</div>
+          <div class="card-count">${cs1b_q} questions</div>
+        </div>
+      </div>
+    </div>`;
+  $("btn-linux").addEventListener("click",()=>showDifficultySelect("linux"));
+  $("btn-cs").addEventListener("click",()=>showDifficultySelect("cs"));
+  $("btn-cs1b").addEventListener("click",()=>showDifficultySelect("cs1b"));
+}
+
+function showDifficultySelect(sub){
+  S.sub=sub;
+  const info=SUBS[sub];
+  $("subtitle").textContent=`${info.icon} ${info.name} — Select difficulty`;
+  $("footer").textContent="Choose how tough you want it";
+  $("main").innerHTML=`
+    <div class="diff-screen">
+      <div class="back-row"><button class="back-btn" id="back-btn">&lt; back</button></div>
+      <h2>&gt; SELECT DIFFICULTY</h2>
+      <div class="diff-cards" id="diff-cards"></div>
+    </div>`;
+  $("back-btn").addEventListener("click",showSubjectSelect);
+  const wrap=$("diff-cards");
+  MODES.forEach(m=>{
+    const count=BANK.filter(q=>q.sub===sub&&q.lvl===m.lvl).length;
+    const best=hi(sub,m.lvl);
+    const el=document.createElement("div");
+    el.className=`diff-card lvl${m.lvl}`;
+    el.innerHTML=`
+      <div class="diff-icon">${m.icon}</div>
+      <div class="diff-info">
+        <div class="diff-name">${m.name}</div>
+        <div class="diff-desc">${m.desc}</div>
+        <div class="diff-badges">
+          <span class="badge life">${"♥".repeat(m.lives)} ${m.lives} lives</span>
+          <span class="badge pts">+${m.pts}pts/q</span>
+          ${m.timer?`<span class="badge hot">⏱ ${m.timer}s/q</span>`:""}
+          ${m.hint?`<span class="badge">💡 hint</span>`:""}
+          <span class="badge">${count} Qs</span>
+        </div>
+      </div>
+      ${best?`<div class="hi-badge">🏆<br>${best}</div>`:""}`;
+    el.addEventListener("click",()=>startGame(sub,m.lvl));
+    wrap.appendChild(el);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// GAME
+// ─────────────────────────────────────────────────────────────
+function startGame(sub,lvl){
+  const m=MODES.find(x=>x.lvl===lvl);
+  S.sub=sub;S.lvl=lvl;S.mode=m;
+  S.queue=shuffle(BANK.filter(q=>q.sub===sub&&q.lvl===lvl));
+  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=m.lives;
+  S.answered=false;S.hintUsed=false;
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ${m.name}`;
+  updateHud();
   renderQ();
 }
 
-// ── Render question ──────────────────────────────────────────────────────────
-function renderQ() {
-  if (S.lives <= 0 || S.idx >= S.queue.length) return gameOver();
-  S.answered = false;
-  const q = S.queue[S.idx];
-  const order = shuffle(q.a.map((_,i)=>i));
-  const correctPos = order.indexOf(q.c);
-  const labels = ["A","B","C","D"];
-  $("main").innerHTML = `
-    <div class="domain-tag">${q.d}</div>
+function renderQ(){
+  if(S.lives<=0||S.idx>=S.queue.length){return gameOver();}
+  S.answered=false;S.hintUsed=false;
+  stopTimer();
+  const q=S.queue[S.idx];
+  const order=shuffle(q.a.map((_,i)=>i));
+  const correctPos=order.indexOf(q.c);
+  S._correctPos=correctPos;
+  const m=S.mode;
+  const lvlNames=["","BEGINNER","EASY","MEDIUM","HARD"];
+  $("main").innerHTML=`
+    <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>
     <div class="question">${q.q}</div>
     <div class="answers" id="ans"></div>
     <div class="feedback" id="fb"></div>
     <div class="controls" id="ctrl"></div>`;
-  const wrap = $("ans");
-  order.forEach((origIdx, pos) => {
-    const b = document.createElement("button");
-    b.className = "answer-btn";
-    b.innerHTML = `<span class="key-hint">${labels[pos]}</span>${q.a[origIdx]}`;
-    b.dataset.pos = pos;
-    b.addEventListener("click", () => pick(pos, correctPos, q));
+  const wrap=$("ans");
+  const labels=["A","B","C","D"];
+  order.forEach((origIdx,pos)=>{
+    const b=document.createElement("button");
+    b.className="answer-btn";
+    b.dataset.pos=pos;
+    b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${q.a[origIdx]}`;
+    b.addEventListener("click",()=>pick(pos,correctPos,q,order));
     wrap.appendChild(b);
   });
-  hud();
+  // Hint button
+  if(m.hint){
+    const ctrl=$("ctrl");
+    const hb=document.createElement("button");
+    hb.className="cmd yellow hint-btn";
+    hb.id="hint-btn";
+    hb.textContent=m.hintCost>0?`💡 50/50 (-${m.hintCost}pts)`:"💡 50/50";
+    hb.addEventListener("click",()=>useHint(correctPos,q,order));
+    ctrl.appendChild(hb);
+  }
+  updateHud();
+  $("footer").textContent=`${m.name} · ${m.pts}pts per correct${m.timer?` · ${m.timer}s timer`:""}`;
+  if(m.timer>0)startTimer();
 }
 
-// ── Handle pick ──────────────────────────────────────────────────────────────
-function pick(pos, correctPos, q) {
-  if (S.answered) return;
-  S.answered = true;
-  const btns = document.querySelectorAll(".answer-btn");
-  btns.forEach((b,i) => {
-    b.disabled = true;
-    if (i === correctPos) b.classList.add("correct");
-    else if (i === pos) b.classList.add("wrong");
+function useHint(correctPos,q,order){
+  if(S.hintUsed||S.answered)return;
+  S.hintUsed=true;
+  const m=S.mode;
+  if(m.hintCost>0)S.score=Math.max(0,S.score-m.hintCost);
+  // eliminate 2 wrong answers
+  const btns=document.querySelectorAll(".answer-btn");
+  let eliminated=0;
+  btns.forEach((b,i)=>{
+    if(i!==correctPos&&eliminated<2){
+      b.classList.add("eliminated");
+      b.disabled=true;
+      eliminated++;
+    }
   });
-  const fb = $("fb");
-  if (pos === correctPos) {
-    S.streak++;
-    S.best = Math.max(S.best, S.streak);
-    const bonus = S.streak >= 3 ? 50 : 0;
-    const pts = 100 + bonus;
-    S.score += pts;
-    fb.className = "feedback good";
-    fb.innerHTML = `✓ <b>Correct!</b> +${pts}${bonus ? " <span style='color:var(--warn)'>🔥 Streak bonus!</span>" : ""}\n\n<strong>Why:</strong> ${q.e}`;
+  $("hint-btn").disabled=true;
+  $("hint-btn").style.opacity=".4";
+  updateHud();
+}
+
+function pick(pos,correctPos,q,order){
+  if(S.answered)return;
+  S.answered=true;
+  stopTimer();
+  const btns=document.querySelectorAll(".answer-btn");
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correctPos)b.classList.add("correct");
+    else if(i===pos)b.classList.add("wrong");
+  });
+  const hb=$("hint-btn");if(hb)hb.disabled=true;
+  const fb=$("fb");
+  const correct=pos===correctPos;
+  const m=S.mode;
+  if(correct){
+    S.streak++;S.best=Math.max(S.best,S.streak);
+    const bonus=S.streak>=3?50:0;
+    const pts=m.pts+bonus;
+    S.score+=pts;
+    fb.className="feedback good";
+    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
+\n<strong>Why:</strong> ${q.e}`;
   } else {
-    S.streak = 0;
-    S.lives--;
-    fb.className = "feedback bad";
-    fb.innerHTML = `✗ <b>Wrong.</b> Correct: <b style='color:var(--good)'>${q.a[q.c]}</b>\n\n<strong>Why:</strong> ${q.e}`;
+    S.streak=0;S.lives--;
+    fb.className="feedback bad";
+    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${q.a[q.c]}</b>
+\n<strong>Why:</strong> ${q.e}`;
   }
-  hud();
-  const ctrl = $("ctrl");
-  const isLast = S.idx + 1 >= S.queue.length || S.lives <= 0;
-  const nb = document.createElement("button");
-  nb.className = "cmd";
-  nb.textContent = isLast ? "> FINISH" : "> NEXT";
-  nb.addEventListener("click", () => { S.idx++; renderQ(); });
+  updateHud();
+  showNext();
+}
+
+function showNext(){
+  const ctrl=$("ctrl");
+  // clear old hint btn if present and add next
+  [...ctrl.querySelectorAll(".cmd:not(.hint-btn)")].forEach(b=>b.remove());
+  const isLast=S.idx+1>=S.queue.length||S.lives<=0;
+  const nb=document.createElement("button");
+  nb.className="cmd";
+  nb.textContent=isLast?"> FINISH":"> NEXT";
+  nb.addEventListener("click",()=>{S.idx++;renderQ();});
   ctrl.appendChild(nb);
   nb.focus();
 }
 
-// ── Game Over ────────────────────────────────────────────────────────────────
-function gameOver() {
-  S.done = true;
-  const max = S.queue.length * 100;
-  const pct = S.score / max;
-  const { rank, msg } = pct >= .95 ? { rank:"ROOT GOD", msg:"You could write the exam." }
-    : pct >= .80 ? { rank:"SYSADMIN", msg:"Exam-ready. Book it now." }
-    : pct >= .60 ? { rank:"POWER USER", msg:"Drill your weak domains and go again." }
-    : pct >= .40 ? { rank:"APPRENTICE", msg:"Review the man pages and retry." }
-    : { rank:"TUX HATCHLING", msg:"Every sysadmin starts here. Keep going." };
-  const won = S.lives > 0;
-  $("main").innerHTML = `
-    <div class="game-over">
-      <h2>${won ? "> SESSION COMPLETE" : "> KERNEL PANIC"}</h2>
-      <div class="subtitle" style="color:var(--dim);margin-bottom:4px">${won ? "You finished the run." : "All lives lost."}</div>
+// ─────────────────────────────────────────────────────────────
+// GAME OVER
+// ─────────────────────────────────────────────────────────────
+function gameOver(){
+  stopTimer();
+  $("timer-wrap").style.display="none";
+  saveHi(S.sub,S.lvl,S.score);
+  const total=S.queue.length;
+  const correct=S.score/S.mode.pts|0; // rough
+  const pct=S.score/(total*S.mode.pts);
+  const {rank,msg}=pct>=.95?{rank:"ROOT GOD",msg:"You own this material."}
+    :pct>=.80?{rank:"EXPERT",msg:"Nearly there — book the exam."}
+    :pct>=.60?{rank:"PROFICIENT",msg:"Drill your weak areas and retry."}
+    :pct>=.40?{rank:"LEARNING",msg:"Review the explanations and go again."}
+    :{rank:"BEGINNER",msg:"Keep studying — everyone starts here."};
+  const won=S.lives>0;
+  const isNew=S.score>0&&S.score>=hi(S.sub,S.lvl);
+  $("main").innerHTML=`
+    <div class="over-screen">
+      <h2>${won?"> SESSION COMPLETE":"> GAME OVER"}</h2>
       <div class="score-big">${S.score}</div>
-      <div class="rank">[ ${rank} ]</div>
+      ${isNew?`<div class="hi-score-line">🏆 New high score!</div>`:`<div class="hi-score-line">Best: ${hi(S.sub,S.lvl)}</div>`}
+      <div class="rank-label">[ ${rank} ]</div>
       <div class="rank-msg">${msg}</div>
-      <div class="stats-row">
-        Best streak: <b>${S.best}</b> &nbsp;·&nbsp;
-        Answered: <b>${S.idx}</b>/${S.queue.length} &nbsp;·&nbsp;
-        Lives left: <b>${S.lives}</b>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="sv">${S.idx}</div><div class="sl">Questions</div></div>
+        <div class="stat-box"><div class="sv">${S.best}</div><div class="sl">Best Streak</div></div>
+        <div class="stat-box"><div class="sv">${S.lives}</div><div class="sl">Lives Left</div></div>
       </div>
-      <div class="controls" style="justify-content:center">
-        <button class="cmd" id="restart">> PLAY AGAIN</button>
+      <div class="controls" style="justify-content:center;gap:10px">
+        <button class="cmd" id="btn-retry">> RETRY</button>
+        <button class="cmd cyan" id="btn-change">> CHANGE</button>
       </div>
     </div>`;
-  $("progbar").style.width = "100%";
-  $("restart").addEventListener("click", start);
-  $("restart").focus();
+  $("progbar").style.width="100%";
+  $("btn-retry").addEventListener("click",()=>startGame(S.sub,S.lvl));
+  $("btn-change").addEventListener("click",showSubjectSelect);
+  $("btn-retry").focus();
 }
 
-// ── Keyboard ─────────────────────────────────────────────────────────────────
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const b = document.querySelector("#ctrl .cmd") || $("restart");
-    if (b) { b.click(); return; }
+// ─────────────────────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────────────────────
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const b=document.querySelector("#ctrl .cmd:not(.hint-btn)")||$("btn-retry");
+    if(b){b.click();return;}
   }
-  if (!S.answered) {
-    const map = { a:0, b:1, c:2, d:3, "1":0, "2":1, "3":2, "4":3 };
-    const idx = map[e.key.toLowerCase()];
-    if (idx !== undefined) {
-      const btns = document.querySelectorAll(".answer-btn");
-      if (btns[idx]) btns[idx].click();
+  if(e.key==="h"||e.key==="H"){
+    const hb=$("hint-btn");if(hb&&!hb.disabled)hb.click();return;
+  }
+  if(!S.answered){
+    const map={a:0,b:1,c:2,d:3,"1":0,"2":1,"3":2,"4":3};
+    const idx=map[e.key.toLowerCase()];
+    if(idx!==undefined){
+      const btns=document.querySelectorAll(".answer-btn:not(:disabled)");
+      // find visible (non-eliminated) btn at logical position
+      const allBtns=document.querySelectorAll(".answer-btn");
+      if(allBtns[idx]&&!allBtns[idx].disabled)allBtns[idx].click();
     }
   }
 });
 
-// ── Service Worker ────────────────────────────────────────────────────────────
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+// ─────────────────────────────────────────────────────────────
+// SERVICE WORKER
+// ─────────────────────────────────────────────────────────────
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
 }
 
-// ── Boot ─────────────────────────────────────────────────────────────────────
-start();
+// ─────────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────────
+showSubjectSelect();
 </script>
 </body>
 </html>
