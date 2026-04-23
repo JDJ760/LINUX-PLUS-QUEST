@@ -137,6 +137,13 @@ main{
 .answer-btn.correct{background:rgba(57,255,20,.1);border-color:var(--green);color:var(--green)}
 .answer-btn.wrong{background:rgba(255,77,109,.1);border-color:var(--red);color:var(--red);text-decoration:line-through;opacity:.75}
 .answer-btn.eliminated{opacity:.3;text-decoration:line-through}
+.fill-wrap{display:flex;flex-direction:column;gap:10px;margin:4px 0}
+.fill-input{background:#0a1228;border:2px solid var(--cyan);border-radius:8px;color:var(--green);font-family:inherit;font-size:clamp(14px,3.5vw,16px);padding:12px 14px;outline:none;width:100%;box-sizing:border-box;letter-spacing:.5px}
+.fill-input:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(57,255,20,.2)}
+.fill-input.correct{border-color:var(--green);color:var(--green);background:rgba(57,255,20,.08)}
+.fill-input.wrong{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.08)}
+.fill-submit{align-self:flex-start}
+.fill-tip{font-size:10px;color:#7a8aad;margin-top:-4px;letter-spacing:.5px}
 .key-hint{display:inline-block;background:#0e1e3a;border:1px solid #2a4060;border-radius:3px;width:18px;height:18px;line-height:18px;text-align:center;font-size:9px;color:var(--dim);margin-right:7px;flex-shrink:0;vertical-align:middle}
 .feedback{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:clamp(11px,2.8vw,12.5px);line-height:1.6;display:none;white-space:pre-wrap;word-break:break-word}
 .feedback.good{background:rgba(57,255,20,.06);border-left:3px solid var(--green);display:block}
@@ -1064,6 +1071,47 @@ const BANK = [
  a:["Set newNode->next = head FIRST, then update head = newNode","Update head = newNode FIRST, then set newNode->next = head","Both operations can happen in any order","Only the head pointer needs to change"],c:0,
  e:"Order matters! If you set `head = newNode` first, you lose the address of the rest of the list. Always link the new node to the existing list BEFORE moving head."},
 
+// ─── FILL-IN-THE-BLANK QUESTIONS ───
+{sub:"linux",lvl:1,d:"Commands",type:"fill",
+ q:"The command that displays your current working directory is: ______",
+ answers:["pwd"],
+ e:"`pwd` = print working directory. Shows the full absolute path of the directory you're currently in."},
+
+{sub:"linux",lvl:2,d:"Filesystem",type:"fill",
+ q:"The file that lists filesystems to mount at boot lives at /etc/______",
+ answers:["fstab","/etc/fstab"],
+ e:"/etc/fstab defines persistent mounts. Each line: device, mount point, fs type, options, dump, pass."},
+
+{sub:"linux",lvl:2,d:"Networking",type:"fill",
+ q:"The default port number for HTTPS traffic is ______",
+ answers:["443"],
+ e:"HTTP = 80, HTTPS = 443. Memorize the common ones: 22 SSH, 25 SMTP, 53 DNS, 80 HTTP, 443 HTTPS, 3389 RDP."},
+
+{sub:"linux",lvl:3,d:"Permissions",type:"fill",
+ q:"In octal notation, the permission rwxr-xr-- is represented by the number ______",
+ answers:["754"],
+ e:"r=4, w=2, x=1. rwx=7, r-x=5, r--=4 → 754. Owner full, group read+exec, others read only."},
+
+{sub:"cs",lvl:1,d:"Memory",type:"fill",
+ q:"The C++ keyword/operator used to dynamically allocate memory on the heap is ______",
+ answers:["new"],
+ e:"`new` returns a pointer to heap-allocated memory. Always pair with `delete` (or `delete[]` for arrays) to avoid leaks."},
+
+{sub:"cs",lvl:2,d:"OOP",type:"fill",
+ q:"A class member function with the same name as the class and NO return type is called a ______",
+ answers:["constructor"],
+ e:"Constructors initialize an object when it's created. Default constructor takes no args; overloaded constructors take parameters."},
+
+{sub:"cs1b",lvl:2,d:"Classes",type:"fill",
+ q:"Every non-static member function receives a hidden pointer named ______ that points to the invoking object.",
+ answers:["this"],
+ e:"`this` lets you disambiguate (`this->age = age;`) and return the current object from member functions (return *this;)."},
+
+{sub:"cs1b",lvl:3,d:"Pointers",type:"fill",
+ q:"To free a single object allocated with `new`, you call ______ followed by the pointer name.",
+ answers:["delete"],
+ e:"`delete ptr;` frees one object. `delete[] arr;` frees an array. Using the wrong one is undefined behavior."},
+
 ]; // end BANK
 
 // ─────────────────────────────────────────────────────────────
@@ -1259,36 +1307,56 @@ function renderQ(){
   S.answered=false;S.hintUsed=false;
   stopTimer();
   const q=S.queue[S.idx];
-  const order=shuffle(q.a.map((_,i)=>i));
-  const correctPos=order.indexOf(q.c);
-  S._correctPos=correctPos;
   const m=S.mode;
   const lvlNames=["","BEGINNER","EASY","MEDIUM","HARD"];
+  const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:"";
   $("main").innerHTML=`
-    <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>
+    <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
     <div class="question">${q.q}</div>
     <div class="answers" id="ans"></div>
     <div class="feedback" id="fb"></div>
     <div class="controls" id="ctrl"></div>`;
   const wrap=$("ans");
-  const labels=["A","B","C","D"];
-  order.forEach((origIdx,pos)=>{
-    const b=document.createElement("button");
-    b.className="answer-btn";
-    b.dataset.pos=pos;
-    b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${q.a[origIdx]}`;
-    b.addEventListener("click",()=>pick(pos,correctPos,q,order));
-    wrap.appendChild(b);
-  });
-  // Hint button
-  if(m.hint){
-    const ctrl=$("ctrl");
-    const hb=document.createElement("button");
-    hb.className="cmd yellow hint-btn";
-    hb.id="hint-btn";
-    hb.textContent=m.hintCost>0?`💡 50/50 (-${m.hintCost}pts)`:"💡 50/50";
-    hb.addEventListener("click",()=>useHint(correctPos,q,order));
-    ctrl.appendChild(hb);
+
+  if(q.type==="fill"){
+    // Fill-in-the-blank
+    wrap.innerHTML=`
+      <div class="fill-wrap">
+        <input type="text" class="fill-input" id="fill-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer…">
+        <div class="fill-tip">↵ ENTER to submit · case-insensitive</div>
+        <button class="cmd fill-submit" id="fill-submit">> SUBMIT</button>
+      </div>`;
+    const inp=$("fill-input");
+    setTimeout(()=>inp.focus(),50);
+    const submit=()=>pickFill(inp.value,q);
+    $("fill-submit").addEventListener("click",submit);
+    inp.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){e.preventDefault();submit();}
+    });
+  } else {
+    // Multiple choice (default) — shuffle answer order
+    const order=shuffle(q.a.map((_,i)=>i));
+    const correctPos=order.indexOf(q.c);
+    S._correctPos=correctPos;
+    const labels=["A","B","C","D"];
+    order.forEach((origIdx,pos)=>{
+      const b=document.createElement("button");
+      b.className="answer-btn";
+      b.dataset.pos=pos;
+      b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${q.a[origIdx]}`;
+      b.addEventListener("click",()=>pick(pos,correctPos,q,order));
+      wrap.appendChild(b);
+    });
+    // Hint button (MC only)
+    if(m.hint){
+      const ctrl=$("ctrl");
+      const hb=document.createElement("button");
+      hb.className="cmd yellow hint-btn";
+      hb.id="hint-btn";
+      hb.textContent=m.hintCost>0?`💡 50/50 (-${m.hintCost}pts)`:"💡 50/50";
+      hb.addEventListener("click",()=>useHint(correctPos,q,order));
+      ctrl.appendChild(hb);
+    }
   }
   updateHud();
   $("footer").textContent=`${m.name} · ${m.pts}pts per correct${m.timer?` · ${m.timer}s timer`:""}`;
@@ -1341,6 +1409,37 @@ function pick(pos,correctPos,q,order){
     S.streak=0;S.lives--;
     fb.className="feedback bad";
     fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${q.a[q.c]}</b>
+\n<strong>Why:</strong> ${q.e}`;
+  }
+  updateHud();
+  showNext();
+}
+
+function pickFill(raw,q){
+  if(S.answered)return;
+  S.answered=true;
+  stopTimer();
+  const norm=s=>String(s||"").trim().toLowerCase().replace(/\s+/g," ");
+  const val=norm(raw);
+  const accepted=(q.answers||[]).map(norm);
+  const correct=val.length>0&&accepted.includes(val);
+  const inp=$("fill-input");
+  if(inp){inp.disabled=true;inp.classList.add(correct?"correct":"wrong");}
+  const sb=$("fill-submit");if(sb)sb.disabled=true;
+  const fb=$("fb");
+  const m=S.mode;
+  if(correct){
+    S.streak++;S.best=Math.max(S.best,S.streak);
+    const bonus=S.streak>=3?50:0;
+    const pts=m.pts+bonus;
+    S.score+=pts;
+    fb.className="feedback good";
+    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
+\n<strong>Why:</strong> ${q.e}`;
+  } else {
+    S.streak=0;S.lives--;
+    fb.className="feedback bad";
+    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${q.answers[0]}</b>
 \n<strong>Why:</strong> ${q.e}`;
   }
   updateHud();
@@ -1404,6 +1503,8 @@ function gameOver(){
 // KEYBOARD
 // ─────────────────────────────────────────────────────────────
 document.addEventListener("keydown",e=>{
+  // Don't hijack keys when typing in a fill-in-blank input
+  if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;
   if(e.key==="Enter"){
     const b=document.querySelector("#ctrl .cmd:not(.hint-btn)")||$("btn-retry");
     if(b){b.click();return;}
