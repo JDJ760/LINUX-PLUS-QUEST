@@ -78,11 +78,14 @@ main{
 .subject-card:active{transform:scale(.97)}
 .subject-card.linux:hover{border-color:var(--green)}
 .subject-card.cs1b:hover{border-color:var(--yellow)}
+.subject-card.ap:hover{border-color:var(--red)}
 .subject-cards.three{grid-template-columns:1fr 1fr 1fr}
+.subject-cards.four{grid-template-columns:1fr 1fr}
 .subject-card .icon{font-size:28px;display:block;margin-bottom:8px}
 .subject-card .card-title{color:var(--green);font-size:14px;font-weight:bold;letter-spacing:1px}
 .subject-card.cs .card-title{color:var(--cyan)}
 .subject-card.cs1b .card-title{color:var(--yellow)}
+.subject-card.ap .card-title{color:var(--red)}
 .subject-card .card-sub{color:var(--dim);font-size:10px;margin-top:4px}
 .subject-card .card-count{color:var(--yellow);font-size:11px;margin-top:6px}
 
@@ -194,6 +197,7 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
   .key-hint{display:none}
   .subject-cards{grid-template-columns:1fr 1fr}
   .subject-cards.three{grid-template-columns:1fr}
+  .subject-cards.four{grid-template-columns:1fr 1fr}
   .stat-grid{grid-template-columns:repeat(3,1fr)}
 }
 @media(min-width:481px) and (max-width:599px){
@@ -1112,6 +1116,290 @@ const BANK = [
  answers:["delete"],
  e:"`delete ptr;` frees one object. `delete[] arr;` frees an array. Using the wrong one is undefined behavior."},
 
+// ═══════════════════════════════════════════════════════════════
+// ▄▄▄ CompTIA A+ — 220-1101 (Core 1) ▄▄▄
+// ═══════════════════════════════════════════════════════════════
+
+// ─── Core 1 · BEGINNER (L1) ───
+{sub:"ap",lvl:1,d:"Core 1 · Hardware",
+ q:"Which connector is standard on a modern monitor for carrying both HD video and audio over a single cable?",
+ a:["HDMI","VGA","DVI-D","PS/2"],c:0,
+ e:"HDMI carries digital video + audio. VGA is analog video only. DVI carries video (some variants). PS/2 is for keyboards/mice."},
+{sub:"ap",lvl:1,d:"Core 1 · Networking",
+ q:"The default port number for HTTP is:",
+ a:["80","443","21","22"],c:0,
+ e:"HTTP = 80 (unencrypted web). HTTPS = 443. FTP = 21. SSH = 22. Know the well-known ports for the exam."},
+{sub:"ap",lvl:1,d:"Core 1 · Hardware",
+ q:"Which storage device has NO moving parts and uses flash memory?",
+ a:["SSD","HDD","Optical drive","Tape drive"],c:0,
+ e:"SSD (Solid State Drive) uses NAND flash — no spinning platters, faster than HDD, more shock-resistant."},
+{sub:"ap",lvl:1,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for SSH is ______",
+ answers:["22"],
+ e:"SSH uses TCP port 22 for encrypted remote shell access. Compare to Telnet (23, unencrypted — avoid)."},
+{sub:"ap",lvl:1,d:"Core 1 · Hardware",
+ q:"Which type of RAM is used in modern laptops?",
+ a:["SODIMM","DIMM","RIMM","SIMM"],c:0,
+ e:"SODIMM (Small Outline DIMM) is the laptop form factor. Desktops use full-size DIMMs. DDR4 SODIMM has 260 pins, DDR5 has 262."},
+{sub:"ap",lvl:1,d:"Core 1 · Mobile",
+ q:"Which wireless technology is used for short-range device pairing (≈10m) like headphones and keyboards?",
+ a:["Bluetooth","NFC","Wi-Fi","Cellular"],c:0,
+ e:"Bluetooth: ~10m, device pairing. NFC: ~4cm, tap-to-pay. Wi-Fi: up to ~100m LAN. Cellular: miles."},
+{sub:"ap",lvl:1,d:"Core 1 · Networking",
+ q:"Which protocol automatically assigns IP addresses to devices on a network?",
+ a:["DHCP","DNS","ARP","NAT"],c:0,
+ e:"DHCP = Dynamic Host Configuration Protocol. DNS resolves names→IPs. ARP resolves IP→MAC. NAT translates private↔public IPs."},
+{sub:"ap",lvl:1,d:"Core 1 · Hardware",
+ q:"Which CPU socket style has the pins on the motherboard and flat contacts on the CPU?",
+ a:["LGA","PGA","BGA","ZIF"],c:0,
+ e:"LGA = Land Grid Array (pins on socket, Intel). PGA = Pin Grid Array (pins on CPU, older AMD). BGA = soldered on."},
+
+// ─── Core 1 · EASY (L2) ───
+{sub:"ap",lvl:2,d:"Core 1 · Networking",
+ q:"A /24 subnet mask in CIDR notation equals which dotted-decimal mask?",
+ a:["255.255.255.0","255.255.0.0","255.0.0.0","255.255.255.255"],c:0,
+ e:"/24 means 24 network bits → 255.255.255.0. Gives 256 addresses (254 usable hosts). The most common home/SOHO mask."},
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for RDP (Remote Desktop Protocol) is ______",
+ answers:["3389"],
+ e:"RDP uses TCP 3389. Microsoft's remote desktop. Often blocked on firewalls to prevent brute-force attacks."},
+{sub:"ap",lvl:2,d:"Core 1 · Printers",
+ q:"Which printer type uses a heated fuser and toner?",
+ a:["Laser","Inkjet","Thermal","Impact"],c:0,
+ e:"Laser printers: charge drum → attract toner → transfer to paper → fuser melts toner. 7 steps: processing, charging, exposing, developing, transferring, fusing, cleaning."},
+{sub:"ap",lvl:2,d:"Core 1 · Networking",
+ q:"Which cable category is rated for 10 Gbps up to 100 meters?",
+ a:["Cat 6a","Cat 5e","Cat 5","Cat 3"],c:0,
+ e:"Cat 6a: 10 Gbps @ 100m. Cat 6: 10 Gbps @ 55m. Cat 5e: 1 Gbps @ 100m. Cat 5: 100 Mbps. Cat 3: phone/10 Mbps."},
+{sub:"ap",lvl:2,d:"Core 1 · Hardware",
+ q:"Which PSU connector powers the CPU on a modern motherboard?",
+ a:["8-pin EPS (CPU power)","24-pin ATX","6-pin PCIe","4-pin Molex"],c:0,
+ e:"8-pin EPS (or 4+4 split) powers the CPU. 24-pin ATX powers the motherboard. 6/8-pin PCIe powers the GPU. Molex is legacy drives."},
+{sub:"ap",lvl:2,d:"Core 1 · Mobile",
+ q:"What does IMEI identify on a mobile device?",
+ a:["The physical hardware (phone itself)","The SIM card","The carrier account","The user"],c:0,
+ e:"IMEI = International Mobile Equipment Identity (15 digits) = the phone hardware. ICCID identifies the SIM. IMSI identifies the subscriber."},
+{sub:"ap",lvl:2,d:"Core 1 · Wi-Fi",
+ q:"Wi-Fi 6 corresponds to which IEEE standard?",
+ a:["802.11ax","802.11ac","802.11n","802.11g"],c:0,
+ e:"Wi-Fi 6 = 802.11ax. Wi-Fi 5 = 802.11ac. Wi-Fi 4 = 802.11n. Wi-Fi 6E adds the 6 GHz band. Wi-Fi 7 = 802.11be."},
+{sub:"ap",lvl:2,d:"Core 1 · Virtualization",
+ q:"A Type-1 hypervisor runs:",
+ a:["Directly on the hardware (bare metal)","On top of a host OS","Inside a guest VM","Only in the cloud"],c:0,
+ e:"Type-1 (bare metal): ESXi, Hyper-V, Proxmox — best performance. Type-2 (hosted): VirtualBox, VMware Workstation — runs as an app."},
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for DNS is ______",
+ answers:["53"],
+ e:"DNS uses port 53 (UDP for queries, TCP for zone transfers and large responses). Domain Name System resolves names to IPs."},
+{sub:"ap",lvl:2,d:"Core 1 · Hardware",
+ q:"How many pins does a DDR4 DIMM (desktop) have?",
+ a:["288","240","184","260"],c:0,
+ e:"DDR4 DIMM: 288 pins. DDR3 DIMM: 240. DDR2: 240 (different notch). DDR4 SODIMM (laptop): 260 pins."},
+{sub:"ap",lvl:2,d:"Core 1 · Cloud",
+ q:"Which cloud model gives you a raw virtual machine with no OS or software installed?",
+ a:["IaaS","PaaS","SaaS","DaaS"],c:0,
+ e:"IaaS = Infrastructure (you manage OS+apps). PaaS = Platform (you manage apps). SaaS = Software (you just use it). Think: EC2=IaaS, Heroku=PaaS, Gmail=SaaS."},
+
+// ─── Core 1 · MEDIUM (L3) ───
+{sub:"ap",lvl:3,d:"Core 1 · Networking",
+ q:"A user reports no internet. `ipconfig` shows 169.254.x.x as the IP. What happened?",
+ a:["DHCP failed — APIPA assigned a link-local address","The device is on the correct subnet","Static IP is misconfigured","DNS is down"],c:0,
+ e:"169.254.0.0/16 = APIPA (Automatic Private IP Addressing). Windows assigns this when DHCP times out. Can talk to LAN peers on same APIPA range but NOT to the gateway/internet."},
+{sub:"ap",lvl:3,d:"Core 1 · Troubleshooting",
+ q:"A laptop screen is dim but you can faintly see the desktop. Most likely failure?",
+ a:["Backlight / inverter","GPU failure","Bad RAM","CMOS battery"],c:0,
+ e:"If the image is present but dark, the LCD panel is working but the backlight is dead. Shine a flashlight at the screen — if you see the image, confirms backlight failure."},
+{sub:"ap",lvl:3,d:"Core 1 · Networking",
+ q:"Which private IPv4 range is defined by RFC 1918?",
+ a:["10.0.0.0/8","169.254.0.0/16","127.0.0.0/8","224.0.0.0/4"],c:0,
+ e:"RFC 1918 private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. 169.254 is APIPA. 127 is loopback. 224+ is multicast."},
+{sub:"ap",lvl:3,d:"Core 1 · Printers",
+ q:"A laser printer prints pages with vertical streaks that appear in the same position on every page. Most likely cause?",
+ a:["Scratched imaging drum","Low toner","Wrong paper","Corrupt driver"],c:0,
+ e:"Repeating defects at the same position = physical damage on the drum (or fuser). Low toner usually causes fading, not streaks. The distance between repeats points to which roller."},
+{sub:"ap",lvl:3,d:"Core 1 · Storage",
+ q:"Which RAID level provides striping with distributed parity and requires a minimum of 3 disks?",
+ a:["RAID 5","RAID 0","RAID 1","RAID 10"],c:0,
+ e:"RAID 5: striping + distributed parity, min 3 disks, survives 1 failure. RAID 0: stripe only (no redundancy). RAID 1: mirror. RAID 10: mirrored stripes, min 4."},
+{sub:"ap",lvl:3,d:"Core 1 · Mobile",
+ q:"A phone won't charge with its cable but the cable works on other phones. You try another cable on the same phone — still nothing. Next best step?",
+ a:["Inspect / clean the charging port for lint or debris","Replace the battery","Factory reset","Replace the phone"],c:0,
+ e:"Lint in the USB-C/Lightning port is the #1 cause of charging failure. Power off, use a toothpick or compressed air. Escalate to battery/board only after clearing the port."},
+{sub:"ap",lvl:3,d:"Core 1 · Networking",
+ q:"Which command shows the path packets take to a destination and the latency at each hop (Windows)?",
+ a:["tracert","ping","nslookup","ipconfig"],c:0,
+ e:"Windows: tracert. Linux/macOS: traceroute. Uses ICMP (Windows) or UDP (Linux) with incrementing TTLs."},
+{sub:"ap",lvl:3,d:"Core 1 · Hardware",
+ q:"A PC powers on, fans spin, but there's no POST, no beeps, no display. Which is the LEAST likely cause?",
+ a:["Hard drive failure","Bad CPU","Dead RAM","Motherboard failure"],c:0,
+ e:"No POST means the system never got past early boot — the drive isn't even accessed yet. POST failure points to CPU, RAM, motherboard, or PSU — not storage."},
+
+// ─── Core 1 · HARD (L4) ───
+{sub:"ap",lvl:4,d:"Core 1 · Networking",
+ q:"You need to extend a 1 Gbps copper link to a building 150 meters away. Cat 6a only reaches 100m. Best solution?",
+ a:["Use multimode fiber with media converters","Use Cat 5e at lower speed","Add a second run of Cat 6a","Use a Wi-Fi bridge"],c:0,
+ e:"Copper Ethernet is capped at 100m. For 150m you need fiber (multimode OM3/OM4 handles 1-10 Gbps for hundreds of meters). Media converters bridge fiber↔copper at each end."},
+{sub:"ap",lvl:4,d:"Core 1 · Troubleshooting",
+ q:"A server reboots randomly under load but runs fine at idle. Temps are normal. PSU is 1+ year old. Best next diagnostic?",
+ a:["Test/replace PSU (check rails under load with a multimeter or swap)","Reinstall the OS","Update the BIOS","Replace the GPU"],c:0,
+ e:"Reboots-under-load + normal temps + aging PSU = classic failing power supply. Capacitors degrade; rails sag when current spikes. Swap with a known-good PSU to confirm."},
+{sub:"ap",lvl:4,d:"Core 1 · Networking",
+ q:"A 172.16.50.10/20 host — what is the network address?",
+ a:["172.16.48.0","172.16.50.0","172.16.0.0","172.16.32.0"],c:0,
+ e:"/20 = 4 bits into the 3rd octet. Block size = 256-240 = 16. 3rd octet increments: 0,16,32,48,64... 50 falls in the 48-63 range → network = 172.16.48.0."},
+{sub:"ap",lvl:4,d:"Core 1 · Virtualization",
+ q:"Which is a key advantage of containers over full VMs?",
+ a:["Containers share the host kernel — lower overhead, faster startup","Containers provide stronger isolation","Containers require their own kernel","Containers can only run on bare metal"],c:0,
+ e:"Containers (Docker, LXC) share the host OS kernel and bundle only app dependencies. VMs each run a full OS. Tradeoff: containers are lighter but share kernel = slightly weaker isolation."},
+{sub:"ap",lvl:4,d:"Core 1 · Hardware",
+ q:"An NVMe SSD is rated PCIe 4.0 x4. You install it in a PCIe 3.0 x4 slot. What happens?",
+ a:["It works, but at PCIe 3.0 speeds (~4 GB/s max)","It doesn't work at all","It runs at full PCIe 4.0 speed","It damages the motherboard"],c:0,
+ e:"PCIe is backward-compatible. A 4.0 device negotiates down to the slot's 3.0 speed. You lose roughly half the bandwidth (PCIe 4.0 x4 ≈ 8 GB/s, 3.0 x4 ≈ 4 GB/s)."},
+{sub:"ap",lvl:4,d:"Core 1 · Printers",
+ q:"A networked printer prints a blank page when a test page is sent from one user, but works for others. Best first step?",
+ a:["Check that user's print driver — reinstall the correct one","Replace the toner cartridge","Update the printer firmware","Reset the printer to factory defaults"],c:0,
+ e:"Problem is user-specific — the printer hardware works fine for others. Wrong/corrupt driver or PostScript vs PCL mismatch is the usual cause. Reinstall the manufacturer's correct driver for that OS."},
+
+// ═══════════════════════════════════════════════════════════════
+// ▄▄▄ CompTIA A+ — 220-1102 (Core 2) ▄▄▄
+// ═══════════════════════════════════════════════════════════════
+
+// ─── Core 2 · BEGINNER (L1) ───
+{sub:"ap",lvl:1,d:"Core 2 · OS",
+ q:"Which Windows command opens the Task Manager directly via keyboard?",
+ a:["Ctrl+Shift+Esc","Ctrl+Alt+Del","Win+R","Alt+F4"],c:0,
+ e:"Ctrl+Shift+Esc opens Task Manager immediately. Ctrl+Alt+Del opens the security screen (where Task Manager is a choice)."},
+{sub:"ap",lvl:1,d:"Core 2 · Security",
+ q:"Which type of malware encrypts your files and demands payment for the decryption key?",
+ a:["Ransomware","Spyware","Adware","Rootkit"],c:0,
+ e:"Ransomware (WannaCry, CryptoLocker, Ryuk) encrypts data and extorts the user. Best defense: offline backups + patched systems."},
+{sub:"ap",lvl:1,d:"Core 2 · OS",
+ q:"Which Windows utility lets you uninstall a program?",
+ a:["Programs and Features / Apps & features","Device Manager","Disk Management","Services"],c:0,
+ e:"Win10/11: Settings → Apps → Apps & features. Legacy: Control Panel → Programs and Features. Device Manager is for hardware drivers, not apps."},
+{sub:"ap",lvl:1,d:"Core 2 · Security",
+ q:"What is the strongest form of authentication for everyday users?",
+ a:["Multi-factor authentication (MFA)","A strong password","A PIN","A security question"],c:0,
+ e:"MFA combines factors: something you know (password) + something you have (token/phone) + something you are (biometric). Far harder to compromise than any single factor."},
+{sub:"ap",lvl:1,d:"Core 2 · OS",type:"fill",
+ q:"The Windows command-line utility to check and repair protected system files is ______ /scannow",
+ answers:["sfc"],
+ e:"sfc /scannow = System File Checker. Scans and restores corrupted Windows system files from the component store."},
+{sub:"ap",lvl:1,d:"Core 2 · Security",
+ q:"What does 'social engineering' mean in IT security?",
+ a:["Manipulating people into revealing info or taking unsafe actions","Writing better code","Designing user interfaces","Modeling network traffic"],c:0,
+ e:"Social engineering attacks the human: phishing, pretexting, tailgating, vishing, baiting. Often easier than technical attacks — users are the weakest link."},
+{sub:"ap",lvl:1,d:"Core 2 · OS",
+ q:"Which file system is REQUIRED for a Windows 11 system drive?",
+ a:["NTFS","FAT32","exFAT","ext4"],c:0,
+ e:"Windows needs NTFS for the system drive (journaling, permissions, large files). FAT32 is for small USB drives (4GB file limit). exFAT is flash-friendly but no journaling. ext4 is Linux."},
+
+// ─── Core 2 · EASY (L2) ───
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"What does a phishing email typically try to do?",
+ a:["Trick the user into clicking a link or revealing credentials","Infect the system directly with no user action","Scan the network","Encrypt files automatically"],c:0,
+ e:"Phishing is social engineering via email. Red flags: urgency, misspelled domains, generic greetings, suspicious attachments. Report + delete — don't click."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",
+ q:"Which Linux command changes file permissions?",
+ a:["chmod","chown","ls","pwd"],c:0,
+ e:"chmod = change mode (permissions). chown = change owner. Example: chmod 755 script.sh (rwxr-xr-x)."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"A user got a pop-up claiming their PC is infected and to call a phone number. Best action?",
+ a:["Close the pop-up (or kill the browser) and run a legitimate AV scan","Call the number to find out","Enter credit card to clean it","Let a remote technician from the popup connect"],c:0,
+ e:"Classic tech-support scam. Never call numbers from pop-ups. Close via Task Manager if needed. Microsoft/Apple never show 'call us now' pop-ups. Run Windows Defender / Malwarebytes."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",
+ q:"Which Windows feature isolates apps from the rest of the OS for safer testing?",
+ a:["Windows Sandbox","BitLocker","Hyper-V Replica","Credential Guard"],c:0,
+ e:"Windows Sandbox (Pro/Ent) gives a disposable virtualized environment that resets on close. Great for opening suspect attachments or testing installers."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",type:"fill",
+ q:"The Windows command to flush the DNS resolver cache is ipconfig /______",
+ answers:["flushdns"],
+ e:"ipconfig /flushdns clears stale DNS entries. Use after DNS changes or when a site resolves to an old IP."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"Which of the following is a STRONG password policy?",
+ a:["Minimum 14 characters, mix of types, no reuse, MFA required","Minimum 6 characters, change every day","Same password used everywhere for convenience","Birthday + pet's name"],c:0,
+ e:"NIST current guidance: length > complexity, allow long passphrases, don't force frequent rotation (drives bad habits), check against breach lists, require MFA."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",
+ q:"On macOS, what is the equivalent of Windows Task Manager?",
+ a:["Activity Monitor","Finder","Spotlight","Mission Control"],c:0,
+ e:"Activity Monitor shows processes, CPU, memory, energy, disk, network. Find it in Applications → Utilities or via Spotlight (Cmd+Space)."},
+{sub:"ap",lvl:2,d:"Core 2 · Procedures",
+ q:"Which step comes FIRST in the CompTIA troubleshooting methodology?",
+ a:["Identify the problem","Establish a theory of probable cause","Test the theory","Document findings"],c:0,
+ e:"CompTIA 6 steps: 1) Identify problem 2) Theory 3) Test theory 4) Plan of action 5) Verify functionality 6) Document. Always gather info + check recent changes FIRST."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"What does 'principle of least privilege' mean?",
+ a:["Users get only the access required to do their job","Admins have all privileges","Users share one account","Passwords never expire"],c:0,
+ e:"Least privilege: limit accounts to minimum permissions. Blast radius of a compromised account or mistake is reduced. Applies to users, services, and processes."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",
+ q:"Which command lists running processes in Linux/macOS terminal?",
+ a:["ps","ls","cd","mv"],c:0,
+ e:"ps (process status). Common flags: ps aux (all processes, detailed). `top` or `htop` give a live view."},
+{sub:"ap",lvl:2,d:"Core 2 · Mobile",
+ q:"A user reports their iPhone battery dies very fast after a recent iOS update. Best first step?",
+ a:["Check Settings → Battery for which apps are using power, then update or disable them","Factory reset","Replace the battery immediately","Jailbreak the phone"],c:0,
+ e:"iOS has built-in battery analytics. Look for rogue apps, background activity, or indexing after update. Restart first, then investigate. Battery replacement is last resort after diagnostics."},
+
+// ─── Core 2 · MEDIUM (L3) ───
+{sub:"ap",lvl:3,d:"Core 2 · Security",
+ q:"A workstation has a legitimate-looking antivirus alert that won't close and demands payment. BEST removal procedure?",
+ a:["Boot into Safe Mode / offline scan with legitimate AV, then scan","Pay to remove it","Reinstall Windows immediately","Disable the firewall"],c:0,
+ e:"CompTIA malware removal 7 steps: 1) Investigate 2) Quarantine 3) Disable System Restore 4) Remediate (boot Safe Mode or WinRE, run AV) 5) Schedule scans 6) Enable System Restore 7) Educate user."},
+{sub:"ap",lvl:3,d:"Core 2 · OS",
+ q:"Windows boots to a black screen with just a cursor after login. Safe Mode works. Most likely culprit?",
+ a:["A startup program or driver — disable in msconfig/Safe Mode","Failed hard drive","Dead RAM","Bad PSU"],c:0,
+ e:"If Safe Mode works, hardware is fine. Something that loads at normal startup is the problem — usually a broken driver, shell replacement, or 3rd-party app. Use msconfig or Task Manager Startup tab."},
+{sub:"ap",lvl:3,d:"Core 2 · Security",
+ q:"Which authentication protocol is used by Active Directory domains?",
+ a:["Kerberos","RADIUS","TACACS+","PAP"],c:0,
+ e:"Kerberos is AD's default auth — uses a KDC and time-sensitive tickets. Why clock skew > 5 minutes breaks logins. RADIUS/TACACS+ are typically for network device admin."},
+{sub:"ap",lvl:3,d:"Core 2 · Scripting",
+ q:"Which file extension is a Windows PowerShell script?",
+ a:[".ps1",".sh",".bat",".vbs"],c:0,
+ e:".ps1 = PowerShell. .bat/.cmd = legacy cmd. .sh = Linux/macOS bash. .vbs = VBScript (legacy)."},
+{sub:"ap",lvl:3,d:"Core 2 · Security",
+ q:"What is the PURPOSE of UAC (User Account Control) in Windows?",
+ a:["Prompt for elevation before administrative actions","Encrypt user files","Lock the screen when idle","Sync passwords to cloud"],c:0,
+ e:"UAC forces consent when a program tries to use admin rights — even admin accounts run as standard users until UAC prompts. Mitigates malware auto-elevation."},
+{sub:"ap",lvl:3,d:"Core 2 · Procedures",
+ q:"You suspect a laptop has been stolen. Which policy lets IT wipe it remotely?",
+ a:["MDM (Mobile Device Management) remote wipe","Group Policy","BitLocker","Windows Defender"],c:0,
+ e:"MDM solutions (Intune, Jamf, etc.) can remotely lock, locate, or wipe enrolled devices. Combined with BitLocker/FileVault, stolen data stays protected."},
+{sub:"ap",lvl:3,d:"Core 2 · OS",type:"fill",
+ q:"The Linux command to show the manual (help pages) for a command is ______",
+ answers:["man"],
+ e:"`man ls` shows the manual for ls. Use /searchterm to find, q to quit. --help flag is another option for quick usage."},
+{sub:"ap",lvl:3,d:"Core 2 · Security",
+ q:"A network-based attack that floods a target with traffic to make it unreachable is called:",
+ a:["Denial of Service (DoS / DDoS)","Phishing","Spoofing","Tailgating"],c:0,
+ e:"DoS = single source. DDoS = distributed (botnet). Mitigation: rate limiting, CDN, cloud scrubbing services, upstream filtering."},
+
+// ─── Core 2 · HARD (L4) ───
+{sub:"ap",lvl:4,d:"Core 2 · Security",
+ q:"A user clicked a link in an email and entered their credentials. You suspect account compromise. What is the FIRST action?",
+ a:["Reset the user's password and invalidate active sessions","Reimage the workstation","Disable email globally","Block the sender domain"],c:0,
+ e:"Containment first. Force password reset + sign the user out everywhere (kill active tokens). THEN investigate logs, check for rules/forwarders added, scan the workstation, and educate the user."},
+{sub:"ap",lvl:4,d:"Core 2 · OS",
+ q:"A Windows update is stuck at 0% for hours. Previous reboots/fixes didn't help. Best next step?",
+ a:["Run DISM /Online /Cleanup-Image /RestoreHealth then sfc /scannow","Factory reset","Replace the SSD","Install a 3rd-party update tool"],c:0,
+ e:"Corrupted component store blocks updates. DISM repairs the store using Windows Update as a source; sfc then repairs system files against the repaired store. Standard repair chain before any reset."},
+{sub:"ap",lvl:4,d:"Core 2 · Security",
+ q:"Which encryption feature protects data on a stolen Windows laptop?",
+ a:["BitLocker (full-disk encryption)","Windows Defender","EFS only for single files","UAC"],c:0,
+ e:"BitLocker encrypts the whole drive using TPM + PIN/recovery key. A stolen drive yields unreadable ciphertext. EFS encrypts individual files but the OS/metadata stay exposed."},
+{sub:"ap",lvl:4,d:"Core 2 · Procedures",
+ q:"Which document describes acceptable computer use, password rules, and data handling for all employees?",
+ a:["AUP (Acceptable Use Policy)","SOP","NDA","SLA"],c:0,
+ e:"AUP: user-facing rules. SOP: how IT performs tasks. NDA: confidentiality. SLA: service-level commitments with vendors/customers."},
+{sub:"ap",lvl:4,d:"Core 2 · OS",
+ q:"A Linux service needs to start at boot on a modern distro. Which tool manages it?",
+ a:["systemd (systemctl enable <service>)","init.d scripts only","cron","update-rc.d"],c:0,
+ e:"Modern Linux = systemd. systemctl enable/start/status/stop <service>. Unit files live in /etc/systemd/system. init.d is legacy SysV."},
+{sub:"ap",lvl:4,d:"Core 2 · Security",
+ q:"A zero-day vulnerability means:",
+ a:["A flaw with no patch yet available","A flaw that is already patched","A flaw in unused software","A flaw that cannot be exploited"],c:0,
+ e:"Zero-day = unknown to the vendor OR unpatched when exploited. Mitigations until a patch: network segmentation, IDS/IPS signatures, compensating controls, least privilege."},
+
 ]; // end BANK
 
 // ─────────────────────────────────────────────────────────────
@@ -1126,7 +1414,8 @@ const MODES = [
 const SUBS = {
   linux:{name:"Linux+",icon:"🐧",color:"var(--green)",desc:"CompTIA XK0-005 prep"},
   cs:{name:"C++ / CS",icon:"💻",color:"var(--cyan)",desc:"Fundamentals & OOP"},
-  cs1b:{name:"CMPR 121",icon:"📚",color:"var(--yellow)",desc:"CS1B — your actual lectures"}
+  cs1b:{name:"CMPR 121",icon:"📚",color:"var(--yellow)",desc:"CS1B — your actual lectures"},
+  ap:{name:"CompTIA A+",icon:"🔧",color:"var(--red)",desc:"220-1101 + 220-1102"}
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -1213,23 +1502,30 @@ function showSubjectSelect(){
   $("hud").style.display="none";
   $("timer-wrap").style.display="none";
   $("progbar").style.width="0%";
-  $("subtitle").textContent="Linux+ · C++ Fundamentals · CMPR 121 — Select a subject";
+  $("subtitle").textContent="Linux+ · C++ · CMPR 121 · A+ — Select a subject";
   $("footer").textContent="Choose a subject to begin";
 
   const linux_q=BANK.filter(q=>q.sub==="linux").length;
   const cs_q=BANK.filter(q=>q.sub==="cs").length;
   const cs1b_q=BANK.filter(q=>q.sub==="cs1b").length;
+  const ap_q=BANK.filter(q=>q.sub==="ap").length;
 
   $("main").innerHTML=`
     <div class="subject-screen">
       <h2>&gt; SELECT SUBJECT</h2>
       <p>Pick your study focus. Each subject has 4 difficulty levels with tailored question banks.</p>
-      <div class="subject-cards three">
+      <div class="subject-cards four">
         <div class="subject-card linux" id="btn-linux">
           <span class="icon">🐧</span>
           <div class="card-title">LINUX+</div>
           <div class="card-sub">CompTIA XK0-005</div>
           <div class="card-count">${linux_q} questions</div>
+        </div>
+        <div class="subject-card ap" id="btn-ap">
+          <span class="icon">🔧</span>
+          <div class="card-title">A+</div>
+          <div class="card-sub">220-1101 &amp; 220-1102</div>
+          <div class="card-count">${ap_q} questions</div>
         </div>
         <div class="subject-card cs" id="btn-cs">
           <span class="icon">💻</span>
@@ -1246,6 +1542,7 @@ function showSubjectSelect(){
       </div>
     </div>`;
   $("btn-linux").addEventListener("click",()=>showDifficultySelect("linux"));
+  $("btn-ap").addEventListener("click",()=>showDifficultySelect("ap"));
   $("btn-cs").addEventListener("click",()=>showDifficultySelect("cs"));
   $("btn-cs1b").addEventListener("click",()=>showDifficultySelect("cs1b"));
 }
