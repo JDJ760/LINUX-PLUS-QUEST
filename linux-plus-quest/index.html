@@ -104,6 +104,8 @@ main{
 }
 .diff-card:hover{background:#0d1c3a}
 .diff-card:active{transform:scale(.98)}
+.diff-card.review-card{border-left:3px solid var(--red);background:linear-gradient(90deg,rgba(255,77,109,.08),transparent 70%)}
+.diff-card.review-card:hover{border-color:var(--red);background:linear-gradient(90deg,rgba(255,77,109,.14),#0d1c3a 70%)}
 .diff-card.lvl1{border-left:3px solid #39ff14}.diff-card.lvl1:hover{border-color:#39ff14}
 .diff-card.lvl2{border-left:3px solid #00e5ff}.diff-card.lvl2:hover{border-color:#00e5ff}
 .diff-card.lvl3{border-left:3px solid #ffd166}.diff-card.lvl3:hover{border-color:#ffd166}
@@ -1441,6 +1443,52 @@ function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.rando
 function hi(sub,lvl){return parseInt(localStorage.getItem(`tq_${sub}_${lvl}`)||"0");}
 function saveHi(sub,lvl,score){if(score>hi(sub,lvl))localStorage.setItem(`tq_${sub}_${lvl}`,score);}
 
+// ── Per-question stats (for Weak Spots review) ──
+// Each question gets a stable id from a 32-bit hash of its text.
+function qid(q){
+  const s=(q.q||"")+"|"+(q.sub||"")+"|"+(q.lvl||"");
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(36);
+}
+function loadStats(){try{return JSON.parse(localStorage.getItem("tq_stats")||"{}");}catch(e){return {};}}
+function saveStats(s){localStorage.setItem("tq_stats",JSON.stringify(s));}
+function recordStat(q,correct){
+  const stats=loadStats();
+  const id=qid(q);
+  const now=Date.now();
+  const cur=stats[id]||{seen:0,wrong:0,lastMissed:0,lastSeen:0};
+  cur.seen++;
+  cur.lastSeen=now;
+  if(!correct){cur.wrong++;cur.lastMissed=now;}
+  stats[id]=cur;
+  saveStats(stats);
+}
+// Returns questions that the user has missed at least once and hasn't yet answered correctly more times than missed
+function getWeakQuestions(sub){
+  const stats=loadStats();
+  return BANK.filter(q=>{
+    if(q.sub!==sub)return false;
+    const st=stats[qid(q)];
+    if(!st)return false;
+    // "weak" = ever missed AND not overwhelmingly mastered
+    return st.wrong>0 && st.wrong>=Math.max(1,st.seen-st.wrong);
+  }).sort((a,b)=>{
+    // prioritize recently missed
+    const sa=stats[qid(a)],sb=stats[qid(b)];
+    return (sb.lastMissed||0)-(sa.lastMissed||0);
+  });
+}
+function subjectStats(sub){
+  const stats=loadStats();
+  let seen=0,wrong=0;
+  BANK.filter(q=>q.sub===sub).forEach(q=>{
+    const st=stats[qid(q)];
+    if(st){seen++;wrong+=st.wrong>0?1:0;}
+  });
+  return {seen,missed:wrong};
+}
+
 // ─────────────────────────────────────────────────────────────
 // HUD
 // ─────────────────────────────────────────────────────────────
@@ -1554,13 +1602,39 @@ function showDifficultySelect(sub){
   const info=SUBS[sub];
   $("subtitle").textContent=`${info.icon} ${info.name} — Select difficulty`;
   $("footer").textContent="Choose how tough you want it";
+  const weakCount=getWeakQuestions(sub).length;
+  const ss=subjectStats(sub);
   $("main").innerHTML=`
     <div class="diff-screen">
       <div class="back-row"><button class="back-btn" id="back-btn">&lt; back</button></div>
       <h2>&gt; SELECT DIFFICULTY</h2>
+      ${weakCount>0?`
+      <div class="diff-card review-card" id="review-card">
+        <div class="diff-icon">⚠️</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--red)">REVIEW WEAK SPOTS</div>
+          <div class="diff-desc">Drill only the questions you've missed — no lives lost, no timer.</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--red);border-color:var(--red)">${weakCount} weak</span>
+            <span class="badge">${ss.seen} seen total</span>
+            <span class="badge">+100pts/q</span>
+          </div>
+        </div>
+      </div>`:""}
       <div class="diff-cards" id="diff-cards"></div>
+      ${ss.seen>0?`<div style="text-align:center;margin-top:6px"><button class="cmd small" id="clear-stats-btn" style="font-size:10px;padding:6px 10px;opacity:.7">reset stats</button></div>`:""}
     </div>`;
   $("back-btn").addEventListener("click",showSubjectSelect);
+  if(weakCount>0){
+    $("review-card").addEventListener("click",()=>startReview(sub));
+  }
+  const cs=$("clear-stats-btn");
+  if(cs){cs.addEventListener("click",()=>{
+    if(confirm("Reset ALL question-level stats? (High scores are kept.)")){
+      localStorage.removeItem("tq_stats");
+      showDifficultySelect(sub);
+    }
+  });}
   const wrap=$("diff-cards");
   MODES.forEach(m=>{
     const count=BANK.filter(q=>q.sub===sub&&q.lvl===m.lvl).length;
@@ -1591,12 +1665,28 @@ function showDifficultySelect(sub){
 // ─────────────────────────────────────────────────────────────
 function startGame(sub,lvl){
   const m=MODES.find(x=>x.lvl===lvl);
-  S.sub=sub;S.lvl=lvl;S.mode=m;
+  S.sub=sub;S.lvl=lvl;S.mode=m;S.review=false;
   S.queue=shuffle(BANK.filter(q=>q.sub===sub&&q.lvl===lvl));
   S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=m.lives;
   S.answered=false;S.hintUsed=false;
   $("hud").style.display="grid";
   $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ${m.name}`;
+  updateHud();
+  renderQ();
+}
+
+// Review Mode: only weak questions, no timer, unlimited lives, forgiving
+function startReview(sub){
+  const weak=getWeakQuestions(sub);
+  if(!weak.length)return;
+  S.sub=sub;S.lvl=0;S.review=true;
+  // Synthesize a permissive "mode" for review
+  S.mode={lvl:0,name:"REVIEW",icon:"⚠️",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Weak-spot drill"};
+  S.queue=shuffle(weak);
+  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=999;
+  S.answered=false;S.hintUsed=false;
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ⚠️ REVIEW`;
   updateHud();
   renderQ();
 }
@@ -1695,6 +1785,7 @@ function pick(pos,correctPos,q,order){
   const hb=$("hint-btn");if(hb)hb.disabled=true;
   const fb=$("fb");
   const correct=pos===correctPos;
+  recordStat(q,correct);
   const m=S.mode;
   if(correct){
     S.streak++;S.best=Math.max(S.best,S.streak);
@@ -1722,6 +1813,7 @@ function pickFill(raw,q){
   const val=norm(raw);
   const accepted=(q.answers||[]).map(norm);
   const correct=val.length>0&&accepted.includes(val);
+  recordStat(q,correct);
   const inp=$("fill-input");
   if(inp){inp.disabled=true;inp.classList.add(correct?"correct":"wrong");}
   const sb=$("fill-submit");if(sb)sb.disabled=true;
@@ -1764,36 +1856,46 @@ function showNext(){
 function gameOver(){
   stopTimer();
   $("timer-wrap").style.display="none";
-  saveHi(S.sub,S.lvl,S.score);
+  if(!S.review)saveHi(S.sub,S.lvl,S.score);
   const total=S.queue.length;
-  const correct=S.score/S.mode.pts|0; // rough
-  const pct=S.score/(total*S.mode.pts);
-  const {rank,msg}=pct>=.95?{rank:"ROOT GOD",msg:"You own this material."}
+  const pct=total>0?S.score/(total*S.mode.pts):0;
+  const {rank,msg}=S.review
+    ?{rank:"DRILL DONE",msg:"Keep hammering — repetition builds mastery."}
+    :pct>=.95?{rank:"ROOT GOD",msg:"You own this material."}
     :pct>=.80?{rank:"EXPERT",msg:"Nearly there — book the exam."}
     :pct>=.60?{rank:"PROFICIENT",msg:"Drill your weak areas and retry."}
     :pct>=.40?{rank:"LEARNING",msg:"Review the explanations and go again."}
     :{rank:"BEGINNER",msg:"Keep studying — everyone starts here."};
   const won=S.lives>0;
-  const isNew=S.score>0&&S.score>=hi(S.sub,S.lvl);
+  const isNew=!S.review&&S.score>0&&S.score>=hi(S.sub,S.lvl);
+  const ss=subjectStats(S.sub);
+  const remainingWeak=getWeakQuestions(S.sub).length;
   $("main").innerHTML=`
     <div class="over-screen">
-      <h2>${won?"> SESSION COMPLETE":"> GAME OVER"}</h2>
+      <h2>${S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER"}</h2>
       <div class="score-big">${S.score}</div>
-      ${isNew?`<div class="hi-score-line">🏆 New high score!</div>`:`<div class="hi-score-line">Best: ${hi(S.sub,S.lvl)}</div>`}
+      ${S.review
+        ?`<div class="hi-score-line" style="color:var(--red)">⚠️ ${remainingWeak} weak question${remainingWeak===1?"":"s"} still need work</div>`
+        :isNew?`<div class="hi-score-line">🏆 New high score!</div>`:`<div class="hi-score-line">Best: ${hi(S.sub,S.lvl)}</div>`}
       <div class="rank-label">[ ${rank} ]</div>
       <div class="rank-msg">${msg}</div>
       <div class="stat-grid">
         <div class="stat-box"><div class="sv">${S.idx}</div><div class="sl">Questions</div></div>
         <div class="stat-box"><div class="sv">${S.best}</div><div class="sl">Best Streak</div></div>
-        <div class="stat-box"><div class="sv">${S.lives}</div><div class="sl">Lives Left</div></div>
+        <div class="stat-box"><div class="sv">${S.review?ss.missed:S.lives}</div><div class="sl">${S.review?"Total Missed":"Lives Left"}</div></div>
       </div>
       <div class="controls" style="justify-content:center;gap:10px">
-        <button class="cmd" id="btn-retry">> RETRY</button>
+        <button class="cmd" id="btn-retry">> ${S.review&&remainingWeak===0?"DONE":"RETRY"}</button>
         <button class="cmd cyan" id="btn-change">> CHANGE</button>
       </div>
     </div>`;
   $("progbar").style.width="100%";
-  $("btn-retry").addEventListener("click",()=>startGame(S.sub,S.lvl));
+  $("btn-retry").addEventListener("click",()=>{
+    if(S.review){
+      if(getWeakQuestions(S.sub).length>0)startReview(S.sub);
+      else showDifficultySelect(S.sub);
+    } else startGame(S.sub,S.lvl);
+  });
   $("btn-change").addEventListener("click",showSubjectSelect);
   $("btn-retry").focus();
 }

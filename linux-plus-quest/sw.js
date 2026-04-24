@@ -1,4 +1,4 @@
-const CACHE = "linuxquest-v6";
+const CACHE = "linuxquest-v7";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", e =>
