@@ -106,6 +106,11 @@ main{
 .diff-card:active{transform:scale(.98)}
 .diff-card.review-card{border-left:3px solid var(--red);background:linear-gradient(90deg,rgba(255,77,109,.08),transparent 70%)}
 .diff-card.review-card:hover{border-color:var(--red);background:linear-gradient(90deg,rgba(255,77,109,.14),#0d1c3a 70%)}
+.diff-card.exam-card{border-left:3px solid var(--cyan);background:linear-gradient(90deg,rgba(124,201,255,.08),transparent 70%)}
+.diff-card.exam-card:hover{border-color:var(--cyan);background:linear-gradient(90deg,rgba(124,201,255,.14),#0d1c3a 70%)}
+#exam-clock{position:fixed;top:8px;right:12px;background:#0a1228;border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;border-radius:6px;font-size:13px;font-weight:bold;letter-spacing:1px;z-index:100;box-shadow:0 0 8px rgba(124,201,255,.2)}
+#exam-clock.urgent{border-color:var(--red);color:var(--red);box-shadow:0 0 8px rgba(255,77,109,.4);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.5}}
 .diff-card.lvl1{border-left:3px solid #39ff14}.diff-card.lvl1:hover{border-color:#39ff14}
 .diff-card.lvl2{border-left:3px solid #00e5ff}.diff-card.lvl2:hover{border-color:#00e5ff}
 .diff-card.lvl3{border-left:3px solid #ffd166}.diff-card.lvl3:hover{border-color:#ffd166}
@@ -150,6 +155,9 @@ main{
 .fill-input.correct{border-color:var(--green);color:var(--green);background:rgba(57,255,20,.08)}
 .fill-input.wrong{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.08)}
 .fill-submit{align-self:flex-start}
+.answer-btn.multi-btn .chk{display:inline-block;margin:0 8px 0 4px;font-size:14px;color:var(--yellow)}
+.answer-btn.multi-btn.selected{background:rgba(255,209,102,.08);border-color:var(--yellow)}
+.answer-btn.multi-btn.selected .chk{color:var(--yellow)}
 .fill-tip{font-size:10px;color:#7a8aad;margin-top:-4px;letter-spacing:.5px}
 .key-hint{display:inline-block;background:#0e1e3a;border:1px solid #2a4060;border-radius:3px;width:18px;height:18px;line-height:18px;text-align:center;font-size:9px;color:var(--dim);margin-right:7px;flex-shrink:0;vertical-align:middle}
 .feedback{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:clamp(11px,2.8vw,12.5px);line-height:1.6;display:none;white-space:pre-wrap;word-break:break-word}
@@ -1404,6 +1412,107 @@ const BANK = [
  a:["A flaw with no patch yet available","A flaw that is already patched","A flaw in unused software","A flaw that cannot be exploited"],c:0,
  e:"Zero-day = unknown to the vendor OR unpatched when exploited. Mitigations until a patch: network segmentation, IDS/IPS signatures, compensating controls, least privilege."},
 
+// ─── A+ EXPANSION PACK ───
+// Multi-select questions
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"multi",
+ q:"Select ALL protocols that use TCP (not UDP) for their primary transport:",
+ a:["HTTPS","SSH","DNS queries","SMTP","DHCP"],correct:[0,1,3],
+ e:"TCP (reliable): HTTPS, SSH, SMTP, FTP, RDP. UDP (fast, stateless): DNS queries (standard), DHCP, TFTP, most VoIP. DNS uses TCP for zone transfers or large responses."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",type:"multi",
+ q:"Which of the following are examples of social engineering? (Select all that apply)",
+ a:["Phishing email","Brute-force password attack","Tailgating through a secure door","SQL injection","Vishing phone call"],correct:[0,2,4],
+ e:"Social engineering targets the human: phishing (email), vishing (voice), smishing (SMS), tailgating, pretexting, baiting. Brute-force and SQLi are technical attacks, not social."},
+{sub:"ap",lvl:3,d:"Core 1 · Hardware",type:"multi",
+ q:"Which components should be installed/handled while wearing an ESD wrist strap? (Select all that apply)",
+ a:["RAM modules","Motherboard","SATA cable","CPU","External USB mouse"],correct:[0,1,3],
+ e:"ESD-sensitive: anything with exposed chip packages — RAM, motherboard, CPU, expansion cards. Cables and fully-assembled peripherals are not ESD-sensitive. Always ground yourself before touching internals."},
+{sub:"ap",lvl:3,d:"Core 2 · OS",type:"multi",
+ q:"Which of these are valid Windows file systems? (Select all that apply)",
+ a:["NTFS","exFAT","FAT32","ext4","APFS"],correct:[0,1,2],
+ e:"Windows: NTFS (system drive), FAT32 (legacy/small USB, 4GB file limit), exFAT (large flash drives, cross-compatible). ext4 = Linux. APFS = macOS."},
+{sub:"ap",lvl:4,d:"Core 2 · Security",type:"multi",
+ q:"A workstation is showing signs of malware. Which steps are part of CompTIA's 7-step malware removal procedure? (Select all that apply)",
+ a:["Quarantine the infected system","Disable System Restore","Educate the end user","Pay the ransom","Schedule periodic scans and updates"],correct:[0,1,2,4],
+ e:"Official 7 steps: 1) Investigate and verify 2) Quarantine 3) Disable System Restore 4) Remediate 5) Schedule scans 6) Re-enable System Restore 7) Educate user. Never pay ransoms — no guarantee, funds crime."},
+
+// Core 1 · More L1-L2 fill-in-blank (port drills)
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for FTP (control channel) is ______",
+ answers:["21"],
+ e:"FTP control = 21. FTP data = 20 (active) or ephemeral (passive). FTPS = 990. SFTP = 22 (tunneled over SSH)."},
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for SMTP is ______",
+ answers:["25"],
+ e:"SMTP = 25 (server-to-server). 587 = submission (client-to-server with auth). 465 = deprecated SMTPS. IMAP = 143, IMAPS = 993. POP3 = 110, POP3S = 995."},
+{sub:"ap",lvl:2,d:"Core 1 · Networking",type:"fill",
+ q:"The port number for Telnet is ______",
+ answers:["23"],
+ e:"Telnet = 23. Unencrypted — avoid for anything real; replaced by SSH (22). Still used on some legacy network gear."},
+
+// Core 1 · More hardware
+{sub:"ap",lvl:2,d:"Core 1 · Hardware",
+ q:"Which motherboard form factor is the SMALLEST of these common sizes?",
+ a:["Mini-ITX","Micro-ATX","ATX","EATX"],c:0,
+ e:"Sizes (small → large): Mini-ITX (17×17cm) → Micro-ATX (24×24cm) → ATX (30×24cm) → EATX (30×33cm). Mini-ITX is popular for small form-factor / HTPC builds."},
+{sub:"ap",lvl:3,d:"Core 1 · Hardware",
+ q:"A user complains about GPU artifacts (screen glitches, colored squares). Load/temp looks normal. Most likely cause?",
+ a:["Failing GPU VRAM or solder joints","Outdated BIOS","Bad SSD","Low RAM"],c:0,
+ e:"Visual artifacts with normal temps point to the GPU's own memory or the card itself. Try: reseat card, update drivers, test in another system. If artifacts persist, RMA/replace."},
+{sub:"ap",lvl:3,d:"Core 1 · Hardware",
+ q:"A laptop battery is swelling and pushing the case apart. What is the correct action?",
+ a:["Stop using the device immediately, remove if safe, and replace the battery","Charge it fully then use it","Puncture the battery to deflate it","Ignore — it's cosmetic"],c:0,
+ e:"A swollen lithium battery is a FIRE / EXPLOSION hazard. Power off, unplug, don't charge. Don't puncture (thermal runaway). Take to e-waste / battery recycling. Replace before reusing the device."},
+{sub:"ap",lvl:3,d:"Core 1 · Networking",
+ q:"Which tool checks whether you can reach another host over the network?",
+ a:["ping","chkdsk","sfc","format"],c:0,
+ e:"ping uses ICMP echo requests. First step in connectivity troubleshooting. Note: many firewalls block ICMP, so 'no reply' doesn't always mean 'unreachable'."},
+{sub:"ap",lvl:4,d:"Core 1 · Storage",
+ q:"Which statement about NVMe vs SATA SSDs is TRUE?",
+ a:["NVMe uses PCIe lanes and can be 5-7x faster than SATA SSDs","NVMe and SATA SSDs have identical throughput","SATA SSDs are always faster","NVMe requires a spinning platter"],c:0,
+ e:"NVMe (over PCIe 4.0 x4) ≈ 7 GB/s. SATA III SSDs cap at ~550 MB/s (SATA bus limit). Real-world NVMe is usually 5-10× faster for sequential, 2-3× for random 4K."},
+
+// Core 2 · More commands + security
+{sub:"ap",lvl:2,d:"Core 2 · OS",type:"fill",
+ q:"The Windows command-line tool to check a disk for filesystem errors is ______",
+ answers:["chkdsk"],
+ e:"chkdsk (or chkdsk /f /r for full check+fix+bad-sector scan). Must run as admin. /f fixes errors, /r locates bad sectors, /x forces dismount."},
+{sub:"ap",lvl:2,d:"Core 2 · OS",type:"fill",
+ q:"The Windows utility to view system events and errors is ______ Viewer (opens with eventvwr.msc)",
+ answers:["event"],
+ e:"Event Viewer shows Application, System, and Security logs. Filter by Error or Critical when troubleshooting. eventvwr.msc opens it; also under Computer Management."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"What does 'shoulder surfing' refer to?",
+ a:["Watching someone enter credentials or PINs in person","A type of network protocol","A malware family","A social media phishing method"],c:0,
+ e:"Shoulder surfing = physically observing someone's screen/keyboard. Mitigations: privacy filters on screens, be aware in public, cover your hand when entering PINs."},
+{sub:"ap",lvl:2,d:"Core 2 · Security",
+ q:"Which biometric factor is generally considered the MOST accurate and hardest to spoof?",
+ a:["Retina / iris scan","Fingerprint","Voice recognition","Typing pattern"],c:0,
+ e:"Iris/retina has thousands of unique features, doesn't change over time, hard to fake. Fingerprints can be lifted. Voice can be recorded. Typing patterns are behavioral, lower confidence."},
+{sub:"ap",lvl:3,d:"Core 2 · Security",
+ q:"What does 'full tunnel' mean in a VPN context?",
+ a:["ALL traffic from the client is routed through the VPN","Only corporate-bound traffic goes through the VPN","The VPN is always on","The VPN uses TCP only"],c:0,
+ e:"Full tunnel: every packet goes through the VPN (best security, can be slower, DNS on corporate). Split tunnel: only specific traffic (corporate subnets) goes through; rest goes direct."},
+{sub:"ap",lvl:3,d:"Core 2 · OS",
+ q:"A user's screen displays upside-down. What's the FASTEST fix?",
+ a:["Ctrl+Alt+Arrow key to rotate the display","Reinstall the GPU driver","Replace the monitor","Reboot"],c:0,
+ e:"Intel graphics hotkey: Ctrl+Alt+↑/↓/←/→ rotates the display. Common 'prank' on shared workstations. Can also disable via Intel Graphics Control Panel."},
+{sub:"ap",lvl:3,d:"Core 2 · Scripting",
+ q:"In PowerShell, which symbol starts a variable?",
+ a:["$","@","%","&"],c:0,
+ e:"$myVar = \"hello\". PowerShell variables always start with $. @ is for arrays/hashtables and splatting. % is ForEach-Object alias. & is the call operator."},
+{sub:"ap",lvl:4,d:"Core 2 · Procedures",
+ q:"When closing a support ticket, which is a MUST-DO for good practice?",
+ a:["Document the resolution steps in the ticket","Close silently to save time","Email the user's manager","Delete the logs"],c:0,
+ e:"Documentation is step 6 of the troubleshooting methodology. Helps future techs, builds knowledge base, supports SLAs, provides audit trail. Never skip it."},
+{sub:"ap",lvl:4,d:"Core 2 · OS",
+ q:"You need to edit the Windows registry safely. What should you do FIRST?",
+ a:["Export a backup of the key (or full registry) you're modifying","Run as SYSTEM user","Disable Windows Defender","Reboot into Safe Mode"],c:0,
+ e:"Registry changes can brick Windows. Always File → Export the branch (or whole HIVE) before editing. If something breaks, double-click the .reg backup to restore."},
+{sub:"ap",lvl:4,d:"Core 2 · Security",
+ q:"Which is a characteristic of a WORM (as opposed to a virus)?",
+ a:["It self-propagates across a network without user interaction","It requires a host file to run","It only encrypts documents","It steals passwords only"],c:0,
+ e:"Worm: self-replicating, spreads automatically (Stuxnet, Conficker, WannaCry's spread). Virus: needs a host file/action to spread. Trojan: disguised legitimate-looking malware."},
+
 ]; // end BANK
 
 // ─────────────────────────────────────────────────────────────
@@ -1548,7 +1657,8 @@ function timeUp(){
 // SCREENS
 // ─────────────────────────────────────────────────────────────
 function showSubjectSelect(){
-  S.screen="subject";
+  S.screen="subject";S.exam=false;S.review=false;
+  stopExamClock();const _ec3=$("exam-clock");if(_ec3)_ec3.remove();
   $("hud").style.display="none";
   $("timer-wrap").style.display="none";
   $("progbar").style.width="0%";
@@ -1622,12 +1732,25 @@ function showDifficultySelect(sub){
         </div>
       </div>`:""}
       <div class="diff-cards" id="diff-cards"></div>
+      <div class="diff-card exam-card" id="exam-card">
+        <div class="diff-icon">🎯</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--cyan)">EXAM SIMULATION</div>
+          <div class="diff-desc">Mixed questions across all levels · 60 min total · pass at 75%</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--cyan);border-color:var(--cyan)">60 questions</span>
+            <span class="badge hot">⏱ 60:00 total</span>
+            <span class="badge">Pass ≥ 75%</span>
+          </div>
+        </div>
+      </div>
       ${ss.seen>0?`<div style="text-align:center;margin-top:6px"><button class="cmd small" id="clear-stats-btn" style="font-size:10px;padding:6px 10px;opacity:.7">reset stats</button></div>`:""}
     </div>`;
   $("back-btn").addEventListener("click",showSubjectSelect);
   if(weakCount>0){
     $("review-card").addEventListener("click",()=>startReview(sub));
   }
+  $("exam-card").addEventListener("click",()=>startExam(sub));
   const cs=$("clear-stats-btn");
   if(cs){cs.addEventListener("click",()=>{
     if(confirm("Reset ALL question-level stats? (High scores are kept.)")){
@@ -1665,7 +1788,8 @@ function showDifficultySelect(sub){
 // ─────────────────────────────────────────────────────────────
 function startGame(sub,lvl){
   const m=MODES.find(x=>x.lvl===lvl);
-  S.sub=sub;S.lvl=lvl;S.mode=m;S.review=false;
+  S.sub=sub;S.lvl=lvl;S.mode=m;S.review=false;S.exam=false;
+  stopExamClock();const _ec=$("exam-clock");if(_ec)_ec.remove();
   S.queue=shuffle(BANK.filter(q=>q.sub===sub&&q.lvl===lvl));
   S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=m.lives;
   S.answered=false;S.hintUsed=false;
@@ -1675,11 +1799,62 @@ function startGame(sub,lvl){
   renderQ();
 }
 
+// Exam Simulation: 60 mixed questions across all levels, 60min total, pass at 75%
+function startExam(sub){
+  const pool=BANK.filter(q=>q.sub===sub);
+  if(pool.length<10){alert("Not enough questions in this subject for exam mode yet.");return;}
+  const N=Math.min(60,pool.length);
+  const PASS=0.75;
+  S.sub=sub;S.lvl=0;S.review=false;S.exam=true;S.examPass=PASS;S.examN=N;
+  S.mode={lvl:0,name:"EXAM",icon:"🎯",lives:N,pts:100,timer:0,hint:false,hintCost:0,desc:"Exam simulation"};
+  S.queue=shuffle(pool).slice(0,N);
+  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=N;  // lives=N so a single miss doesn't end the exam
+  S.examCorrect=0;
+  S.answered=false;S.hintUsed=false;
+  S.examDeadline=Date.now()+60*60*1000;  // 60 minutes
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · 🎯 EXAM MODE`;
+  startExamClock();
+  updateHud();
+  renderQ();
+}
+
+function startExamClock(){
+  stopExamClock();
+  let clk=$("exam-clock");
+  if(!clk){
+    clk=document.createElement("div");
+    clk.id="exam-clock";
+    document.body.appendChild(clk);
+  }
+  const tick=()=>{
+    const ms=S.examDeadline-Date.now();
+    if(ms<=0){stopExamClock();clk.textContent="⏱ 00:00";examTimeUp();return;}
+    const total=Math.ceil(ms/1000);
+    const mm=String(Math.floor(total/60)).padStart(2,"0");
+    const ss=String(total%60).padStart(2,"0");
+    clk.textContent=`⏱ ${mm}:${ss}`;
+    if(total<=300)clk.classList.add("urgent");  // last 5 min
+  };
+  tick();
+  S.examClockInterval=setInterval(tick,1000);
+}
+function stopExamClock(){
+  if(S.examClockInterval){clearInterval(S.examClockInterval);S.examClockInterval=null;}
+}
+function examTimeUp(){
+  // Jump directly to game over
+  S.exam=false; // switch flag so gameOver uses post-exam flow
+  S.examExpired=true;
+  gameOver();
+}
+
 // Review Mode: only weak questions, no timer, unlimited lives, forgiving
 function startReview(sub){
   const weak=getWeakQuestions(sub);
   if(!weak.length)return;
-  S.sub=sub;S.lvl=0;S.review=true;
+  S.sub=sub;S.lvl=0;S.review=true;S.exam=false;
+  stopExamClock();const _ec2=$("exam-clock");if(_ec2)_ec2.remove();
   // Synthesize a permissive "mode" for review
   S.mode={lvl:0,name:"REVIEW",icon:"⚠️",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Weak-spot drill"};
   S.queue=shuffle(weak);
@@ -1698,7 +1873,7 @@ function renderQ(){
   const q=S.queue[S.idx];
   const m=S.mode;
   const lvlNames=["","BEGINNER","EASY","MEDIUM","HARD"];
-  const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:"";
+  const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:q.type==="multi"?`<span class="lvl-tag l3" style="background:rgba(255,209,102,.12);color:var(--yellow);border-color:var(--yellow)">MULTI</span>`:"";
   $("main").innerHTML=`
     <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
     <div class="question">${q.q}</div>
@@ -1722,6 +1897,36 @@ function renderQ(){
     inp.addEventListener("keydown",e=>{
       if(e.key==="Enter"){e.preventDefault();submit();}
     });
+  } else if(q.type==="multi"){
+    // Multi-select (select all that apply)
+    const order=shuffle(q.a.map((_,i)=>i));
+    const correctSet=new Set(q.correct||[]);
+    const labels=["A","B","C","D","E","F"];
+    const pickedSet=new Set();
+    order.forEach((origIdx,pos)=>{
+      const b=document.createElement("button");
+      b.className="answer-btn multi-btn";
+      b.dataset.pos=pos;
+      b.innerHTML=`<span class="key-hint">${labels[pos]}</span><span class="chk">☐</span> ${q.a[origIdx]}`;
+      b.addEventListener("click",()=>{
+        if(S.answered)return;
+        if(pickedSet.has(pos)){pickedSet.delete(pos);b.classList.remove("selected");b.querySelector(".chk").textContent="☐";}
+        else{pickedSet.add(pos);b.classList.add("selected");b.querySelector(".chk").textContent="☑";}
+      });
+      wrap.appendChild(b);
+    });
+    const ctrl=$("ctrl");
+    const sb=document.createElement("button");
+    sb.className="cmd multi-submit";
+    sb.id="multi-submit";
+    sb.textContent="> SUBMIT";
+    sb.addEventListener("click",()=>pickMulti(pickedSet,order,correctSet,q));
+    ctrl.appendChild(sb);
+    const tip=document.createElement("div");
+    tip.className="fill-tip";
+    tip.style.marginTop="6px";
+    tip.textContent=`Select ALL that apply · ${correctSet.size} correct`;
+    wrap.appendChild(tip);
   } else {
     // Multiple choice (default) — shuffle answer order
     const order=shuffle(q.a.map((_,i)=>i));
@@ -1786,6 +1991,7 @@ function pick(pos,correctPos,q,order){
   const fb=$("fb");
   const correct=pos===correctPos;
   recordStat(q,correct);
+  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
   const m=S.mode;
   if(correct){
     S.streak++;S.best=Math.max(S.best,S.streak);
@@ -1805,6 +2011,49 @@ function pick(pos,correctPos,q,order){
   showNext();
 }
 
+function pickMulti(pickedSet,order,correctSet,q){
+  if(S.answered)return;
+  S.answered=true;
+  stopTimer();
+  // Translate picked positions -> original indices
+  const pickedOrig=new Set([...pickedSet].map(p=>order[p]));
+  // Correct if picked set exactly equals correct set
+  let correct = pickedOrig.size===correctSet.size;
+  if(correct){for(const i of correctSet){if(!pickedOrig.has(i)){correct=false;break;}}}
+  recordStat(q,correct);
+  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
+  // Visual feedback
+  document.querySelectorAll(".multi-btn").forEach((b,pos)=>{
+    b.disabled=true;
+    const origIdx=order[pos];
+    const wasPicked=pickedSet.has(pos);
+    const isRight=correctSet.has(origIdx);
+    if(isRight)b.classList.add("correct");
+    else if(wasPicked)b.classList.add("wrong");
+  });
+  const sb=$("multi-submit");if(sb)sb.disabled=true;
+  const fb=$("fb");
+  const m=S.mode;
+  // Build "correct answers" display string
+  const correctList=[...correctSet].map(i=>q.a[i]).join(", ");
+  if(correct){
+    S.streak++;S.best=Math.max(S.best,S.streak);
+    const bonus=S.streak>=3?50:0;
+    const pts=m.pts+bonus;
+    S.score+=pts;
+    fb.className="feedback good";
+    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
+\n<strong>Why:</strong> ${q.e}`;
+  } else {
+    S.streak=0;S.lives--;
+    fb.className="feedback bad";
+    fb.innerHTML=`✗ <b>Wrong.</b> Correct: <b style="color:var(--green)">${correctList}</b>
+\n<strong>Why:</strong> ${q.e}`;
+  }
+  updateHud();
+  showNext();
+}
+
 function pickFill(raw,q){
   if(S.answered)return;
   S.answered=true;
@@ -1814,6 +2063,7 @@ function pickFill(raw,q){
   const accepted=(q.answers||[]).map(norm);
   const correct=val.length>0&&accepted.includes(val);
   recordStat(q,correct);
+  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
   const inp=$("fill-input");
   if(inp){inp.disabled=true;inp.classList.add(correct?"correct":"wrong");}
   const sb=$("fill-submit");if(sb)sb.disabled=true;
@@ -1855,11 +2105,21 @@ function showNext(){
 // ─────────────────────────────────────────────────────────────
 function gameOver(){
   stopTimer();
+  stopExamClock();
+  const examClk=$("exam-clock");if(examClk)examClk.remove();
   $("timer-wrap").style.display="none";
-  if(!S.review)saveHi(S.sub,S.lvl,S.score);
+  const wasExam=S.exam||S.examExpired;
+  if(!S.review&&!wasExam)saveHi(S.sub,S.lvl,S.score);
   const total=S.queue.length;
   const pct=total>0?S.score/(total*S.mode.pts):0;
-  const {rank,msg}=S.review
+  // Exam uses correctness-based percentage, not score-based
+  const examPct=wasExam&&S.examN?(S.examCorrect||0)/S.examN:0;
+  const examPassed=wasExam&&examPct>=(S.examPass||0.75);
+  const {rank,msg}=wasExam
+    ?(examPassed
+        ?{rank:"PASS",msg:`You scored ${Math.round(examPct*100)}% — you'd pass the real exam.`}
+        :{rank:"FAIL",msg:`You scored ${Math.round(examPct*100)}% — need ${Math.round((S.examPass||0.75)*100)}% to pass. Keep drilling.`})
+    :S.review
     ?{rank:"DRILL DONE",msg:"Keep hammering — repetition builds mastery."}
     :pct>=.95?{rank:"ROOT GOD",msg:"You own this material."}
     :pct>=.80?{rank:"EXPERT",msg:"Nearly there — book the exam."}
@@ -1867,30 +2127,38 @@ function gameOver(){
     :pct>=.40?{rank:"LEARNING",msg:"Review the explanations and go again."}
     :{rank:"BEGINNER",msg:"Keep studying — everyone starts here."};
   const won=S.lives>0;
-  const isNew=!S.review&&S.score>0&&S.score>=hi(S.sub,S.lvl);
+  const isNew=!S.review&&!wasExam&&S.score>0&&S.score>=hi(S.sub,S.lvl);
   const ss=subjectStats(S.sub);
   const remainingWeak=getWeakQuestions(S.sub).length;
+  const hdr=wasExam?(examPassed?"> EXAM PASSED":S.examExpired?"> TIME EXPIRED":"> EXAM FAILED"):S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER";
+  const rankColor=wasExam?(examPassed?"var(--green)":"var(--red)"):"var(--green)";
   $("main").innerHTML=`
     <div class="over-screen">
-      <h2>${S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER"}</h2>
-      <div class="score-big">${S.score}</div>
-      ${S.review
+      <h2 style="color:${rankColor}">${hdr}</h2>
+      <div class="score-big" style="color:${rankColor}">${wasExam?Math.round(examPct*100)+"%":S.score}</div>
+      ${wasExam
+        ?`<div class="hi-score-line">${S.examCorrect||0} / ${S.examN} correct · score ${S.score}</div>`
+        :S.review
         ?`<div class="hi-score-line" style="color:var(--red)">⚠️ ${remainingWeak} weak question${remainingWeak===1?"":"s"} still need work</div>`
         :isNew?`<div class="hi-score-line">🏆 New high score!</div>`:`<div class="hi-score-line">Best: ${hi(S.sub,S.lvl)}</div>`}
-      <div class="rank-label">[ ${rank} ]</div>
+      <div class="rank-label" style="color:${rankColor}">[ ${rank} ]</div>
       <div class="rank-msg">${msg}</div>
       <div class="stat-grid">
-        <div class="stat-box"><div class="sv">${S.idx}</div><div class="sl">Questions</div></div>
+        <div class="stat-box"><div class="sv">${S.idx}</div><div class="sl">Answered</div></div>
         <div class="stat-box"><div class="sv">${S.best}</div><div class="sl">Best Streak</div></div>
-        <div class="stat-box"><div class="sv">${S.review?ss.missed:S.lives}</div><div class="sl">${S.review?"Total Missed":"Lives Left"}</div></div>
+        <div class="stat-box"><div class="sv">${wasExam?(S.examN-(S.examCorrect||0)):S.review?ss.missed:S.lives}</div><div class="sl">${wasExam?"Missed":S.review?"Total Missed":"Lives Left"}</div></div>
       </div>
       <div class="controls" style="justify-content:center;gap:10px">
-        <button class="cmd" id="btn-retry">> ${S.review&&remainingWeak===0?"DONE":"RETRY"}</button>
+        <button class="cmd" id="btn-retry">> ${S.review&&remainingWeak===0?"DONE":wasExam?"RETAKE":"RETRY"}</button>
         <button class="cmd cyan" id="btn-change">> CHANGE</button>
       </div>
     </div>`;
   $("progbar").style.width="100%";
+  const retakeSub=S.sub;const wasExamClick=wasExam;
   $("btn-retry").addEventListener("click",()=>{
+    // Clear flags
+    S.examExpired=false;
+    if(wasExamClick){startExam(retakeSub);return;}
     if(S.review){
       if(getWeakQuestions(S.sub).length>0)startReview(S.sub);
       else showDifficultySelect(S.sub);
