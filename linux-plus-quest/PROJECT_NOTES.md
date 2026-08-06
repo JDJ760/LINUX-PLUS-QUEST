@@ -98,6 +98,12 @@ All questions live in one big `BANK` array in `index.html`. Four types exist:
  e:"Social eng targets humans…"},
 ```
 
+**Question text is DATA, never markup.** Every BANK field is passed through `esc()`
+before it reaches `innerHTML`. Write `vector<int>`, `<iostream>`, and `2>&1` as plain
+characters — do NOT hand-escape them as `&lt;`. Before `esc()` existed, raw angle
+brackets were parsed as HTML tags and silently deleted, which made the "which header
+do you need for cout and cin?" question render four completely blank buttons.
+
 **Fields:**
 - `sub` — subject key: `"linux" | "cs" | "cs1b" | "ap"`
 - `lvl` — difficulty: `1` beginner, `2` easy, `3` medium, `4` hard
@@ -123,6 +129,9 @@ All questions live in one big `BANK` array in `index.html`. Four types exist:
 | `cs1c` | CS1C | 🌳 | purple |
 | `cs3a` | CS 3A | ⚙️ | orange |
 | `disc` | Discrete Math | 🔢 | pink |
+| `py` | Python | 🐍 | blue |
+| `bash` | Bash | 🐚 | mint |
+| `sql` | SQL | 🗄️ | tan |
 
 Adding a new subject is now **two lines plus questions**: add the key to `SUBS`, add the
 key to `SUB_ORDER` (controls display order), and add questions to `BANK`.
@@ -132,9 +141,10 @@ per-subject markup to copy any more.
 Optional polish for a new subject: a `.subject-card.<key>:hover` and
 `.subject-card.<key> .card-title` colour rule in the CSS block near the other ones.
 
-Note on the grid: `.subject-cards.seven` is two columns and makes the LAST card in
-`SUB_ORDER` span the full width, so an odd subject count still looks balanced. If the
-subject count changes to an even number, drop the `seven` class in `showSubjectSelect()`.
+Note on the grid: the subject grid is always two columns. `showSubjectSelect()` adds an
+`odd-count` class when `SUB_ORDER.length` is odd, which makes the LAST card span the full
+width so the layout never ends on a lonely half-row. This is automatic — you do not need
+to touch the CSS when adding or removing a subject.
 
 ---
 
@@ -152,8 +162,8 @@ subject count changes to an even number, drop the `seven` class in `showSubjectS
 ## Feature status
 
 ### ✅ Built (phases 1–5a)
-- 7 subjects, 4 difficulty modes each (beginner / easy / medium / hard)
-- 400 questions total (as of v10)
+- 10 subjects, 4 difficulty modes each (beginner / easy / medium / hard)
+- 544 questions total (as of v12)
 - Shuffled question order + shuffled answer order (no memorizing position)
 - Fill-in-the-blank question type
 - Multi-select question type ("select all that apply")
@@ -177,6 +187,7 @@ subject count changes to an even number, drop the `seven` class in `showSubjectS
 | 6 | Match / drag-and-order question types |
 | 6 | Daily streak / question-of-the-day |
 | — | Content: expand CS1C / CS 3A / Discrete Math past 48 questions each, and align them with the actual Saddleback syllabi once they're posted |
+| — | Content: expand Python / Bash / SQL past 48 each; add PowerShell and a Networking subject |
 | — | Content: Security+ SY0-701 subject |
 | — | Content: Networking deep-dive subject |
 | — | Content: Expand A+ bank to 150+ |
