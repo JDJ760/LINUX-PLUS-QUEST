@@ -120,8 +120,21 @@ All questions live in one big `BANK` array in `index.html`. Four types exist:
 | `ap` | CompTIA A+ | 🔧 | red |
 | `cs` | C++ / CS | 💻 | cyan |
 | `cs1b` | CMPR 121 | 📚 | yellow |
+| `cs1c` | CS1C | 🌳 | purple |
+| `cs3a` | CS 3A | ⚙️ | orange |
+| `disc` | Discrete Math | 🔢 | pink |
 
-Adding a new subject = add key to `SUBS`, add a card in `showSubjectSelect()`, add questions to `BANK`.
+Adding a new subject is now **two lines plus questions**: add the key to `SUBS`, add the
+key to `SUB_ORDER` (controls display order), and add questions to `BANK`.
+`showSubjectSelect()` builds its cards by looping over `SUB_ORDER` — there is no
+per-subject markup to copy any more.
+
+Optional polish for a new subject: a `.subject-card.<key>:hover` and
+`.subject-card.<key> .card-title` colour rule in the CSS block near the other ones.
+
+Note on the grid: `.subject-cards.seven` is two columns and makes the LAST card in
+`SUB_ORDER` span the full width, so an odd subject count still looks balanced. If the
+subject count changes to an even number, drop the `seven` class in `showSubjectSelect()`.
 
 ---
 
@@ -138,9 +151,9 @@ Adding a new subject = add key to `SUBS`, add a card in `showSubjectSelect()`, a
 
 ## Feature status
 
-### ✅ Built (phases 1–4)
-- 4 subjects, 4 difficulty modes each (beginner / easy / medium / hard)
-- ~280+ questions total (as of v8)
+### ✅ Built (phases 1–5a)
+- 7 subjects, 4 difficulty modes each (beginner / easy / medium / hard)
+- 400 questions total (as of v10)
 - Shuffled question order + shuffled answer order (no memorizing position)
 - Fill-in-the-blank question type
 - Multi-select question type ("select all that apply")
@@ -150,6 +163,8 @@ Adding a new subject = add key to `SUBS`, add a card in `showSubjectSelect()`, a
 - Per-question stats tracking
 - **Weak Spots review mode** — drill only missed questions, unlimited lives, sorted most-recent-miss first
 - **Exam Simulation mode** — 60 random mixed questions, 60-min countdown, pass at 75%, PASS/FAIL banner
+- **Bookmarks / Starred** — star button on every question; "Starred" review card on difficulty screen drills only starred Qs (localStorage `tq_starred`)
+- **Flashcard mode** — flip-card study mode, no scoring/timer/lives, click to reveal answer + explanation, prev/next nav
 - PWA install support
 - Service worker offline cache
 - Strict CSP + no-referrer privacy meta
@@ -158,11 +173,10 @@ Adding a new subject = add key to `SUBS`, add a card in `showSubjectSelect()`, a
 
 | Phase | Idea |
 |---|---|
-| 5 | Flashcard mode (flip cards, no scoring) |
-| 5 | Bookmark / star favorite questions |
-| 5 | Custom quiz builder (pick subject + tags + count) |
+| 5b | Custom quiz builder (pick subject + tags + count) |
 | 6 | Match / drag-and-order question types |
 | 6 | Daily streak / question-of-the-day |
+| — | Content: expand CS1C / CS 3A / Discrete Math past 48 questions each, and align them with the actual Saddleback syllabi once they're posted |
 | — | Content: Security+ SY0-701 subject |
 | — | Content: Networking deep-dive subject |
 | — | Content: Expand A+ bank to 150+ |

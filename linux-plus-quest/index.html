@@ -16,6 +16,7 @@
   --bg:#05070f;--panel:#0f1730;--fg:#d7f7d7;
   --green:#39ff14;--cyan:#00e5ff;--red:#ff4d6d;
   --yellow:#ffd166;--dim:#5a7f5a;--border:#1a3050;
+  --purple:#b388ff;--orange:#ff9f43;--pink:#ff6ec7;
   --safe:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -81,13 +82,21 @@ main{
 .subject-card.linux:hover{border-color:var(--green)}
 .subject-card.cs1b:hover{border-color:var(--yellow)}
 .subject-card.ap:hover{border-color:var(--red)}
+.subject-card.cs1c:hover{border-color:var(--purple)}
+.subject-card.disc:hover{border-color:var(--pink)}
+.subject-card.cs3a:hover{border-color:var(--orange)}
 .subject-cards.three{grid-template-columns:1fr 1fr 1fr}
 .subject-cards.four{grid-template-columns:1fr 1fr}
+.subject-cards.seven{grid-template-columns:1fr 1fr}
+.subject-cards.seven .subject-card:last-child{grid-column:1/-1}
 .subject-card .icon{font-size:28px;display:block;margin-bottom:8px}
 .subject-card .card-title{color:var(--green);font-size:14px;font-weight:bold;letter-spacing:1px}
 .subject-card.cs .card-title{color:var(--cyan)}
 .subject-card.cs1b .card-title{color:var(--yellow)}
 .subject-card.ap .card-title{color:var(--red)}
+.subject-card.cs1c .card-title{color:var(--purple)}
+.subject-card.disc .card-title{color:var(--pink)}
+.subject-card.cs3a .card-title{color:var(--orange)}
 .subject-card .card-sub{color:var(--dim);font-size:10px;margin-top:4px}
 .subject-card .card-count{color:var(--yellow);font-size:11px;margin-top:6px}
 
@@ -219,6 +228,25 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
   .app{padding:16px 20px calc(16px + var(--safe))}
   .diff-cards{display:grid;grid-template-columns:1fr 1fr}
 }
+/* ── Phase 5a: bookmarks + flashcards ── */
+.star-btn{float:right;background:transparent;border:1px solid var(--border);color:var(--dim);font-size:18px;line-height:1;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s ease}
+.star-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.star-btn.on{border-color:var(--yellow);color:var(--yellow);text-shadow:0 0 6px rgba(255,209,102,.6);background:rgba(255,209,102,.08)}
+.diff-card.star-card{border-left:3px solid var(--yellow);background:linear-gradient(90deg,rgba(255,209,102,.08),transparent 70%)}
+.diff-card.star-card:hover{border-color:var(--yellow);background:linear-gradient(90deg,rgba(255,209,102,.14),#0d1c3a 70%)}
+.diff-card.flash-card{border-left:3px solid var(--cyan);background:linear-gradient(90deg,rgba(0,229,255,.06),transparent 70%)}
+.diff-card.flash-card:hover{border-color:var(--cyan);background:linear-gradient(90deg,rgba(0,229,255,.14),#0d1c3a 70%)}
+.flash-screen{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.flash-card-box{background:#0a1228;border:1px solid var(--border);border-radius:12px;padding:28px 20px;min-height:240px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transition:all .2s ease;position:relative}
+.flash-card-box:hover{border-color:var(--cyan)}
+.flash-side{font-size:11px;letter-spacing:2px;color:var(--dim);text-align:center;margin-bottom:10px}
+.flash-q{font-size:clamp(15px,4.5vw,19px);line-height:1.5;color:var(--green);text-align:center;white-space:pre-wrap}
+.flash-a{font-size:clamp(14px,4vw,17px);line-height:1.5;color:var(--yellow);text-align:center;margin-top:8px}
+.flash-exp{font-size:12px;line-height:1.5;color:#9ec;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);text-align:left}
+.flash-ctrl{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.flash-ctrl .cmd{flex:1}
+.flash-pos{color:var(--cyan);font-size:12px;letter-spacing:1px;min-width:70px;text-align:center}
+.flash-star-row{display:flex;justify-content:flex-end;margin-top:-4px}
 </style>
 </head>
 <body>
@@ -1513,6 +1541,630 @@ const BANK = [
  a:["It self-propagates across a network without user interaction","It requires a host file to run","It only encrypts documents","It steals passwords only"],c:0,
  e:"Worm: self-replicating, spreads automatically (Stuxnet, Conficker, WannaCry's spread). Virus: needs a host file/action to spread. Trojan: disguised legitimate-looking malware."},
 
+// ══════════════════════════════════════════
+//  CS1C — DATA STRUCTURES & ALGORITHMS  BEGINNER (lvl 1)
+// ══════════════════════════════════════════
+{sub:"cs1c",lvl:1,d:"Big-O",
+ q:"What is the time complexity of accessing an array element by index, like arr[5]?",
+ a:["O(1) — constant time","O(n) — linear time","O(log n) — logarithmic","O(n²) — quadratic"],c:0,
+ e:"Arrays store elements contiguously, so the address is computed directly: base + index × element_size. One arithmetic operation regardless of array size."},
+{sub:"cs1c",lvl:1,d:"Stacks & Queues",
+ q:"A stack follows which access order?",
+ a:["LIFO — Last In, First Out","FIFO — First In, First Out","Sorted order","Random access"],c:0,
+ e:"LIFO: the last item pushed is the first popped. Think a stack of plates — you take from the top. Used for function calls, undo, and expression evaluation."},
+{sub:"cs1c",lvl:1,d:"Stacks & Queues",
+ q:"A queue follows which access order?",
+ a:["FIFO — First In, First Out","LIFO — Last In, First Out","Sorted order","Priority order"],c:0,
+ e:"FIFO: the first item enqueued is the first dequeued, like a checkout line. Used for BFS, task scheduling, and buffers."},
+{sub:"cs1c",lvl:1,d:"Fundamentals",
+ q:"What does ADT stand for in data structures?",
+ a:["Abstract Data Type","Automatic Data Transfer","Array Data Table","Allocated Dynamic Type"],c:0,
+ e:"An ADT defines WHAT operations exist (push, pop, peek) without specifying HOW they are implemented. A stack ADT can be built on an array or a linked list."},
+{sub:"cs1c",lvl:1,d:"Searching",
+ q:"What is the worst-case time complexity of linear search on an unsorted array of n elements?",
+ a:["O(n)","O(1)","O(log n)","O(n log n)"],c:0,
+ e:"In the worst case the target is last or absent, so all n elements get checked. Linear search is the only option on unsorted data."},
+{sub:"cs1c",lvl:1,d:"Searching",
+ q:"What must be true about an array before you can use binary search on it?",
+ a:["It must be sorted","It must be of even length","It must contain no duplicates","It must be dynamically allocated"],c:0,
+ e:"Binary search discards half the range each step by comparing to the middle element. That only works if the data is ordered."},
+{sub:"cs1c",lvl:1,d:"Big-O",
+ q:"What is the time complexity of binary search?",
+ a:["O(log n)","O(n)","O(1)","O(n log n)"],c:0,
+ e:"Each comparison halves the search space: n → n/2 → n/4 … takes log₂(n) steps. Searching 1,000,000 sorted items takes about 20 comparisons."},
+{sub:"cs1c",lvl:1,d:"Linked Lists",
+ q:"What does a node in a singly linked list contain?",
+ a:["The data and a pointer to the next node","Only the data","The data and pointers to both neighbors","An index and a value"],c:0,
+ e:"A singly linked node is data + next pointer. A doubly linked node adds a prev pointer. The last node's next is nullptr."},
+{sub:"cs1c",lvl:1,d:"Stacks & Queues",type:"fill",
+ q:"The access order used by a stack is abbreviated ______ (4 letters).",
+ answers:["LIFO"],
+ e:"LIFO = Last In, First Out. Queues use FIFO instead."},
+{sub:"cs1c",lvl:1,d:"Fundamentals",
+ q:"What is the main advantage of std::vector over a raw C++ array?",
+ a:["It can grow and shrink at runtime","It is always faster to index","It uses less memory","It stores elements non-contiguously"],c:0,
+ e:"vector manages its own dynamic memory and resizes automatically. Indexing speed is the same O(1) — vector is contiguous too."},
+{sub:"cs1c",lvl:1,d:"Recursion",
+ q:"What happens if a recursive function has no base case?",
+ a:["It recurses until the call stack overflows","It returns 0 automatically","The compiler rejects it","It runs exactly once"],c:0,
+ e:"With no base case nothing stops the recursion. Each call pushes a new stack frame until the stack is exhausted — a stack overflow crash."},
+{sub:"cs1c",lvl:1,d:"Big-O",
+ q:"What does Big-O notation describe?",
+ a:["How runtime or space grows as input size grows","The exact runtime in seconds","Total RAM a program uses","The number of lines of code"],c:0,
+ e:"Big-O describes growth rate, ignoring constants and lower-order terms. O(n) means roughly proportional to n — not a specific number of seconds."},
+
+// ══════════════════════════════════════════
+//  CS1C  EASY (lvl 2)
+// ══════════════════════════════════════════
+{sub:"cs1c",lvl:2,d:"Linked Lists",
+ q:"What is the time complexity of inserting a new node at the HEAD of a singly linked list?",
+ a:["O(1)","O(n)","O(log n)","O(n²)"],c:0,
+ e:"You already hold the head pointer: point the new node at the old head, then move head. No traversal, so constant time. Inserting at the tail without a tail pointer is O(n)."},
+{sub:"cs1c",lvl:2,d:"Linked Lists",
+ q:"What is the time complexity of accessing the nth element of a singly linked list?",
+ a:["O(n) — you must walk from the head","O(1) — direct indexing","O(log n)","O(n log n)"],c:0,
+ e:"Linked lists have no index arithmetic — nodes are scattered in memory. To reach position n you follow n next pointers. This is the core tradeoff versus arrays."},
+{sub:"cs1c",lvl:2,d:"STL",
+ q:"By default, which container does std::stack use underneath?",
+ a:["std::deque","std::vector","std::list","std::array"],c:0,
+ e:"std::stack is a container adaptor defaulting to std::deque. You can override it: std::stack&lt;int, std::vector&lt;int&gt;&gt;."},
+{sub:"cs1c",lvl:2,d:"STL",
+ q:"What is the AMORTIZED time complexity of std::vector::push_back?",
+ a:["O(1) amortized","O(n) always","O(log n)","O(n log n)"],c:0,
+ e:"Most push_backs are O(1). When capacity fills, the vector reallocates and copies everything — O(n). Because capacity doubles, those resizes are rare enough to average out to O(1) per push."},
+{sub:"cs1c",lvl:2,d:"Linked Lists",
+ q:"What is the main advantage of a doubly linked list over a singly linked list?",
+ a:["You can traverse backward and delete a node given only a pointer to it","It uses less memory per node","Indexing becomes O(1)","It stays automatically sorted"],c:0,
+ e:"The prev pointer allows backward traversal and O(1) deletion when you already hold the node. The cost is an extra pointer per node."},
+{sub:"cs1c",lvl:2,d:"Recursion",
+ q:"Compared to an iterative loop, what extra cost does recursion normally carry?",
+ a:["Stack frame overhead for each call","Slower arithmetic operations","More heap fragmentation","Higher compile time only"],c:0,
+ e:"Every recursive call pushes a frame holding the return address, parameters, and locals. Deep recursion risks stack overflow; a loop reuses one frame."},
+{sub:"cs1c",lvl:2,d:"Stacks & Queues",
+ q:"Which problem is most naturally solved with a stack?",
+ a:["Checking whether brackets in an expression are balanced","Scheduling print jobs in arrival order","Finding the shortest path in a graph","Sorting a list of names"],c:0,
+ e:"Push each opening bracket; on a closing bracket pop and check that it matches. LIFO order mirrors nesting. Print queues and BFS use queues instead."},
+{sub:"cs1c",lvl:2,d:"STL",
+ q:"In std::queue, which member function removes the element at the front?",
+ a:["pop()","dequeue()","erase()","remove()"],c:0,
+ e:"std::queue uses push() to enqueue at the back and pop() to remove from the front. pop() returns void, so read the value with front() first."},
+{sub:"cs1c",lvl:2,d:"STL",
+ q:"When is std::list preferable to std::vector?",
+ a:["When you frequently insert or erase in the middle and already hold an iterator there","When you need fast random access by index","When memory locality matters most","When the size never changes"],c:0,
+ e:"std::list splices nodes in O(1) given an iterator, with no element shifting. But it has no random access and poor cache locality, so vector wins for most workloads."},
+{sub:"cs1c",lvl:2,d:"STL",type:"multi",
+ q:"Which std::vector operations run in constant time? (Select all that apply)",
+ a:["Accessing v[i] by index","push_back (amortized)","size()","Inserting at the front","Erasing from the middle"],correct:[0,1,2],
+ e:"Indexing, size(), and amortized push_back are O(1). Inserting at the front or erasing from the middle must shift every following element — O(n)."},
+{sub:"cs1c",lvl:2,d:"Big-O",type:"fill",
+ q:"Binary search on a sorted array of n elements runs in O(______ n) time.",
+ answers:["log","log2","lg"],
+ e:"O(log n). Each comparison halves the remaining search space."},
+{sub:"cs1c",lvl:2,d:"Stacks & Queues",
+ q:"Why is a circular (ring) buffer used to implement an array-based queue?",
+ a:["It reuses freed slots at the front instead of wasting them","It keeps the queue automatically sorted","It removes the need for a size limit","It converts the queue to LIFO"],c:0,
+ e:"In a naive array queue, dequeuing advances the front index and leaves dead space behind it. A circular buffer wraps indices with modulo so the whole array stays usable."},
+
+// ══════════════════════════════════════════
+//  CS1C  MEDIUM (lvl 3)
+// ══════════════════════════════════════════
+{sub:"cs1c",lvl:3,d:"Trees",
+ q:"An in-order traversal of a binary SEARCH tree visits the nodes in what order?",
+ a:["Ascending sorted order","The order they were inserted","Level by level","Descending sorted order"],c:0,
+ e:"In-order is left, root, right. Because a BST keeps smaller values left and larger right, this yields sorted output — a common way to verify a BST is valid."},
+{sub:"cs1c",lvl:3,d:"Trees",
+ q:"What is the visit sequence for a PRE-order traversal?",
+ a:["Root, left subtree, right subtree","Left, root, right","Left, right, root","Right, root, left"],c:0,
+ e:"Pre-order visits the root first, which is useful for copying or serializing a tree. In-order is left, root, right. Post-order is left, right, root."},
+{sub:"cs1c",lvl:3,d:"Trees",
+ q:"Which traversal should you use to safely DELETE every node in a binary tree?",
+ a:["Post-order (left, right, root)","Pre-order (root, left, right)","In-order (left, root, right)","Level-order"],c:0,
+ e:"Post-order frees both children before the parent, so you never dereference a pointer through a node you already deleted."},
+{sub:"cs1c",lvl:3,d:"Trees",
+ q:"What is the WORST-case search time in an unbalanced binary search tree with n nodes?",
+ a:["O(n)","O(log n)","O(1)","O(n log n)"],c:0,
+ e:"Inserting already-sorted data makes the BST degenerate into a linked list — every node has one child, so search walks all n nodes. AVL and red-black trees guarantee O(log n)."},
+{sub:"cs1c",lvl:3,d:"Heaps",
+ q:"What is the defining property of a MAX heap?",
+ a:["Every parent is greater than or equal to its children","Every left child is smaller than its parent and every right child larger","The tree is sorted in-order","All leaves sit at the same depth"],c:0,
+ e:"Heap order constrains parent versus child only, not left versus right. That is why a heap gives O(1) access to the max but does NOT give sorted traversal like a BST."},
+{sub:"cs1c",lvl:3,d:"Heaps",
+ q:"In an array-based heap using 0-based indexing, where are the children of the node at index i?",
+ a:["2i+1 and 2i+2","2i and 2i+1","i+1 and i+2","i/2 and i/2+1"],c:0,
+ e:"Children are at 2i+1 (left) and 2i+2 (right); the parent is at (i−1)/2 with integer division. A heap is a complete binary tree, so it packs into an array with no gaps and no pointers."},
+{sub:"cs1c",lvl:3,d:"Heaps",
+ q:"What is the time complexity of inserting into a binary heap of n elements?",
+ a:["O(log n)","O(1)","O(n)","O(n log n)"],c:0,
+ e:"Place the new item at the end, then sift it up, swapping with its parent while heap order is violated. Tree height is log n, which bounds the number of swaps."},
+{sub:"cs1c",lvl:3,d:"Sorting",
+ q:"What is the time complexity of merge sort in the WORST case?",
+ a:["O(n log n)","O(n²)","O(n)","O(log n)"],c:0,
+ e:"Merge sort always splits in half, giving log n levels, and merges each level in O(n). Best, average, and worst are all O(n log n). The cost is O(n) extra space."},
+{sub:"cs1c",lvl:3,d:"Sorting",
+ q:"What input causes naive quicksort (always picking the first element as pivot) to hit its O(n²) worst case?",
+ a:["An already-sorted array","An array of random values","An array with many duplicates","An array of length 1"],c:0,
+ e:"A sorted array makes the first element the minimum every time, so each partition peels off a single element — n levels of O(n) work. Randomized or median-of-three pivots avoid this."},
+{sub:"cs1c",lvl:3,d:"Sorting",
+ q:"What does it mean for a sorting algorithm to be STABLE?",
+ a:["Records with equal keys keep their original relative order","It never crashes on large inputs","Its runtime is identical in all cases","It sorts in place with no extra memory"],c:0,
+ e:"Stability matters when sorting by multiple fields: sort by first name, then stably by last name, and equal last names stay ordered by first. Merge sort is stable; quicksort and heapsort are not."},
+{sub:"cs1c",lvl:3,d:"Hashing",
+ q:"In a hash table, what is SEPARATE CHAINING?",
+ a:["Each bucket holds a linked list of all entries that hashed there","Colliding keys are placed in the next open bucket","The table is resized on every collision","Two hash functions are applied in sequence"],c:0,
+ e:"Chaining stores collisions in a per-bucket list. The alternative family is open addressing — linear probing, quadratic probing, double hashing — which places collisions in other buckets."},
+{sub:"cs1c",lvl:3,d:"Hashing",
+ q:"What is the AVERAGE-case lookup time in a well-designed hash table, and the worst case?",
+ a:["O(1) average, O(n) worst","O(log n) average, O(n) worst","O(1) average, O(log n) worst","O(n) average, O(n) worst"],c:0,
+ e:"With a good hash function and a low load factor, lookups are constant time. If every key collides into one bucket, lookup degrades to scanning a list of n items."},
+
+// ══════════════════════════════════════════
+//  CS1C  HARD (lvl 4)
+// ══════════════════════════════════════════
+{sub:"cs1c",lvl:4,d:"Heaps",
+ q:"What is the time complexity of building a heap from an unsorted array of n elements using bottom-up heapify?",
+ a:["O(n)","O(n log n)","O(log n)","O(n²)"],c:0,
+ e:"Counter-intuitive but true: most nodes sit near the bottom and sift down only a short distance. The sum Σ (n/2^h)·h converges to O(n). Inserting one at a time WOULD be O(n log n)."},
+{sub:"cs1c",lvl:4,d:"Sorting",
+ q:"What are heapsort's time and space complexities?",
+ a:["O(n log n) time, O(1) extra space","O(n log n) time, O(n) extra space","O(n²) time, O(1) extra space","O(n) time, O(n) extra space"],c:0,
+ e:"Heapsort builds a heap in place, then repeatedly swaps the root to the end. Guaranteed O(n log n) with no extra array — unlike merge sort (O(n) space) or quicksort (O(n²) worst case)."},
+{sub:"cs1c",lvl:4,d:"Balanced Trees",
+ q:"In an AVL tree, what triggers a rebalancing rotation?",
+ a:["A node's left and right subtree heights differ by more than 1","A node gains more than two children","The tree exceeds a fixed node count","A duplicate key is inserted"],c:0,
+ e:"AVL stores a balance factor (height difference) per node and keeps it in {−1, 0, 1}. Violations are repaired with single or double rotations, preserving O(log n) height."},
+{sub:"cs1c",lvl:4,d:"Graphs",
+ q:"Which data structures back breadth-first search and depth-first search respectively?",
+ a:["Queue for BFS, stack (or recursion) for DFS","Stack for BFS, queue for DFS","A heap for both","Hash table for BFS, queue for DFS"],c:0,
+ e:"BFS explores level by level, so it needs FIFO — a queue. DFS dives deep before backtracking, which is LIFO — an explicit stack or the call stack via recursion."},
+{sub:"cs1c",lvl:4,d:"Graphs",
+ q:"A topological sort can only be performed on which kind of graph?",
+ a:["A directed acyclic graph (DAG)","Any connected undirected graph","A complete graph","A weighted graph with no negative edges"],c:0,
+ e:"Topological order lists vertices so that every edge points forward. A cycle makes that impossible. Used for build dependencies, course prerequisites, and task scheduling."},
+{sub:"cs1c",lvl:4,d:"Graphs",
+ q:"What is a key restriction of Dijkstra's shortest-path algorithm?",
+ a:["It fails on graphs with negative edge weights","It only works on undirected graphs","It requires the graph to be acyclic","It only finds paths of length 1"],c:0,
+ e:"Dijkstra greedily finalizes the closest unvisited node, assuming no later path can be cheaper. A negative edge breaks that assumption — use Bellman-Ford instead."},
+{sub:"cs1c",lvl:4,d:"Big-O",
+ q:"Why does a dynamic array that DOUBLES capacity on resize achieve O(1) amortized push_back, while one that grows by a FIXED one slot does not?",
+ a:["Doubling makes resizes exponentially rarer, so total copy cost across n pushes is O(n)","Doubling avoids copying elements entirely","Fixed growth fragments the heap","Doubling uses a faster memory allocator"],c:0,
+ e:"With doubling, copies total n + n/2 + n/4 … ≈ 2n, so O(1) per push. Growing by one copies on EVERY push: 1+2+3+…+n = O(n²) total, meaning O(n) per push."},
+{sub:"cs1c",lvl:4,d:"Hashing",
+ q:"What is the LOAD FACTOR of a hash table, and why does it matter?",
+ a:["Elements divided by buckets — when it climbs too high, collisions rise and the table is rehashed","Bytes used divided by bytes allocated — it triggers garbage collection","The number of hash functions in use","The ratio of reads to writes"],c:0,
+ e:"Load factor α = n/m. As α rises, collision chains lengthen and O(1) degrades. Implementations rehash into a larger table past a threshold; std::unordered_map defaults to 1.0."},
+{sub:"cs1c",lvl:4,d:"Sorting",
+ q:"What is the space complexity of standard array-based merge sort?",
+ a:["O(n) — it needs a temporary array to merge into","O(1) — it sorts fully in place","O(log n) — only the recursion stack","O(n log n)"],c:0,
+ e:"Merging two sorted runs in place is difficult, so the standard version allocates an O(n) scratch buffer. Linked-list merge sort only needs O(log n) for recursion, since nodes are relinked rather than copied."},
+{sub:"cs1c",lvl:4,d:"Sorting",type:"multi",
+ q:"Which sorting algorithms guarantee O(n log n) in the WORST case? (Select all that apply)",
+ a:["Merge sort","Heapsort","Quicksort","Bubble sort","Insertion sort"],correct:[0,1],
+ e:"Merge sort and heapsort are O(n log n) in all cases. Quicksort averages O(n log n) but degrades to O(n²). Bubble and insertion sort are O(n²) in the worst case."},
+{sub:"cs1c",lvl:4,d:"Trees",type:"fill",
+ q:"A balanced binary tree containing n nodes has a height on the order of O(______ n).",
+ answers:["log","log2","lg"],
+ e:"O(log n). Each level roughly doubles the node count, so n nodes fit in about log₂ n levels. This is what makes AVL and red-black tree operations O(log n)."},
+{sub:"cs1c",lvl:4,d:"Algorithms",
+ q:"What does the QUICKSELECT algorithm find, and in what average time?",
+ a:["The kth smallest element, in O(n) average time","The median only, in O(n log n) time","All duplicates, in O(n) time","The shortest path, in O(n log n) time"],c:0,
+ e:"Quickselect partitions like quicksort but recurses into only ONE side. The work halves each time: n + n/2 + n/4 … = O(n) average. The worst case is still O(n²)."},
+
+// ══════════════════════════════════════════
+//  DISCRETE MATH  BEGINNER (lvl 1)
+// ══════════════════════════════════════════
+{sub:"disc",lvl:1,d:"Logic",
+ q:"The conditional statement p → q is FALSE in exactly which case?",
+ a:["p is true and q is false","p is false and q is true","Both are false","Both are true"],c:0,
+ e:"An implication only breaks when the promise fails: the hypothesis holds but the conclusion does not. Every other row is true, including the vacuously true rows where p is false."},
+{sub:"disc",lvl:1,d:"Logic",
+ q:"The logical connective ∧ represents which operation?",
+ a:["AND (conjunction)","OR (disjunction)","NOT (negation)","IF-THEN (implication)"],c:0,
+ e:"∧ is AND, true only when both operands are true. ∨ is OR, ¬ is NOT, → is implication, and ↔ is the biconditional."},
+{sub:"disc",lvl:1,d:"Logic",
+ q:"How many rows does a truth table have for a statement with n distinct propositional variables?",
+ a:["2^n","n²","2n","n!"],c:0,
+ e:"Each variable is independently true or false, giving 2 choices per variable: 2×2×…×2 = 2^n. Three variables produce 8 rows."},
+{sub:"disc",lvl:1,d:"Sets",
+ q:"What does A ∪ B represent?",
+ a:["All elements in A, in B, or in both","Only elements in both A and B","Elements in A but not in B","The total count of elements in A and B"],c:0,
+ e:"∪ is union (or). ∩ is intersection (both). A − B is set difference. |A| denotes cardinality."},
+{sub:"disc",lvl:1,d:"Sets",
+ q:"Which statement about the empty set ∅ is true?",
+ a:["It is a subset of every set","It is an element of every set","It equals {0}","It has cardinality 1"],c:0,
+ e:"∅ ⊆ A holds vacuously for any A, since no element of ∅ fails to be in A. Note that ∅ and {∅} differ: the latter has one element."},
+{sub:"disc",lvl:1,d:"Sets",
+ q:"If A = {2, 4, 6, 8}, what is |A|?",
+ a:["4","8","2","16"],c:0,
+ e:"|A| is cardinality — the number of elements. A has four members, so |A| = 4."},
+{sub:"disc",lvl:1,d:"Sets",type:"fill",
+ q:"A set with n elements has exactly 2^______ subsets.",
+ answers:["n"],
+ e:"2^n. Each element is independently in or out of a subset, giving 2 choices per element. A 3-element set has 2³ = 8 subsets, counting ∅ and the set itself."},
+{sub:"disc",lvl:1,d:"Logic",
+ q:"What is the negation of 'All cats are black'?",
+ a:["Some cat is not black","All cats are not black","No cats are black","Some cats are black"],c:0,
+ e:"¬∀x P(x) ≡ ∃x ¬P(x). To disprove a universal claim you need only one counterexample, not the opposite universal claim."},
+{sub:"disc",lvl:1,d:"Number Theory",
+ q:"The sum of two even integers is always:",
+ a:["Even","Odd","Prime","Either even or odd"],c:0,
+ e:"Let the numbers be 2a and 2b. Their sum is 2a + 2b = 2(a+b), which has a factor of 2, so it is even. This is a standard direct-proof exercise."},
+{sub:"disc",lvl:1,d:"Logic",
+ q:"When is the disjunction p ∨ q FALSE?",
+ a:["Only when both p and q are false","Only when both are true","When exactly one is true","Never"],c:0,
+ e:"Inclusive OR is true if at least one operand is true, so the only false row is F ∨ F. Exclusive OR (XOR) differs: it is false when both are true."},
+{sub:"disc",lvl:1,d:"Sets",
+ q:"If A = {1, 2, 3, 4} and B = {3, 4, 5}, what is A ∩ B?",
+ a:["{3, 4}","{1, 2, 5}","{1, 2, 3, 4, 5}","∅"],c:0,
+ e:"Intersection keeps only elements in BOTH sets: 3 and 4. Their union would be {1, 2, 3, 4, 5}."},
+{sub:"disc",lvl:1,d:"Number Theory",
+ q:"Which of these is a prime number?",
+ a:["17","1","21","51"],c:0,
+ e:"17 has only the divisors 1 and 17. The number 1 is not prime by definition, 21 = 3×7, and 51 = 3×17."},
+
+// ══════════════════════════════════════════
+//  DISCRETE MATH  EASY (lvl 2)
+// ══════════════════════════════════════════
+{sub:"disc",lvl:2,d:"Logic",
+ q:"What is the contrapositive of 'If p then q', and is it logically equivalent to the original?",
+ a:["'If not q then not p' — yes, always equivalent","'If q then p' — yes, always equivalent","'If not p then not q' — yes, always equivalent","'If not q then not p' — no, never equivalent"],c:0,
+ e:"p → q ≡ ¬q → ¬p, the basis of proof by contraposition. The CONVERSE (q → p) and INVERSE (¬p → ¬q) are NOT equivalent to the original."},
+{sub:"disc",lvl:2,d:"Logic",
+ q:"The CONVERSE of p → q is:",
+ a:["q → p","¬q → ¬p","¬p → ¬q","p ∧ ¬q"],c:0,
+ e:"The converse swaps the parts: q → p. It is not equivalent to the original — 'if it rains, the ground is wet' does not imply 'if the ground is wet, it rained'."},
+{sub:"disc",lvl:2,d:"Logic",
+ q:"By De Morgan's law, ¬(p ∧ q) is equivalent to:",
+ a:["¬p ∨ ¬q","¬p ∧ ¬q","p ∨ q","¬(p ∨ q)"],c:0,
+ e:"Negating an AND flips it to OR with both parts negated. Likewise ¬(p ∨ q) ≡ ¬p ∧ ¬q. The same law applies to sets: (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ."},
+{sub:"disc",lvl:2,d:"Sets",
+ q:"How many elements are in the power set of {a, b, c}?",
+ a:["8","3","6","9"],c:0,
+ e:"|P(S)| = 2^|S| = 2³ = 8: ∅, {a}, {b}, {c}, {a,b}, {a,c}, {b,c}, and {a,b,c}."},
+{sub:"disc",lvl:2,d:"Sets",
+ q:"If |A| = 4 and |B| = 3, what is |A × B|?",
+ a:["12","7","64","81"],c:0,
+ e:"The Cartesian product pairs every element of A with every element of B, so |A × B| = |A| · |B| = 4 · 3 = 12 ordered pairs."},
+{sub:"disc",lvl:2,d:"Functions",
+ q:"A function is INJECTIVE (one-to-one) when:",
+ a:["Distinct inputs always map to distinct outputs","Every element of the codomain is hit","Its inverse is also a function","The domain and codomain are the same size"],c:0,
+ e:"Injective means f(a) = f(b) implies a = b — no two inputs collide. Surjective (onto) means every codomain element is hit. Bijective is both, and only bijections have inverses."},
+{sub:"disc",lvl:2,d:"Functions",
+ q:"A function f: A → B is SURJECTIVE (onto) when:",
+ a:["Every element of B is the image of at least one element of A","No two elements of A share an image","|A| = |B|","It is strictly increasing"],c:0,
+ e:"Surjective means the range equals the entire codomain B — nothing in B is left unmapped."},
+{sub:"disc",lvl:2,d:"Sets",
+ q:"If |A| = 10, |B| = 8, and |A ∩ B| = 3, what is |A ∪ B|?",
+ a:["15","18","21","5"],c:0,
+ e:"Inclusion-exclusion: |A ∪ B| = |A| + |B| − |A ∩ B| = 10 + 8 − 3 = 15. You subtract the overlap because it was counted twice."},
+{sub:"disc",lvl:2,d:"Logic",
+ q:"The biconditional p ↔ q is TRUE exactly when:",
+ a:["p and q have the same truth value","At least one of p, q is true","Both are false","p is true and q is false"],c:0,
+ e:"p ↔ q means 'p if and only if q' — true when both are true or both are false. It is equivalent to (p → q) ∧ (q → p)."},
+{sub:"disc",lvl:2,d:"Logic",
+ q:"What is a TAUTOLOGY?",
+ a:["A statement true for every assignment of truth values","A statement false in every case","A statement that is sometimes true","A statement with exactly one variable"],c:0,
+ e:"A tautology is always true, such as p ∨ ¬p. Always false is a contradiction (p ∧ ¬p). Sometimes true is a contingency."},
+{sub:"disc",lvl:2,d:"Sets",type:"fill",
+ q:"If |A| = 5 and |B| = 6, then |A × B| = ______",
+ answers:["30"],
+ e:"|A × B| = |A| · |B| = 5 · 6 = 30 ordered pairs."},
+{sub:"disc",lvl:2,d:"Logic",type:"multi",
+ q:"Which statements are logically EQUIVALENT to p → q? (Select all that apply)",
+ a:["¬q → ¬p","¬p ∨ q","q → p","¬p → ¬q","¬(p ∧ ¬q)"],correct:[0,1,4],
+ e:"The contrapositive ¬q → ¬p, the disjunctive form ¬p ∨ q, and ¬(p ∧ ¬q) are all equivalent to p → q. The converse (q → p) and inverse (¬p → ¬q) are not."},
+
+// ══════════════════════════════════════════
+//  DISCRETE MATH  MEDIUM (lvl 3)
+// ══════════════════════════════════════════
+{sub:"disc",lvl:3,d:"Combinatorics",
+ q:"How many ways can 3 books be chosen from 7 distinct books and arranged on a shelf, where order matters?",
+ a:["210","35","343","21"],c:0,
+ e:"Permutations: P(7,3) = 7!/(7−3)! = 7·6·5 = 210. If order did NOT matter it would be C(7,3) = 35."},
+{sub:"disc",lvl:3,d:"Combinatorics",
+ q:"What is C(5, 2), the number of 2-element subsets of a 5-element set?",
+ a:["10","20","25","120"],c:0,
+ e:"C(5,2) = 5!/(2!·3!) = (5·4)/(2·1) = 10. Order does not matter, so each pair is counted once."},
+{sub:"disc",lvl:3,d:"Combinatorics",
+ q:"By the pigeonhole principle, what is guaranteed if 13 people are in a room?",
+ a:["At least two share a birth month","At least two share a birthday","All 12 months are represented","Exactly one month has two people"],c:0,
+ e:"13 people into 12 months means some month holds at least ⌈13/12⌉ = 2 people. The principle guarantees a collision, not which month or an even spread."},
+{sub:"disc",lvl:3,d:"Proofs",
+ q:"What are the two required parts of a proof by mathematical induction?",
+ a:["A base case, and an inductive step showing P(k) implies P(k+1)","A base case and a counterexample","A contradiction and a contrapositive","Two separate base cases"],c:0,
+ e:"Prove P(1), then prove that assuming P(k) forces P(k+1). Together they cascade the claim to every n. Skipping the base case is the classic error."},
+{sub:"disc",lvl:3,d:"Proofs",
+ q:"In a proof by contradiction of statement S, what do you assume at the start?",
+ a:["That S is false","That S is true","That S is unprovable","Nothing — you argue directly"],c:0,
+ e:"Assume ¬S, derive a logical impossibility, and conclude S must hold. The classic example is the irrationality of √2."},
+{sub:"disc",lvl:3,d:"Relations",type:"multi",
+ q:"Which properties must a relation have to be an EQUIVALENCE relation? (Select all that apply)",
+ a:["Reflexive","Symmetric","Transitive","Antisymmetric","Irreflexive"],correct:[0,1,2],
+ e:"Equivalence = reflexive + symmetric + transitive, and it partitions a set into equivalence classes. Antisymmetry instead characterizes partial orders."},
+{sub:"disc",lvl:3,d:"Relations",
+ q:"A PARTIAL ORDER is a relation that is:",
+ a:["Reflexive, antisymmetric, and transitive","Reflexive, symmetric, and transitive","Symmetric and transitive only","Irreflexive and symmetric"],c:0,
+ e:"Examples are ⊆ on sets and ≤ on integers. It is 'partial' because some pairs may be incomparable — under ⊆, {1} and {2} are neither a subset of the other."},
+{sub:"disc",lvl:3,d:"Number Theory",
+ q:"What is 47 mod 5?",
+ a:["2","9","7","5"],c:0,
+ e:"47 = 5·9 + 2, so the remainder is 2. Modular arithmetic underpins hashing, cryptography, and check digits."},
+{sub:"disc",lvl:3,d:"Number Theory",
+ q:"What is gcd(48, 18)?",
+ a:["6","3","12","144"],c:0,
+ e:"Euclid's algorithm: gcd(48,18) → gcd(18,12) → gcd(12,6) → gcd(6,0) = 6. Note that lcm(48,18) = 48·18/6 = 144."},
+{sub:"disc",lvl:3,d:"Graph Theory",
+ q:"In any undirected graph, the sum of all vertex degrees equals:",
+ a:["Twice the number of edges","The number of edges","The number of vertices","The number of vertices minus one"],c:0,
+ e:"The handshaking lemma: each edge adds 1 to the degree of each endpoint, so Σ deg(v) = 2|E|. A corollary is that the number of odd-degree vertices is always even."},
+{sub:"disc",lvl:3,d:"Graph Theory",
+ q:"How many edges does a tree with n vertices have?",
+ a:["n − 1","n","n + 1","n(n−1)/2"],c:0,
+ e:"A tree is connected and acyclic, giving exactly n−1 edges. Adding any edge creates a cycle; removing any edge disconnects it."},
+{sub:"disc",lvl:3,d:"Combinatorics",type:"fill",
+ q:"How many different 5-card hands can be dealt from a standard 52-card deck? (Enter the number.)",
+ answers:["2598960","2,598,960"],
+ e:"C(52,5) = 52!/(5!·47!) = 2,598,960. Order does not matter within a hand, so this is a combination rather than a permutation."},
+
+// ══════════════════════════════════════════
+//  DISCRETE MATH  HARD (lvl 4)
+// ══════════════════════════════════════════
+{sub:"disc",lvl:4,d:"Graph Theory",
+ q:"How many edges does the complete graph K₈ have?",
+ a:["28","64","56","16"],c:0,
+ e:"Every pair of the 8 vertices is joined: C(8,2) = 8·7/2 = 28. In general Kₙ has n(n−1)/2 edges."},
+{sub:"disc",lvl:4,d:"Graph Theory",
+ q:"A connected undirected graph has an EULER CIRCUIT (a closed walk using every edge exactly once) if and only if:",
+ a:["Every vertex has even degree","Every vertex has odd degree","Exactly two vertices have odd degree","The graph is a tree"],c:0,
+ e:"Even degree everywhere lets you always enter and leave a vertex. If exactly TWO vertices have odd degree you get an Euler PATH, open and starting and ending at those two, but not a circuit."},
+{sub:"disc",lvl:4,d:"Graph Theory",
+ q:"A graph is BIPARTITE if and only if it contains:",
+ a:["No cycles of odd length","No cycles at all","No vertices of degree 1","A Hamiltonian cycle"],c:0,
+ e:"A two-coloring alternates along any cycle, which only closes consistently when the cycle has even length. So odd cycles are exactly the obstruction."},
+{sub:"disc",lvl:4,d:"Combinatorics",
+ q:"How many non-negative integer solutions are there to x₁ + x₂ + x₃ = 10?",
+ a:["66","45","120","1000"],c:0,
+ e:"Stars and bars: C(n + k − 1, k − 1) with n = 10 and k = 3 gives C(12, 2) = 66. You are placing 2 dividers among 12 positions."},
+{sub:"disc",lvl:4,d:"Combinatorics",
+ q:"In the expansion of (x + y)⁷, what is the coefficient of x³y⁴?",
+ a:["35","21","7","840"],c:0,
+ e:"By the binomial theorem the coefficient is C(7,3) = C(7,4) = 35. Sanity check: the exponents 3 + 4 = 7 as required."},
+{sub:"disc",lvl:4,d:"Number Theory",
+ q:"Fermat's Little Theorem states that if p is prime and a is not divisible by p, then:",
+ a:["a^(p−1) ≡ 1 (mod p)","a^p ≡ 0 (mod p)","a^(p+1) ≡ a (mod p)","gcd(a, p) = p"],c:0,
+ e:"a^(p−1) ≡ 1 (mod p). For example 2⁶ = 64 ≡ 1 (mod 7). It underlies RSA and fast primality testing."},
+{sub:"disc",lvl:4,d:"Proofs",
+ q:"How does STRONG induction differ from ordinary induction?",
+ a:["The inductive step may assume P holds for ALL values up to k, not just P(k)","It requires no base case","It proves statements about real numbers","It works backward from P(n) to P(1)"],c:0,
+ e:"Strong induction assumes P(1) ∧ … ∧ P(k) to prove P(k+1). It helps when the argument needs a smaller case that is not the immediate predecessor, such as proving every integer above 1 has a prime factorization."},
+{sub:"disc",lvl:4,d:"Sets",
+ q:"Which set is UNCOUNTABLE?",
+ a:["The real numbers ℝ","The integers ℤ","The rational numbers ℚ","The set of all finite binary strings"],c:0,
+ e:"Cantor's diagonal argument shows ℝ cannot be put in bijection with ℕ. ℤ and ℚ are countably infinite, as is the set of finite strings over a finite alphabet."},
+{sub:"disc",lvl:4,d:"Number Theory",
+ q:"An integer a has a multiplicative inverse modulo m if and only if:",
+ a:["gcd(a, m) = 1","a is prime","m is prime","a &lt; m"],c:0,
+ e:"a and m must be coprime; then the extended Euclidean algorithm produces x with ax ≡ 1 (mod m). For example 3⁻¹ ≡ 5 (mod 7), since 15 ≡ 1."},
+{sub:"disc",lvl:4,d:"Recurrences",
+ q:"The recurrence T(n) = 2T(n/2) + n with T(1) = 1 solves to:",
+ a:["Θ(n log n)","Θ(n)","Θ(n²)","Θ(log n)"],c:0,
+ e:"Master theorem case 2: a = 2, b = 2, so n^(log_b a) = n¹, matching f(n) = n. The result is Θ(n log n) — exactly merge sort's runtime."},
+{sub:"disc",lvl:4,d:"Combinatorics",
+ q:"If 100 items are placed into 9 boxes, the generalized pigeonhole principle guarantees some box holds at least how many items?",
+ a:["12","11","10","9"],c:0,
+ e:"⌈100/9⌉ = ⌈11.11…⌉ = 12. The general form is ⌈n/k⌉ for n items in k boxes."},
+{sub:"disc",lvl:4,d:"Logic",type:"multi",
+ q:"Which of the following are logically equivalent to ¬(p ∨ q)? (Select all that apply)",
+ a:["¬p ∧ ¬q","(¬p) ∨ (¬q)","Neither p nor q is true","¬p → q","p NOR q"],correct:[0,2,4],
+ e:"De Morgan gives ¬(p ∨ q) ≡ ¬p ∧ ¬q, which is exactly 'neither p nor q' and exactly the NOR operation. The option ¬p ∨ ¬q is the negation of the CONJUNCTION — a different statement."},
+
+// ══════════════════════════════════════════
+//  CS 3A — COMP ORG / MACHINE LANGUAGE  BEGINNER (lvl 1)
+// ══════════════════════════════════════════
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"What is the binary number 1010 in decimal?",
+ a:["10","8","12","5"],c:0,
+ e:"Place values from the right are 1, 2, 4, 8: so 8·1 + 4·0 + 2·1 + 1·0 = 8 + 2 = 10."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"How many bits are in a byte?",
+ a:["8","4","16","32"],c:0,
+ e:"A byte is 8 bits, holding 2⁸ = 256 distinct values (0–255 unsigned). A nibble is 4 bits, which is exactly one hex digit."},
+{sub:"cs3a",lvl:1,d:"Number Systems",type:"fill",
+ q:"One hexadecimal digit represents exactly ______ bits.",
+ answers:["4","four"],
+ e:"4 bits, a nibble, since 2⁴ = 16. That is why hex is used to write binary compactly: one byte is exactly two hex digits."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"What is the hexadecimal value 0xFF in decimal?",
+ a:["255","16","128","512"],c:0,
+ e:"F = 15, so 0xFF = 15·16 + 15 = 240 + 15 = 255. This is the largest value one unsigned byte can hold."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"How many distinct values can be represented with n bits?",
+ a:["2^n","n²","2n","n!"],c:0,
+ e:"Each bit doubles the possibilities, giving 2^n. Ten bits gives 1024 values; sixteen bits gives 65,536."},
+{sub:"cs3a",lvl:1,d:"CPU",
+ q:"Which component of the CPU performs arithmetic and logical operations?",
+ a:["The ALU (Arithmetic Logic Unit)","The control unit","The program counter","The cache"],c:0,
+ e:"The ALU handles add, subtract, AND, OR, XOR, and shifts. The control unit decodes instructions and directs data flow, while registers hold the operands."},
+{sub:"cs3a",lvl:1,d:"Memory",
+ q:"What does it mean that RAM is VOLATILE?",
+ a:["Its contents are lost when power is removed","It can be written but not read","Its speed changes with temperature","It can only be accessed sequentially"],c:0,
+ e:"Volatile memory needs continuous power to retain data. RAM is volatile; ROM, flash, and SSDs are non-volatile."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"What is binary 1111 in decimal, and in hexadecimal?",
+ a:["15 decimal, F hex","16 decimal, 10 hex","7 decimal, 7 hex","11 decimal, B hex"],c:0,
+ e:"8 + 4 + 2 + 1 = 15, which is F in hex. Four set bits max out one nibble."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"2¹⁰ equals which value — the reason a 'kilobyte' is often 1024 bytes?",
+ a:["1024","1000","2048","512"],c:0,
+ e:"2¹⁰ = 1024, conveniently close to 1000. Standards bodies call 1024 bytes a kibibyte (KiB), reserving kB for exactly 1000."},
+{sub:"cs3a",lvl:1,d:"Assembly",
+ q:"What is machine language?",
+ a:["Binary instructions the CPU executes directly","A high-level language like C++","The operating system's scripting shell","A markup format for describing hardware"],c:0,
+ e:"Machine code is raw binary opcodes and operands. Assembly language is a human-readable mnemonic form of it (ADD, MOV, LW) translated one-to-one by an assembler."},
+{sub:"cs3a",lvl:1,d:"Number Systems",
+ q:"What is the largest decimal value an unsigned 8-bit number can hold?",
+ a:["255","256","127","128"],c:0,
+ e:"8 bits give 2⁸ = 256 values running 0 through 255. The count is 256 but the maximum is 255."},
+{sub:"cs3a",lvl:1,d:"Memory",
+ q:"Which storage is FASTEST for the CPU to access?",
+ a:["Registers","L1 cache","Main RAM","SSD"],c:0,
+ e:"Registers sit inside the CPU and are accessed in a single cycle. The hierarchy runs registers → L1 → L2 → L3 → RAM → SSD/disk, getting larger and slower at each step."},
+
+// ══════════════════════════════════════════
+//  CS 3A  EASY (lvl 2)
+// ══════════════════════════════════════════
+{sub:"cs3a",lvl:2,d:"Signed Numbers",
+ q:"What is the range of an 8-bit two's complement signed integer?",
+ a:["−128 to 127","−127 to 128","−255 to 255","0 to 255"],c:0,
+ e:"The range is −2^(n−1) to 2^(n−1)−1. The asymmetry exists because zero occupies one of the non-negative slots, leaving one extra negative value."},
+{sub:"cs3a",lvl:2,d:"Signed Numbers",
+ q:"How do you negate a number in two's complement?",
+ a:["Invert all the bits, then add 1","Invert all the bits","Flip only the leftmost bit","Subtract it from 2^n − 1"],c:0,
+ e:"Invert (one's complement) then add 1. Flipping only the sign bit is SIGN-MAGNITUDE representation, which hardware avoids because it has two zeros and needs extra adder logic."},
+{sub:"cs3a",lvl:2,d:"Signed Numbers",type:"fill",
+ q:"In 8-bit two's complement, the value −1 is represented by the bit pattern ______ (8 binary digits).",
+ answers:["11111111","1111 1111"],
+ e:"All ones. Invert 00000001 to get 11111110, then add 1 to get 11111111. That is why −1 is 0xFF in a byte and 0xFFFFFFFF in a 32-bit word."},
+{sub:"cs3a",lvl:2,d:"Bitwise Ops",
+ q:"Shifting an unsigned binary number LEFT by 1 bit is equivalent to:",
+ a:["Multiplying by 2","Dividing by 2","Adding 1","Negating it"],c:0,
+ e:"Each left shift moves every bit to a place worth twice as much, so the value doubles; bits shifted off the top are lost. A right shift divides by 2, discarding the remainder."},
+{sub:"cs3a",lvl:2,d:"Bitwise Ops",
+ q:"The XOR of bits 1 and 1 is:",
+ a:["0","1","Undefined","2"],c:0,
+ e:"XOR is 1 only when the inputs DIFFER: 0⊕0=0, 0⊕1=1, 1⊕0=1, 1⊕1=0. A handy consequence is x ⊕ x = 0, which is why XOR appears in swaps and checksums."},
+{sub:"cs3a",lvl:2,d:"Bitwise Ops",
+ q:"To test whether bit 3 of a byte is set, which operation would you use?",
+ a:["AND the byte with 00001000 and check for a non-zero result","OR the byte with 00001000","XOR the byte with 11111111","Shift the byte left by 3"],c:0,
+ e:"AND with a mask isolates bits, forcing everything but the target bit to 0. As a rule: AND clears bits, OR sets bits, XOR toggles bits."},
+{sub:"cs3a",lvl:2,d:"Memory",
+ q:"In LITTLE-endian byte order, how is the 32-bit value 0x12345678 stored in memory?",
+ a:["78 56 34 12 — least significant byte at the lowest address","12 34 56 78 — most significant byte at the lowest address","It depends only on the compiler","Bytes are stored in reverse bit order"],c:0,
+ e:"Little-endian puts the LEAST significant byte first. x86 and most ARM configurations are little-endian; network byte order and older MIPS/SPARC are big-endian, which is why htonl() exists."},
+{sub:"cs3a",lvl:2,d:"CPU",
+ q:"What does the program counter (PC) hold?",
+ a:["The address of the next instruction to execute","The result of the last arithmetic operation","The count of instructions executed so far","The current stack depth"],c:0,
+ e:"The PC, called IP on x86, points to the next instruction. It increments automatically on each fetch; jumps and branches work by writing a new value into it."},
+{sub:"cs3a",lvl:2,d:"Number Systems",
+ q:"What is binary 11010 in decimal?",
+ a:["26","24","22","13"],c:0,
+ e:"Place values from the left are 16, 8, 4, 2, 1: so 16 + 8 + 0 + 2 + 0 = 26."},
+{sub:"cs3a",lvl:2,d:"Assembly",
+ q:"What does an ASSEMBLER do?",
+ a:["Translates assembly mnemonics into machine code","Combines object files into an executable","Translates C++ into assembly","Loads a program into memory at run time"],c:0,
+ e:"Assembler: assembly → object code. Compiler: high-level → assembly. Linker: object files plus libraries → executable. Loader: executable → memory."},
+{sub:"cs3a",lvl:2,d:"CPU",
+ q:"What are the three basic stages of the instruction cycle?",
+ a:["Fetch, decode, execute","Load, compile, run","Read, write, commit","Push, pop, branch"],c:0,
+ e:"Fetch the instruction at the PC, decode it to determine the operation and operands, then execute. Pipelined CPUs subdivide these further — MIPS uses IF, ID, EX, MEM, WB."},
+{sub:"cs3a",lvl:2,d:"Memory",type:"multi",
+ q:"Which of these are VOLATILE storage? (Select all that apply)",
+ a:["CPU registers","SRAM cache","DRAM main memory","Flash / SSD","Hard disk platters"],correct:[0,1,2],
+ e:"Registers, cache (SRAM), and main memory (DRAM) all lose their contents without power. Flash, SSDs, and magnetic disks retain data, so they are non-volatile."},
+
+// ══════════════════════════════════════════
+//  CS 3A  MEDIUM (lvl 3)
+// ══════════════════════════════════════════
+{sub:"cs3a",lvl:3,d:"Floating Point",
+ q:"How are the 32 bits divided in IEEE 754 single-precision floating point?",
+ a:["1 sign, 8 exponent, 23 mantissa","1 sign, 11 exponent, 20 mantissa","1 sign, 7 exponent, 24 mantissa","4 sign, 8 exponent, 20 mantissa"],c:0,
+ e:"Single precision is 1 + 8 + 23 = 32 bits. Double precision is 1 sign, 11 exponent, and 52 mantissa bits for 64 total."},
+{sub:"cs3a",lvl:3,d:"Floating Point",
+ q:"What is the exponent BIAS in IEEE 754 single precision, and why is it used?",
+ a:["127 — so the stored exponent is always non-negative and values compare correctly as integers","0 — no bias is used","255 — to reserve the top values for infinity","128 — to match the byte range"],c:0,
+ e:"The true exponent is stored plus 127. Biasing avoids a separate sign bit for the exponent and lets floats be compared using unsigned integer comparison hardware."},
+{sub:"cs3a",lvl:3,d:"Floating Point",
+ q:"Why can't 0.1 be represented exactly in binary floating point?",
+ a:["Its binary expansion repeats infinitely, so it must be truncated","Floating point only stores integers","0.1 exceeds the exponent range","The mantissa cannot store a leading zero"],c:0,
+ e:"0.1 in binary is 0.0001100110011… repeating forever, just as 1/3 repeats in decimal. Truncating to 23 or 52 bits leaves a tiny error, which is why 0.1 + 0.2 does not equal 0.3 in most languages."},
+{sub:"cs3a",lvl:3,d:"Cache",
+ q:"What is SPATIAL locality?",
+ a:["Recently accessed data makes NEARBY addresses likely to be accessed soon","Recently accessed data is likely to be accessed again soon","Data is spread evenly across cache sets","Instructions and data occupy separate caches"],c:0,
+ e:"Spatial locality is why caches fetch whole lines, often 64 bytes at a time, and why iterating an array in order is fast. TEMPORAL locality is the separate reuse-the-same-address principle."},
+{sub:"cs3a",lvl:3,d:"Cache",
+ q:"In a DIRECT-MAPPED cache, where can a given memory block be placed?",
+ a:["In exactly one cache line, determined by its address","In any cache line","In any line within one set","Anywhere in the top half of the cache"],c:0,
+ e:"Direct-mapped gives each block exactly one home — simple and fast but prone to conflict misses. Fully associative allows any line; set-associative is the middle ground of any line within one set."},
+{sub:"cs3a",lvl:3,d:"Assembly",
+ q:"In IMMEDIATE addressing mode, where does the operand come from?",
+ a:["It is encoded directly inside the instruction itself","A register named by the instruction","A memory address named by the instruction","A memory address held in a register"],c:0,
+ e:"Immediate keeps the constant in the instruction, as in addi $t0,$t0,5. Register mode reads a register, direct mode names an address, and indirect mode uses a register holding an address."},
+{sub:"cs3a",lvl:3,d:"Assembly",
+ q:"In the MIPS architecture, how many general-purpose registers are there and how wide is each instruction?",
+ a:["32 registers, 32 bits per instruction","16 registers, 16 bits per instruction","64 registers, 64 bits per instruction","8 registers, variable width"],c:0,
+ e:"MIPS is a classic RISC design: 32 registers ($0–$31, with $0 hardwired to zero) and fixed 32-bit instructions, which keeps decoding and pipelining simple."},
+{sub:"cs3a",lvl:3,d:"Architecture",
+ q:"Which statement best characterizes RISC compared to CISC?",
+ a:["Simple fixed-length instructions, load/store memory access, more registers","Complex variable-length instructions that operate directly on memory","Fewer registers and heavily microcoded instructions","No support for pipelining"],c:0,
+ e:"RISC (MIPS, ARM, RISC-V) uses few simple instructions where only load/store touch memory, making it easy to pipeline. CISC (x86) has rich variable-length instructions with memory operands. Modern x86 decodes CISC into RISC-like micro-ops internally."},
+{sub:"cs3a",lvl:3,d:"Memory",
+ q:"On most common architectures such as x86 and MIPS, which way does the call stack grow?",
+ a:["Downward, toward lower memory addresses","Upward, toward higher memory addresses","It alternates per function","It does not move — it is a fixed size"],c:0,
+ e:"Pushing DECREMENTS the stack pointer. The stack grows down from high addresses while the heap grows up from low addresses, so they approach each other and maximize usable space."},
+{sub:"cs3a",lvl:3,d:"Memory",
+ q:"Why do many architectures require data to be naturally ALIGNED, such as a 4-byte word at an address divisible by 4?",
+ a:["The memory system reads fixed-width blocks, so an unaligned value would need two accesses","Alignment reduces the size of the data","Unaligned addresses cannot be expressed in binary","It is required by the C++ standard"],c:0,
+ e:"Aligned accesses complete in one memory transaction. Unaligned ones cost an extra access, or fault outright on strict architectures like older ARM and MIPS. This is why compilers insert padding into structs."},
+{sub:"cs3a",lvl:3,d:"Architecture",
+ q:"In a LOAD/STORE architecture, which instructions may access memory?",
+ a:["Only explicit load and store instructions","Any arithmetic instruction","Only branch instructions","All instructions except jumps"],c:0,
+ e:"Arithmetic works register-to-register only, so data must be loaded first and stored back afterward. This keeps instructions uniform and pipelining simple — a defining RISC trait."},
+{sub:"cs3a",lvl:3,d:"Signed Numbers",
+ q:"When adding two two's complement numbers, signed overflow has occurred when:",
+ a:["The operands share a sign and the result has the opposite sign","There is a carry out of the most significant bit","The result is zero","One operand is negative and one is positive"],c:0,
+ e:"Adding two positives cannot legitimately give a negative, and vice versa. Carry-out instead indicates UNSIGNED overflow — a different condition, which is why CPUs keep separate carry and overflow flags."},
+
+// ══════════════════════════════════════════
+//  CS 3A  HARD (lvl 4)
+// ══════════════════════════════════════════
+{sub:"cs3a",lvl:4,d:"Pipelining",
+ q:"A DATA hazard in a pipeline occurs when:",
+ a:["An instruction needs a result that an earlier instruction has not finished producing","Two instructions need the same hardware unit in the same cycle","The CPU cannot tell which instruction to fetch after a branch","Memory returns corrupted data"],c:0,
+ e:"A data hazard is a dependency on an in-flight result (read-after-write). A structural hazard is a hardware resource conflict, and a control hazard is uncertainty after a branch."},
+{sub:"cs3a",lvl:4,d:"Pipelining",
+ q:"What is FORWARDING (bypassing) in a pipelined CPU?",
+ a:["Routing a computed result straight to a later instruction before it is written back to the register file","Predicting which branch will be taken","Reordering instructions at run time","Sending an instruction to a second core"],c:0,
+ e:"The ALU result exists at the end of EX, several cycles before write-back. Forwarding paths feed it directly to a waiting instruction, eliminating most stalls. A load-use hazard still costs one stall cycle."},
+{sub:"cs3a",lvl:4,d:"Pipelining",
+ q:"Why do modern CPUs use BRANCH PREDICTION?",
+ a:["To keep the pipeline full instead of stalling until the branch outcome is known","To reduce the number of instructions in a program","To avoid data hazards","To lower memory latency"],c:0,
+ e:"A branch's direction is not known until several stages in. Rather than stall, the CPU predicts and speculatively executes. A misprediction flushes the pipeline, costing 10–20 cycles on deep pipelines."},
+{sub:"cs3a",lvl:4,d:"Performance",
+ q:"If 80% of a program can be perfectly parallelized, what is the maximum possible speedup with unlimited processors, by Amdahl's law?",
+ a:["5×","8×","10×","Unlimited"],c:0,
+ e:"Speedup is capped at 1/(1 − p) = 1/(1 − 0.8) = 5. The serial 20% becomes a hard floor no matter how many cores you add."},
+{sub:"cs3a",lvl:4,d:"Cache",
+ q:"In a WRITE-BACK cache, when is main memory updated?",
+ a:["Only when a modified (dirty) line is evicted","On every write to the cache","Never — memory is read-only","At fixed timer intervals"],c:0,
+ e:"Write-back defers memory traffic using a dirty bit per line, so repeated writes to one line cost a single memory write. Write-through updates memory every time — simpler and always coherent, but far more bus traffic."},
+{sub:"cs3a",lvl:4,d:"Virtual Memory",
+ q:"What does the TLB (Translation Lookaside Buffer) cache?",
+ a:["Recent virtual-to-physical page address translations","Recently executed instructions","Branch prediction history","Recently freed heap blocks"],c:0,
+ e:"Without a TLB every memory access would need extra reads to walk the page table. The TLB caches translations so the common case is one fast lookup; a TLB miss triggers a page-table walk."},
+{sub:"cs3a",lvl:4,d:"Assembly",
+ q:"MIPS has three instruction formats. Which is used for instructions with two source registers and one destination register, such as add?",
+ a:["R-format","I-format","J-format","D-format"],c:0,
+ e:"R-format holds opcode, rs, rt, rd, shamt, and funct for register arithmetic. I-format carries a 16-bit immediate (addi, lw, beq), and J-format carries a 26-bit jump target (j, jal)."},
+{sub:"cs3a",lvl:4,d:"I/O",
+ q:"What is the main advantage of INTERRUPT-driven I/O over polling?",
+ a:["The CPU can do other work instead of repeatedly checking device status","It transfers more bytes per operation","It requires no device driver","It eliminates the need for buses"],c:0,
+ e:"Polling burns cycles asking whether the device is ready. An interrupt lets the device signal the CPU, which then runs a handler. DMA goes further, moving data to memory without CPU involvement at all."},
+{sub:"cs3a",lvl:4,d:"Cache",
+ q:"A 4-way set-associative cache with 256 total lines has how many sets?",
+ a:["64","4","256","1024"],c:0,
+ e:"Sets = total lines / associativity = 256 / 4 = 64. Each memory block maps to one set and may occupy any of that set's 4 ways, which reduces conflict misses versus direct mapping."},
+{sub:"cs3a",lvl:4,d:"Signed Numbers",
+ q:"When loading a 16-bit signed value into a 32-bit register, why is SIGN EXTENSION used instead of zero-filling?",
+ a:["Copying the sign bit into the upper bits preserves the number's value in two's complement","It makes the load instruction faster","It prevents cache misses","Zero-filling is impossible in hardware"],c:0,
+ e:"−1 as 16 bits is 0xFFFF; zero-filling gives 0x0000FFFF = 65535, the wrong value. Replicating the sign bit gives 0xFFFFFFFF, still −1. MIPS provides both lh (sign-extend) and lhu (zero-extend)."},
+{sub:"cs3a",lvl:4,d:"I/O",
+ q:"What does DMA (Direct Memory Access) allow?",
+ a:["A device to transfer data to or from memory without routing every byte through the CPU","Two CPUs to share one cache","A program to bypass virtual memory","Direct execution of code stored on disk"],c:0,
+ e:"A DMA controller moves blocks between a device and RAM while the CPU does other work, interrupting only on completion. It is essential for disk and network throughput."},
+{sub:"cs3a",lvl:4,d:"Pipelining",type:"multi",
+ q:"Which are recognized categories of pipeline hazard? (Select all that apply)",
+ a:["Structural hazard","Data hazard","Control hazard","Cache hazard","Register hazard"],correct:[0,1,2],
+ e:"The three classic hazards are structural (resource conflict), data (dependency on an unfinished result), and control (branch outcome unknown). 'Cache hazard' and 'register hazard' are not standard terms."},
+
 ]; // end BANK
 
 // ─────────────────────────────────────────────────────────────
@@ -1528,8 +2180,13 @@ const SUBS = {
   linux:{name:"Linux+",icon:"🐧",color:"var(--green)",desc:"CompTIA XK0-005 prep"},
   cs:{name:"C++ / CS",icon:"💻",color:"var(--cyan)",desc:"Fundamentals & OOP"},
   cs1b:{name:"CMPR 121",icon:"📚",color:"var(--yellow)",desc:"CS1B — your actual lectures"},
-  ap:{name:"CompTIA A+",icon:"🔧",color:"var(--red)",desc:"220-1101 + 220-1102"}
+  ap:{name:"CompTIA A+",icon:"🔧",color:"var(--red)",desc:"220-1101 + 220-1102"},
+  cs1c:{name:"CS1C",icon:"🌳",color:"var(--purple)",desc:"Data structures & algorithms"},
+  disc:{name:"Discrete Math",icon:"🔢",color:"var(--pink)",desc:"Logic, sets, proofs, graphs"},
+  cs3a:{name:"CS 3A",icon:"⚙️",color:"var(--orange)",desc:"Comp org & machine language"}
 };
+// Display order on the subject screen. The last card spans full width (see .subject-cards.seven).
+const SUB_ORDER = ["linux","ap","cs","cs1b","cs1c","cs3a","disc"];
 
 // ─────────────────────────────────────────────────────────────
 // STATE
@@ -1588,6 +2245,13 @@ function getWeakQuestions(sub){
     return (sb.lastMissed||0)-(sa.lastMissed||0);
   });
 }
+// ── Bookmarks / Starred questions ──
+function loadStarred(){try{return JSON.parse(localStorage.getItem("tq_starred")||"{}");}catch(e){return {};}}
+function saveStarred(s){localStorage.setItem("tq_starred",JSON.stringify(s));}
+function isStarred(q){return !!loadStarred()[qid(q)];}
+function toggleStar(q){const s=loadStarred();const id=qid(q);if(s[id])delete s[id];else s[id]=1;saveStarred(s);return !!s[id];}
+function getStarredQuestions(sub){const s=loadStarred();return BANK.filter(q=>q.sub===sub&&s[qid(q)]);}
+
 function subjectStats(sub){
   const stats=loadStats();
   let seen=0,wrong=0;
@@ -1662,49 +2326,30 @@ function showSubjectSelect(){
   $("hud").style.display="none";
   $("timer-wrap").style.display="none";
   $("progbar").style.width="0%";
-  $("subtitle").textContent="Linux+ · C++ · CMPR 121 · A+ — Select a subject";
+  $("subtitle").textContent="Certs · C++ · Discrete · Comp Org — Select a subject";
   $("footer").textContent="Choose a subject to begin";
 
-  const linux_q=BANK.filter(q=>q.sub==="linux").length;
-  const cs_q=BANK.filter(q=>q.sub==="cs").length;
-  const cs1b_q=BANK.filter(q=>q.sub==="cs1b").length;
-  const ap_q=BANK.filter(q=>q.sub==="ap").length;
+  const cards=SUB_ORDER.map(key=>{
+    const s=SUBS[key];
+    const n=BANK.filter(q=>q.sub===key).length;
+    return `
+        <div class="subject-card ${key}" id="btn-${key}">
+          <span class="icon">${s.icon}</span>
+          <div class="card-title">${s.name}</div>
+          <div class="card-sub">${s.desc}</div>
+          <div class="card-count">${n} question${n===1?"":"s"}</div>
+        </div>`;
+  }).join("");
 
   $("main").innerHTML=`
     <div class="subject-screen">
       <h2>&gt; SELECT SUBJECT</h2>
       <p>Pick your study focus. Each subject has 4 difficulty levels with tailored question banks.</p>
-      <div class="subject-cards four">
-        <div class="subject-card linux" id="btn-linux">
-          <span class="icon">🐧</span>
-          <div class="card-title">LINUX+</div>
-          <div class="card-sub">CompTIA XK0-005</div>
-          <div class="card-count">${linux_q} questions</div>
-        </div>
-        <div class="subject-card ap" id="btn-ap">
-          <span class="icon">🔧</span>
-          <div class="card-title">A+</div>
-          <div class="card-sub">220-1101 &amp; 220-1102</div>
-          <div class="card-count">${ap_q} questions</div>
-        </div>
-        <div class="subject-card cs" id="btn-cs">
-          <span class="icon">💻</span>
-          <div class="card-title">C++ / CS</div>
-          <div class="card-sub">Fundamentals &amp; OOP</div>
-          <div class="card-count">${cs_q} questions</div>
-        </div>
-        <div class="subject-card cs1b" id="btn-cs1b">
-          <span class="icon">📚</span>
-          <div class="card-title" style="color:var(--yellow)">CMPR 121</div>
-          <div class="card-sub">Your CS1B lectures</div>
-          <div class="card-count">${cs1b_q} questions</div>
-        </div>
-      </div>
+      <div class="subject-cards seven">${cards}</div>
     </div>`;
-  $("btn-linux").addEventListener("click",()=>showDifficultySelect("linux"));
-  $("btn-ap").addEventListener("click",()=>showDifficultySelect("ap"));
-  $("btn-cs").addEventListener("click",()=>showDifficultySelect("cs"));
-  $("btn-cs1b").addEventListener("click",()=>showDifficultySelect("cs1b"));
+  SUB_ORDER.forEach(key=>{
+    $("btn-"+key).addEventListener("click",()=>showDifficultySelect(key));
+  });
 }
 
 function showDifficultySelect(sub){
@@ -1713,6 +2358,7 @@ function showDifficultySelect(sub){
   $("subtitle").textContent=`${info.icon} ${info.name} — Select difficulty`;
   $("footer").textContent="Choose how tough you want it";
   const weakCount=getWeakQuestions(sub).length;
+  const starCount=getStarredQuestions(sub).length;
   const ss=subjectStats(sub);
   $("main").innerHTML=`
     <div class="diff-screen">
@@ -1731,6 +2377,29 @@ function showDifficultySelect(sub){
           </div>
         </div>
       </div>`:""}
+      ${starCount>0?`
+      <div class="diff-card star-card" id="star-card">
+        <div class="diff-icon">⭐</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--yellow)">STARRED QUESTIONS</div>
+          <div class="diff-desc">Drill only the questions you've bookmarked — no lives, no timer.</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--yellow);border-color:var(--yellow)">${starCount} starred</span>
+            <span class="badge">+100pts/q</span>
+          </div>
+        </div>
+      </div>`:""}
+      <div class="diff-card flash-card" id="flash-card-btn">
+        <div class="diff-icon">🎴</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--cyan)">FLASHCARDS</div>
+          <div class="diff-desc">No scoring — flip the card to reveal the answer + explanation. Good for warmup.</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--cyan);border-color:var(--cyan)">${BANK.filter(q=>q.sub===sub).length} cards</span>
+            <span class="badge">study mode</span>
+          </div>
+        </div>
+      </div>
       <div class="diff-cards" id="diff-cards"></div>
       <div class="diff-card exam-card" id="exam-card">
         <div class="diff-icon">🎯</div>
@@ -1750,6 +2419,10 @@ function showDifficultySelect(sub){
   if(weakCount>0){
     $("review-card").addEventListener("click",()=>startReview(sub));
   }
+  if(starCount>0){
+    $("star-card").addEventListener("click",()=>startStarred(sub));
+  }
+  $("flash-card-btn").addEventListener("click",()=>startFlashcards(sub));
   $("exam-card").addEventListener("click",()=>startExam(sub));
   const cs=$("clear-stats-btn");
   if(cs){cs.addEventListener("click",()=>{
@@ -1850,6 +2523,104 @@ function examTimeUp(){
 }
 
 // Review Mode: only weak questions, no timer, unlimited lives, forgiving
+function startStarred(sub){
+  const starred=getStarredQuestions(sub);
+  if(!starred.length)return;
+  S.sub=sub;S.lvl=0;S.review=true;S.exam=false;
+  stopExamClock();const _ecs=$("exam-clock");if(_ecs)_ecs.remove();
+  S.mode={lvl:0,name:"STARRED",icon:"⭐",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Starred drill"};
+  S.queue=shuffle(starred);
+  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=999;
+  S.answered=false;S.hintUsed=false;
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ⭐ STARRED`;
+  updateHud();
+  renderQ();
+}
+
+// ── Flashcard mode (no scoring, click to flip) ──
+function startFlashcards(sub){
+  const pool=BANK.filter(q=>q.sub===sub);
+  if(!pool.length){alert("No questions in this subject yet.");return;}
+  S.sub=sub;S.lvl=0;S.review=false;S.exam=false;S.flash=true;
+  stopTimer();stopExamClock();const _ecf=$("exam-clock");if(_ecf)_ecf.remove();
+  S.queue=shuffle(pool);
+  S.idx=0;S.flashRevealed=false;
+  $("hud").style.display="none";
+  $("timer-wrap").style.display="none";
+  $("progbar").style.width="0%";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · 🎴 FLASHCARDS`;
+  renderFlashcard();
+}
+function flashAnswer(q){
+  if(q.type==="fill")return (q.answers||[])[0]||"";
+  if(q.type==="multi")return (q.correct||[]).map(i=>q.a[i]).join(" · ");
+  return q.a[q.c];
+}
+function renderFlashcard(){
+  if(S.idx<0)S.idx=0;
+  if(S.idx>=S.queue.length){
+    $("main").innerHTML=`
+      <div class="flash-screen">
+        <div class="flash-card-box" style="cursor:default">
+          <div class="flash-side">DECK COMPLETE</div>
+          <div class="flash-q">You've been through all ${S.queue.length} cards.</div>
+          <div class="flash-exp" style="text-align:center;border:0">Star the ones you want to drill later, or jump into a quiz.</div>
+        </div>
+        <div class="flash-ctrl">
+          <button class="cmd" id="flash-again">> SHUFFLE AGAIN</button>
+          <button class="cmd" id="flash-done">> BACK</button>
+        </div>
+      </div>`;
+    $("flash-again").addEventListener("click",()=>startFlashcards(S.sub));
+    $("flash-done").addEventListener("click",()=>{S.flash=false;showDifficultySelect(S.sub);});
+    $("footer").textContent="Flashcard deck complete";
+    return;
+  }
+  const q=S.queue[S.idx];
+  S.flashRevealed=false;
+  const pct=(S.idx/S.queue.length)*100;
+  $("progbar").style.width=pct+"%";
+  const starred=isStarred(q);
+  $("main").innerHTML=`
+    <div class="flash-screen">
+      <div class="flash-star-row">
+        <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this card">${starred?"★":"☆"}</button>
+      </div>
+      <span class="domain-tag">${q.d}</span>
+      <div class="flash-card-box" id="flash-box">
+        <div class="flash-side" id="flash-side">QUESTION · tap to flip</div>
+        <div class="flash-q" id="flash-content">${q.q}</div>
+      </div>
+      <div class="flash-ctrl">
+        <button class="cmd" id="flash-prev"${S.idx===0?" disabled":""}>&lt; PREV</button>
+        <span class="flash-pos">${S.idx+1} / ${S.queue.length}</span>
+        <button class="cmd" id="flash-next">${S.idx+1>=S.queue.length?"> DONE":"NEXT &gt;"}</button>
+      </div>
+      <div style="text-align:center"><button class="cmd small" id="flash-exit" style="font-size:10px;padding:6px 10px;opacity:.7">exit flashcards</button></div>
+    </div>`;
+  $("star-btn").addEventListener("click",()=>{
+    const on=toggleStar(q);
+    const b=$("star-btn");b.classList.toggle("on",on);b.textContent=on?"★":"☆";
+  });
+  $("flash-box").addEventListener("click",()=>{
+    S.flashRevealed=!S.flashRevealed;
+    const side=$("flash-side");
+    const content=$("flash-content");
+    if(S.flashRevealed){
+      side.textContent="ANSWER · tap to flip back";
+      content.innerHTML=`<div class="flash-a">${flashAnswer(q)}</div>${q.e?`<div class="flash-exp"><strong>Why:</strong> ${q.e}</div>`:""}`;
+    } else {
+      side.textContent="QUESTION · tap to flip";
+      content.innerHTML=q.q;
+    }
+  });
+  $("flash-prev").addEventListener("click",()=>{if(S.idx>0){S.idx--;renderFlashcard();}});
+  $("flash-next").addEventListener("click",()=>{S.idx++;renderFlashcard();});
+  $("flash-exit").addEventListener("click",()=>{S.flash=false;showDifficultySelect(S.sub);});
+  $("footer").textContent="🎴 Flashcards · tap card to flip · no scoring";
+}
+
 function startReview(sub){
   const weak=getWeakQuestions(sub);
   if(!weak.length)return;
@@ -1874,12 +2645,20 @@ function renderQ(){
   const m=S.mode;
   const lvlNames=["","BEGINNER","EASY","MEDIUM","HARD"];
   const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:q.type==="multi"?`<span class="lvl-tag l3" style="background:rgba(255,209,102,.12);color:var(--yellow);border-color:var(--yellow)">MULTI</span>`:"";
+  const starred=isStarred(q);
   $("main").innerHTML=`
+    <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question">${starred?"★":"☆"}</button>
     <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
     <div class="question">${q.q}</div>
     <div class="answers" id="ans"></div>
     <div class="feedback" id="fb"></div>
     <div class="controls" id="ctrl"></div>`;
+  $("star-btn").addEventListener("click",()=>{
+    const on=toggleStar(q);
+    const b=$("star-btn");
+    b.classList.toggle("on",on);
+    b.textContent=on?"★":"☆";
+  });
   const wrap=$("ans");
 
   if(q.type==="fill"){
