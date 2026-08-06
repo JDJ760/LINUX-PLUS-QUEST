@@ -181,6 +181,10 @@ to touch the CSS when adding or removing a subject.
 
 ### 🗺️ Roadmap (pending)
 
+See **[DESIGN-TEACHING.md](DESIGN-TEACHING.md)** for the design map that turns this
+from a quiz engine into a teaching tool (concept graph, lessons, placement diagnostic,
+new item types, the code-execution decision, and phasing).
+
 See **[ROADMAP.md](ROADMAP.md)** for the prioritized plan (spaced repetition, PBQs,
 Networking + Security+ subjects, progress export, test suite). The table below is the
 older running idea list.
