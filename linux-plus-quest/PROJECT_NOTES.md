@@ -181,6 +181,10 @@ to touch the CSS when adding or removing a subject.
 
 ### 🗺️ Roadmap (pending)
 
+See **[ROADMAP.md](ROADMAP.md)** for the prioritized plan (spaced repetition, PBQs,
+Networking + Security+ subjects, progress export, test suite). The table below is the
+older running idea list.
+
 | Phase | Idea |
 |---|---|
 | 5b | Custom quiz builder (pick subject + tags + count) |
