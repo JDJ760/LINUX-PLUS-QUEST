@@ -1607,7 +1607,7 @@ const BANK = [
 {sub:"cs1c",lvl:2,d:"STL",
  q:"By default, which container does std::stack use underneath?",
  a:["std::deque","std::vector","std::list","std::array"],c:0,
- e:"std::stack is a container adaptor defaulting to std::deque. You can override it: std::stack&lt;int, std::vector&lt;int&gt;&gt;."},
+ e:"std::stack is a container adaptor defaulting to std::deque. You can override it: std::stack<int, std::vector<int>>."},
 {sub:"cs1c",lvl:2,d:"STL",
  q:"What is the AMORTIZED time complexity of std::vector::push_back?",
  a:["O(1) amortized","O(n) always","O(log n)","O(n log n)"],c:0,
@@ -1942,7 +1942,7 @@ const BANK = [
  e:"Cantor's diagonal argument shows ℝ cannot be put in bijection with ℕ. ℤ and ℚ are countably infinite, as is the set of finite strings over a finite alphabet."},
 {sub:"disc",lvl:4,d:"Number Theory",
  q:"An integer a has a multiplicative inverse modulo m if and only if:",
- a:["gcd(a, m) = 1","a is prime","m is prime","a &lt; m"],c:0,
+ a:["gcd(a, m) = 1","a is prime","m is prime","a < m"],c:0,
  e:"a and m must be coprime; then the extended Euclidean algorithm produces x with ax ≡ 1 (mod m). For example 3⁻¹ ≡ 5 (mod 7), since 15 ≡ 1."},
 {sub:"disc",lvl:4,d:"Recurrences",
  q:"The recurrence T(n) = 2T(n/2) + n with T(1) = 1 solves to:",
@@ -2205,6 +2205,11 @@ const S = {
 // UTILS
 // ─────────────────────────────────────────────────────────────
 const $=id=>document.getElementById(id);
+// Question text is DATA, not markup. C++ generics ("vector<int>", "<iostream>")
+// and shell placeholders ("<service>") would otherwise be parsed as HTML tags and
+// vanish from the page, so escape every BANK field before it reaches innerHTML.
+function esc(s){return String(s==null?"":s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 function hi(sub,lvl){return parseInt(localStorage.getItem(`tq_${sub}_${lvl}`)||"0");}
 function saveHi(sub,lvl,score){if(score>hi(sub,lvl))localStorage.setItem(`tq_${sub}_${lvl}`,score);}
@@ -2265,11 +2270,20 @@ function subjectStats(sub){
 // ─────────────────────────────────────────────────────────────
 // HUD
 // ─────────────────────────────────────────────────────────────
+// Review/starred modes run on 999 lives and exam mode on one-per-question, so
+// only render individual hearts for the small graded modes.
+function livesText(){
+  const m=S.mode;
+  const cur=Math.max(0,S.lives);
+  if(m.lives>=999)return "∞";
+  if(m.lives>6)return `♥ ${cur}`;
+  return "♥".repeat(cur)+"♡".repeat(Math.max(0,m.lives-cur));
+}
 function updateHud(){
   const m=S.mode;
   $("h-score").textContent=S.score;
   $("h-streak").textContent=(S.streak>=3?"🔥":"")+S.streak;
-  $("h-lives").textContent="♥".repeat(S.lives)+"♡".repeat(m.lives-S.lives);
+  $("h-lives").textContent=livesText();
   $("h-qnum").textContent=`${Math.min(S.idx+1,S.queue.length)}/${S.queue.length}`;
   $("h-hi").textContent=hi(S.sub,S.lvl);
   const pct=S.queue.length?(S.idx/S.queue.length)*100:0;
@@ -2308,11 +2322,30 @@ function timeUp(){
   S.answered=true;
   S.streak=0;
   S.lives--;
-  const btns=document.querySelectorAll(".answer-btn");
-  btns.forEach((b,i)=>{b.disabled=true;if(i===S._correctPos)b.classList.add("correct");});
+  const q=S.queue[S.idx];
+  recordStat(q,false);
+  // Lock whichever input this question type rendered, and reveal the answer.
+  if(q.type==="fill"){
+    const inp=$("fill-input");if(inp){inp.disabled=true;inp.classList.add("wrong");}
+    const sb=$("fill-submit");if(sb)sb.disabled=true;
+  } else if(q.type==="multi"){
+    const order=S._multiOrder||[];
+    const correctSet=new Set(q.correct||[]);
+    document.querySelectorAll(".multi-btn").forEach((b,pos)=>{
+      b.disabled=true;
+      if(correctSet.has(order[pos]))b.classList.add("correct");
+    });
+    const sb=$("multi-submit");if(sb)sb.disabled=true;
+  } else {
+    document.querySelectorAll(".answer-btn").forEach((b,i)=>{
+      b.disabled=true;
+      if(i===S._correctPos)b.classList.add("correct");
+    });
+  }
+  const hb=$("hint-btn");if(hb)hb.disabled=true;
   const fb=$("fb");
   fb.className="feedback bad";
-  fb.innerHTML=`⏱ <b>Time's up!</b> Correct: <b style="color:var(--green)">${S.queue[S.idx].a[S.queue[S.idx].c]}</b>\n\n<strong>Why:</strong> ${S.queue[S.idx].e}`;
+  fb.innerHTML=`⏱ <b>Time's up!</b> Correct: <b style="color:var(--green)">${esc(correctText(q))}</b>\n\n<strong>Why:</strong> ${esc(q.e)}`;
   updateHud();
   showNext();
 }
@@ -2552,7 +2585,9 @@ function startFlashcards(sub){
   $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · 🎴 FLASHCARDS`;
   renderFlashcard();
 }
-function flashAnswer(q){
+// The correct answer as display text, for any question type.
+// Used by flashcards and by the timer-expiry reveal.
+function correctText(q){
   if(q.type==="fill")return (q.answers||[])[0]||"";
   if(q.type==="multi")return (q.correct||[]).map(i=>q.a[i]).join(" · ");
   return q.a[q.c];
@@ -2587,10 +2622,10 @@ function renderFlashcard(){
       <div class="flash-star-row">
         <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this card">${starred?"★":"☆"}</button>
       </div>
-      <span class="domain-tag">${q.d}</span>
+      <span class="domain-tag">${esc(q.d)}</span>
       <div class="flash-card-box" id="flash-box">
         <div class="flash-side" id="flash-side">QUESTION · tap to flip</div>
-        <div class="flash-q" id="flash-content">${q.q}</div>
+        <div class="flash-q" id="flash-content">${esc(q.q)}</div>
       </div>
       <div class="flash-ctrl">
         <button class="cmd" id="flash-prev"${S.idx===0?" disabled":""}>&lt; PREV</button>
@@ -2609,10 +2644,10 @@ function renderFlashcard(){
     const content=$("flash-content");
     if(S.flashRevealed){
       side.textContent="ANSWER · tap to flip back";
-      content.innerHTML=`<div class="flash-a">${flashAnswer(q)}</div>${q.e?`<div class="flash-exp"><strong>Why:</strong> ${q.e}</div>`:""}`;
+      content.innerHTML=`<div class="flash-a">${esc(correctText(q))}</div>${q.e?`<div class="flash-exp"><strong>Why:</strong> ${esc(q.e)}</div>`:""}`;
     } else {
       side.textContent="QUESTION · tap to flip";
-      content.innerHTML=q.q;
+      content.innerHTML=esc(q.q);
     }
   });
   $("flash-prev").addEventListener("click",()=>{if(S.idx>0){S.idx--;renderFlashcard();}});
@@ -2648,11 +2683,17 @@ function renderQ(){
   const starred=isStarred(q);
   $("main").innerHTML=`
     <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question">${starred?"★":"☆"}</button>
-    <span class="domain-tag">${q.d}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
-    <div class="question">${q.q}</div>
+    <span class="domain-tag">${esc(q.d)}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
+    <div class="question">${esc(q.q)}</div>
     <div class="answers" id="ans"></div>
     <div class="feedback" id="fb"></div>
-    <div class="controls" id="ctrl"></div>`;
+    <div class="controls" id="ctrl"></div>
+    <div style="text-align:center;margin-top:10px"><button class="cmd" id="quit-btn" style="font-size:10px;padding:6px 10px;opacity:.7">quit to menu</button></div>`;
+  $("quit-btn").addEventListener("click",()=>{
+    stopTimer();stopExamClock();const _ecq=$("exam-clock");if(_ecq)_ecq.remove();
+    S.exam=false;S.review=false;S.examExpired=false;S.answered=true;
+    showDifficultySelect(S.sub);
+  });
   $("star-btn").addEventListener("click",()=>{
     const on=toggleStar(q);
     const b=$("star-btn");
@@ -2679,6 +2720,7 @@ function renderQ(){
   } else if(q.type==="multi"){
     // Multi-select (select all that apply)
     const order=shuffle(q.a.map((_,i)=>i));
+    S._multiOrder=order;  // timeUp() needs this to mark the right buttons
     const correctSet=new Set(q.correct||[]);
     const labels=["A","B","C","D","E","F"];
     const pickedSet=new Set();
@@ -2686,7 +2728,7 @@ function renderQ(){
       const b=document.createElement("button");
       b.className="answer-btn multi-btn";
       b.dataset.pos=pos;
-      b.innerHTML=`<span class="key-hint">${labels[pos]}</span><span class="chk">☐</span> ${q.a[origIdx]}`;
+      b.innerHTML=`<span class="key-hint">${labels[pos]}</span><span class="chk">☐</span> ${esc(q.a[origIdx])}`;
       b.addEventListener("click",()=>{
         if(S.answered)return;
         if(pickedSet.has(pos)){pickedSet.delete(pos);b.classList.remove("selected");b.querySelector(".chk").textContent="☐";}
@@ -2716,7 +2758,7 @@ function renderQ(){
       const b=document.createElement("button");
       b.className="answer-btn";
       b.dataset.pos=pos;
-      b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${q.a[origIdx]}`;
+      b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${esc(q.a[origIdx])}`;
       b.addEventListener("click",()=>pick(pos,correctPos,q,order));
       wrap.appendChild(b);
     });
@@ -2779,12 +2821,12 @@ function pick(pos,correctPos,q,order){
     S.score+=pts;
     fb.className="feedback good";
     fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${q.e}`;
+\n<strong>Why:</strong> ${esc(q.e)}`;
   } else {
     S.streak=0;S.lives--;
     fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${q.a[q.c]}</b>
-\n<strong>Why:</strong> ${q.e}`;
+    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(q.a[q.c])}</b>
+\n<strong>Why:</strong> ${esc(q.e)}`;
   }
   updateHud();
   showNext();
@@ -2822,12 +2864,12 @@ function pickMulti(pickedSet,order,correctSet,q){
     S.score+=pts;
     fb.className="feedback good";
     fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${q.e}`;
+\n<strong>Why:</strong> ${esc(q.e)}`;
   } else {
     S.streak=0;S.lives--;
     fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Correct: <b style="color:var(--green)">${correctList}</b>
-\n<strong>Why:</strong> ${q.e}`;
+    fb.innerHTML=`✗ <b>Wrong.</b> Correct: <b style="color:var(--green)">${esc(correctList)}</b>
+\n<strong>Why:</strong> ${esc(q.e)}`;
   }
   updateHud();
   showNext();
@@ -2855,12 +2897,12 @@ function pickFill(raw,q){
     S.score+=pts;
     fb.className="feedback good";
     fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${q.e}`;
+\n<strong>Why:</strong> ${esc(q.e)}`;
   } else {
     S.streak=0;S.lives--;
     fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${q.answers[0]}</b>
-\n<strong>Why:</strong> ${q.e}`;
+    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(q.answers[0])}</b>
+\n<strong>Why:</strong> ${esc(q.e)}`;
   }
   updateHud();
   showNext();
@@ -2964,8 +3006,6 @@ document.addEventListener("keydown",e=>{
     const map={a:0,b:1,c:2,d:3,"1":0,"2":1,"3":2,"4":3};
     const idx=map[e.key.toLowerCase()];
     if(idx!==undefined){
-      const btns=document.querySelectorAll(".answer-btn:not(:disabled)");
-      // find visible (non-eliminated) btn at logical position
       const allBtns=document.querySelectorAll(".answer-btn");
       if(allBtns[idx]&&!allBtns[idx].disabled)allBtns[idx].click();
     }
