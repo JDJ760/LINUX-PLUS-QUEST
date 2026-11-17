@@ -16,7 +16,6 @@ A single-file Progressive Web App (PWA) study game for IT certifications. Built 
 ## Owner / context
 
 - **Jason Johnson** — Cyber Defense student at Saddleback College, transferring to CSU Fullerton
-- **Email:** jasondjohnson1010@gmail.com
 - **Active goals:** CompTIA A+ (220-1101 / 220-1102) in progress, Linux+ XK0-005 next, Security+ SY0-701 after
 - **Side goal:** explore turning this into a sellable app-store product long-term
 - **Build machine:** Windows PC, Git Bash, PowerShell, VS Code / Visual Studio
