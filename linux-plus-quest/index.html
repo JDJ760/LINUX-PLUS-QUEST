@@ -3172,7 +3172,7 @@ function startGame(sub,lvl){
   resetMode();
   S.sub=sub;S.lvl=lvl;S.mode=m;
   S.queue=shuffle(BANK.filter(q=>q.sub===sub&&q.lvl===lvl));
-  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=m.lives;
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=m.lives;
   S.answered=false;S.hintUsed=false;
   $("hud").style.display="grid";
   $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ${m.name}`;
@@ -3190,7 +3190,7 @@ function startExam(sub){
   S.sub=sub;S.lvl=0;S.exam=true;S.examPass=PASS;S.examN=N;
   S.mode={lvl:0,name:"EXAM",icon:"🎯",lives:N,pts:100,timer:0,hint:false,hintCost:0,desc:"Exam simulation"};
   S.queue=shuffle(pool).slice(0,N);
-  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=N;  // lives=N so a single miss doesn't end the exam
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=N;  // lives=N so a single miss doesn't end the exam
   S.examCorrect=0;
   S.answered=false;S.hintUsed=false;
   S.examDeadline=Date.now()+60*60*1000;  // 60 minutes
@@ -3239,7 +3239,7 @@ function startStarred(sub){
   S.sub=sub;S.lvl=0;S.review=true;
   S.mode={lvl:0,name:"STARRED",icon:"⭐",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Starred drill"};
   S.queue=shuffle(starred);
-  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=999;
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=999;
   S.answered=false;S.hintUsed=false;
   $("hud").style.display="grid";
   $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ⭐ STARRED`;
@@ -3340,7 +3340,7 @@ function startReview(sub){
   // Synthesize a permissive "mode" for review
   S.mode={lvl:0,name:"REVIEW",icon:"⚠️",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Weak-spot drill"};
   S.queue=shuffle(weak);
-  S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=999;
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=999;
   S.answered=false;S.hintUsed=false;
   $("hud").style.display="grid";
   $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ⚠️ REVIEW`;
@@ -3434,7 +3434,7 @@ function renderQ(){
       b.className="answer-btn";
       b.dataset.pos=pos;
       b.innerHTML=`<span class="key-hint">${labels[pos]}</span>${esc(q.a[origIdx])}`;
-      b.addEventListener("click",()=>pick(pos,correctPos,q,order));
+      b.addEventListener("click",()=>pick(pos,correctPos,q));
       wrap.appendChild(b);
     });
     // Hint button (MC only)
@@ -3444,7 +3444,7 @@ function renderQ(){
       hb.className="cmd yellow hint-btn";
       hb.id="hint-btn";
       hb.textContent=m.hintCost>0?`💡 50/50 (-${m.hintCost}pts)`:"💡 50/50";
-      hb.addEventListener("click",()=>useHint(correctPos,q,order));
+      hb.addEventListener("click",()=>useHint(correctPos));
       ctrl.appendChild(hb);
     }
   }
@@ -3453,7 +3453,7 @@ function renderQ(){
   if(m.timer>0)startTimer();
 }
 
-function useHint(correctPos,q,order){
+function useHint(correctPos){
   if(S.hintUsed||S.answered)return;
   S.hintUsed=true;
   const m=S.mode;
@@ -3473,114 +3473,82 @@ function useHint(correctPos,q,order){
   updateHud();
 }
 
-function pick(pos,correctPos,q,order){
-  if(S.answered)return;
-  S.answered=true;
-  stopTimer();
-  const btns=document.querySelectorAll(".answer-btn");
-  btns.forEach((b,i)=>{
-    b.disabled=true;
-    if(i===correctPos)b.classList.add("correct");
-    else if(i===pos)b.classList.add("wrong");
-  });
-  const hb=$("hint-btn");if(hb)hb.disabled=true;
-  const fb=$("fb");
-  const correct=pos===correctPos;
+// ── Grading ──
+// The ONE place an answer turns into points, lives and saved stats.
+// pick(), pickMulti() and pickFill() each work out right/wrong for their own
+// question type and colour their own buttons, then hand off to grade().
+// (This logic used to be copy-pasted three times, so a scoring change had to
+// be made three times and it was easy to miss one.)
+function grade(q,correct,answerText){
   recordStat(q,correct);
-  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
   const m=S.mode;
+  const fb=$("fb");
   if(correct){
+    S.correct++;
+    if(S.exam)S.examCorrect=(S.examCorrect||0)+1;
     S.streak++;S.best=Math.max(S.best,S.streak);
     const bonus=S.streak>=3?50:0;
     const pts=m.pts+bonus;
     S.score+=pts;
     fb.className="feedback good";
-    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${esc(q.e)}`;
+    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}\n\n<strong>Why:</strong> ${esc(q.e)}`;
   } else {
     S.streak=0;S.lives--;
     fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(q.a[q.c])}</b>
-\n<strong>Why:</strong> ${esc(q.e)}`;
+    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(answerText)}</b>\n\n<strong>Why:</strong> ${esc(q.e)}`;
   }
   updateHud();
   showNext();
+}
+
+function pick(pos,correctPos,q){
+  if(S.answered)return;
+  S.answered=true;
+  stopTimer();
+  document.querySelectorAll(".answer-btn").forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correctPos)b.classList.add("correct");
+    else if(i===pos)b.classList.add("wrong");
+  });
+  const hb=$("hint-btn");if(hb)hb.disabled=true;
+  grade(q,pos===correctPos,q.a[q.c]);
 }
 
 function pickMulti(pickedSet,order,correctSet,q){
   if(S.answered)return;
   S.answered=true;
   stopTimer();
-  // Translate picked positions -> original indices
+  // Buttons are shown shuffled. `order[pos]` converts a screen position back
+  // to the option's original index in q.a, which is what q.correct refers to.
   const pickedOrig=new Set([...pickedSet].map(p=>order[p]));
-  // Correct if picked set exactly equals correct set
-  let correct = pickedOrig.size===correctSet.size;
+  // All-or-nothing: correct only if the picked set EQUALS the correct set.
+  let correct=pickedOrig.size===correctSet.size;
   if(correct){for(const i of correctSet){if(!pickedOrig.has(i)){correct=false;break;}}}
-  recordStat(q,correct);
-  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
-  // Visual feedback
   document.querySelectorAll(".multi-btn").forEach((b,pos)=>{
     b.disabled=true;
-    const origIdx=order[pos];
-    const wasPicked=pickedSet.has(pos);
-    const isRight=correctSet.has(origIdx);
-    if(isRight)b.classList.add("correct");
-    else if(wasPicked)b.classList.add("wrong");
+    if(correctSet.has(order[pos]))b.classList.add("correct");
+    else if(pickedSet.has(pos))b.classList.add("wrong");
   });
   const sb=$("multi-submit");if(sb)sb.disabled=true;
-  const fb=$("fb");
-  const m=S.mode;
-  // Build "correct answers" display string
-  const correctList=[...correctSet].map(i=>q.a[i]).join(", ");
-  if(correct){
-    S.streak++;S.best=Math.max(S.best,S.streak);
-    const bonus=S.streak>=3?50:0;
-    const pts=m.pts+bonus;
-    S.score+=pts;
-    fb.className="feedback good";
-    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${esc(q.e)}`;
-  } else {
-    S.streak=0;S.lives--;
-    fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Correct: <b style="color:var(--green)">${esc(correctList)}</b>
-\n<strong>Why:</strong> ${esc(q.e)}`;
-  }
-  updateHud();
-  showNext();
+  grade(q,correct,[...correctSet].map(i=>q.a[i]).join(", "));
 }
 
 function pickFill(raw,q){
   if(S.answered)return;
-  S.answered=true;
-  stopTimer();
+  // "Normalise" both sides so harmless differences don't count as wrong:
+  // trim the ends, lower-case, squeeze runs of spaces to one.
   const norm=s=>String(s||"").trim().toLowerCase().replace(/\s+/g," ");
   const val=norm(raw);
-  const accepted=(q.answers||[]).map(norm);
-  const correct=val.length>0&&accepted.includes(val);
-  recordStat(q,correct);
-  if(S.exam&&correct)S.examCorrect=(S.examCorrect||0)+1;
   const inp=$("fill-input");
+  // An empty submit is almost always a stray Enter, not an answer — ignore it
+  // rather than charging a life.
+  if(!val){if(inp)inp.focus();return;}
+  S.answered=true;
+  stopTimer();
+  const correct=(q.answers||[]).map(norm).includes(val);
   if(inp){inp.disabled=true;inp.classList.add(correct?"correct":"wrong");}
   const sb=$("fill-submit");if(sb)sb.disabled=true;
-  const fb=$("fb");
-  const m=S.mode;
-  if(correct){
-    S.streak++;S.best=Math.max(S.best,S.streak);
-    const bonus=S.streak>=3?50:0;
-    const pts=m.pts+bonus;
-    S.score+=pts;
-    fb.className="feedback good";
-    fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}
-\n<strong>Why:</strong> ${esc(q.e)}`;
-  } else {
-    S.streak=0;S.lives--;
-    fb.className="feedback bad";
-    fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(q.answers[0])}</b>
-\n<strong>Why:</strong> ${esc(q.e)}`;
-  }
-  updateHud();
-  showNext();
+  grade(q,correct,q.answers[0]);
 }
 
 function showNext(){
@@ -3605,9 +3573,12 @@ function gameOver(){
   const examClk=$("exam-clock");if(examClk)examClk.remove();
   $("timer-wrap").style.display="none";
   const wasExam=S.exam||S.examExpired;
+  const prevHi=hi(S.sub,S.lvl);
   if(!S.review&&!wasExam)saveHi(S.sub,S.lvl,S.score);
   const total=S.queue.length;
-  const pct=total>0?S.score/(total*S.mode.pts):0;
+  // Rank is based on questions answered correctly, NOT on points. Points
+  // include streak bonuses, which used to push 12/15 (80%) over the 95% line.
+  const pct=total>0?S.correct/total:0;
   // Exam uses correctness-based percentage, not score-based
   const examPct=wasExam&&S.examN?(S.examCorrect||0)/S.examN:0;
   const examPassed=wasExam&&examPct>=(S.examPass||0.75);
@@ -3623,7 +3594,7 @@ function gameOver(){
     :pct>=.40?{rank:"LEARNING",msg:"Review the explanations and go again."}
     :{rank:"BEGINNER",msg:"Keep studying — everyone starts here."};
   const won=S.lives>0;
-  const isNew=!S.review&&!wasExam&&S.score>0&&S.score>=hi(S.sub,S.lvl);
+  const isNew=!S.review&&!wasExam&&S.score>prevHi;
   const ss=subjectStats(S.sub);
   const remainingWeak=getWeakQuestions(S.sub).length;
   const hdr=wasExam?(examPassed?"> EXAM PASSED":S.examExpired?"> TIME EXPIRED":"> EXAM FAILED"):S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER";
@@ -3669,6 +3640,9 @@ document.addEventListener("keydown",e=>{
   // Don't hijack keys when typing in a fill-in-blank input
   if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;
   if(e.key==="Enter"){
+    // A focused button already "clicks" itself on Enter. Clicking NEXT/RETRY
+    // here as well made Enter on the CHANGE button restart the round instead.
+    if(e.target&&e.target.tagName==="BUTTON")return;
     const b=document.querySelector("#ctrl .cmd:not(.hint-btn)")||$("btn-retry");
     if(b){b.click();return;}
   }
