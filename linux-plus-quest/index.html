@@ -2828,13 +2828,14 @@ const SUB_ORDER = ["linux","ap","cs","cs1b","cs1c","cs3a","disc","py","bash","sq
 // STATE
 // ─────────────────────────────────────────────────────────────
 const S = {
-  screen:"subject",
   sub:null,lvl:null,
   queue:[],idx:0,
   score:0,streak:0,best:0,lives:3,
   answered:false,hintUsed:false,
-  timerSecs:0,timerInterval:null,timerPct:100,
+  timerSecs:0,timerInterval:null,
   mode:null,
+  exam:false,review:false,flash:false,examExpired:false,
+  correct:0,
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -2989,9 +2990,18 @@ function timeUp(){
 // ─────────────────────────────────────────────────────────────
 // SCREENS
 // ─────────────────────────────────────────────────────────────
+// Ends whatever mode was running. EVERY screen/mode entry point calls this
+// first. Before it existed each start function cleared a different subset of
+// the flags by hand, and a timed-out exam left S.examExpired=true forever, so
+// the next normal game was scored as a failed exam.
+function resetMode(){
+  S.exam=false;S.review=false;S.flash=false;S.examExpired=false;
+  stopTimer();stopExamClock();
+  const clk=$("exam-clock");if(clk)clk.remove();
+}
+
 function showSubjectSelect(){
-  S.screen="subject";S.exam=false;S.review=false;
-  stopExamClock();const _ec3=$("exam-clock");if(_ec3)_ec3.remove();
+  resetMode();
   $("hud").style.display="none";
   $("timer-wrap").style.display="none";
   $("progbar").style.width="0%";
@@ -3130,8 +3140,8 @@ function showDifficultySelect(sub){
 // ─────────────────────────────────────────────────────────────
 function startGame(sub,lvl){
   const m=MODES.find(x=>x.lvl===lvl);
-  S.sub=sub;S.lvl=lvl;S.mode=m;S.review=false;S.exam=false;
-  stopExamClock();const _ec=$("exam-clock");if(_ec)_ec.remove();
+  resetMode();
+  S.sub=sub;S.lvl=lvl;S.mode=m;
   S.queue=shuffle(BANK.filter(q=>q.sub===sub&&q.lvl===lvl));
   S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=m.lives;
   S.answered=false;S.hintUsed=false;
@@ -3147,7 +3157,8 @@ function startExam(sub){
   if(pool.length<10){alert("Not enough questions in this subject for exam mode yet.");return;}
   const N=Math.min(60,pool.length);
   const PASS=0.75;
-  S.sub=sub;S.lvl=0;S.review=false;S.exam=true;S.examPass=PASS;S.examN=N;
+  resetMode();
+  S.sub=sub;S.lvl=0;S.exam=true;S.examPass=PASS;S.examN=N;
   S.mode={lvl:0,name:"EXAM",icon:"🎯",lives:N,pts:100,timer:0,hint:false,hintCost:0,desc:"Exam simulation"};
   S.queue=shuffle(pool).slice(0,N);
   S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=N;  // lives=N so a single miss doesn't end the exam
@@ -3195,8 +3206,8 @@ function examTimeUp(){
 function startStarred(sub){
   const starred=getStarredQuestions(sub);
   if(!starred.length)return;
-  S.sub=sub;S.lvl=0;S.review=true;S.exam=false;
-  stopExamClock();const _ecs=$("exam-clock");if(_ecs)_ecs.remove();
+  resetMode();
+  S.sub=sub;S.lvl=0;S.review=true;
   S.mode={lvl:0,name:"STARRED",icon:"⭐",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Starred drill"};
   S.queue=shuffle(starred);
   S.idx=0;S.score=0;S.streak=0;S.best=0;S.lives=999;
@@ -3211,8 +3222,8 @@ function startStarred(sub){
 function startFlashcards(sub){
   const pool=BANK.filter(q=>q.sub===sub);
   if(!pool.length){alert("No questions in this subject yet.");return;}
-  S.sub=sub;S.lvl=0;S.review=false;S.exam=false;S.flash=true;
-  stopTimer();stopExamClock();const _ecf=$("exam-clock");if(_ecf)_ecf.remove();
+  resetMode();
+  S.sub=sub;S.lvl=0;S.flash=true;
   S.queue=shuffle(pool);
   S.idx=0;S.flashRevealed=false;
   $("hud").style.display="none";
@@ -3244,7 +3255,7 @@ function renderFlashcard(){
         </div>
       </div>`;
     $("flash-again").addEventListener("click",()=>startFlashcards(S.sub));
-    $("flash-done").addEventListener("click",()=>{S.flash=false;showDifficultySelect(S.sub);});
+    $("flash-done").addEventListener("click",()=>{resetMode();showDifficultySelect(S.sub);});
     $("footer").textContent="Flashcard deck complete";
     return;
   }
@@ -3288,15 +3299,15 @@ function renderFlashcard(){
   });
   $("flash-prev").addEventListener("click",()=>{if(S.idx>0){S.idx--;renderFlashcard();}});
   $("flash-next").addEventListener("click",()=>{S.idx++;renderFlashcard();});
-  $("flash-exit").addEventListener("click",()=>{S.flash=false;showDifficultySelect(S.sub);});
+  $("flash-exit").addEventListener("click",()=>{resetMode();showDifficultySelect(S.sub);});
   $("footer").textContent="🎴 Flashcards · tap card to flip · no scoring";
 }
 
 function startReview(sub){
   const weak=getWeakQuestions(sub);
   if(!weak.length)return;
-  S.sub=sub;S.lvl=0;S.review=true;S.exam=false;
-  stopExamClock();const _ec2=$("exam-clock");if(_ec2)_ec2.remove();
+  resetMode();
+  S.sub=sub;S.lvl=0;S.review=true;
   // Synthesize a permissive "mode" for review
   S.mode={lvl:0,name:"REVIEW",icon:"⚠️",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Weak-spot drill"};
   S.queue=shuffle(weak);
@@ -3326,8 +3337,7 @@ function renderQ(){
     <div class="controls" id="ctrl"></div>
     <div style="text-align:center;margin-top:10px"><button class="cmd" id="quit-btn" style="font-size:10px;padding:6px 10px;opacity:.7">quit to menu</button></div>`;
   $("quit-btn").addEventListener("click",()=>{
-    stopTimer();stopExamClock();const _ecq=$("exam-clock");if(_ecq)_ecq.remove();
-    S.exam=false;S.review=false;S.examExpired=false;S.answered=true;
+    resetMode();S.answered=true;
     showDifficultySelect(S.sub);
   });
   $("star-btn").addEventListener("click",()=>{
@@ -3613,8 +3623,6 @@ function gameOver(){
   $("progbar").style.width="100%";
   const retakeSub=S.sub;const wasExamClick=wasExam;
   $("btn-retry").addEventListener("click",()=>{
-    // Clear flags
-    S.examExpired=false;
     if(wasExamClick){startExam(retakeSub);return;}
     if(S.review){
       if(getWeakQuestions(S.sub).length>0)startReview(S.sub);
