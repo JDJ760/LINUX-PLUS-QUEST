@@ -2969,8 +2969,18 @@ const $=id=>document.getElementById(id);
 // Question text is DATA, not markup. C++ generics ("vector<int>", "<iostream>")
 // and shell placeholders ("<service>") would otherwise be parsed as HTML tags and
 // vanish from the page, so escape every BANK field before it reaches innerHTML.
+// SECURITY: this is the app's XSS defence. Anything that did not come from a
+// hard-coded string in this file must pass through esc() before it is put
+// into innerHTML. It only covers text BETWEEN tags; never build an attribute
+// (like title="...") from unescaped data, because quotes are not escaped.
 function esc(s){return String(s==null?"":s)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+// Fisher–Yates shuffle. Walk from the last slot to the first; for each slot
+// pick a random slot at or before it and swap. Every ordering is equally
+// likely. `a.slice()` copies the array first so the caller's array (often
+// BANK itself) is never reordered. `x|0` chops the decimals off, like (int)x.
+// WHY not a.sort(()=>Math.random()-.5)? That looks simpler but is biased:
+// some orderings come up much more often than others.
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 // ── Safe storage ──
 // localStorage is the browser's small per-site key/value store. It can THROW:
@@ -3006,6 +3016,15 @@ function saveHi(sub,lvl,score){if(score>hi(sub,lvl))store.set(`tq_${sub}_${lvl}`
 
 // ── Per-question stats (for Weak Spots review) ──
 // Each question gets a stable id from a 32-bit hash of its text.
+// WHY a hash instead of the question's position in BANK? Positions change
+// every time a question is added or moved, which would attach your saved
+// history to the wrong questions. A hash of the text stays the same wherever
+// the question sits. The algorithm is FNV-1a: start from a fixed number, and
+// for each character XOR it in (^=) then multiply by a fixed prime.
+// Math.imul keeps the multiply inside 32 bits like C++ unsigned overflow;
+// `>>>0` reinterprets the result as unsigned; toString(36) makes it short.
+// TRADE-OFF: editing q.q, q.sub or q.lvl gives the question a NEW id, so its
+// history starts again. Editing answers or the explanation does not.
 function qid(q){
   const s=(q.q||"")+"|"+(q.sub||"")+"|"+(q.lvl||"");
   let h=2166136261;
@@ -3035,7 +3054,10 @@ function getWeakQuestions(sub){
     if(q.sub!==sub)return false;
     const st=stats[qid(q)];
     if(!st)return false;
-    // "weak" = ever missed AND not overwhelmingly mastered
+    // "weak" = ever missed AND not overwhelmingly mastered.
+    // (seen - wrong) is the number of times you got it RIGHT, so this reads:
+    // "missed at least once, and wrong at least as often as right".
+    // One miss therefore needs two correct answers to clear.
     return st.wrong>0 && st.wrong>=Math.max(1,st.seen-st.wrong);
   }).sort((a,b)=>{
     // prioritize recently missed
@@ -3086,6 +3108,17 @@ function updateHud(){
 // ─────────────────────────────────────────────────────────────
 // TIMER
 // ─────────────────────────────────────────────────────────────
+// Two things run side by side here and it is easy to confuse them:
+//   1. The BAR is pure decoration: one CSS transition shrinking width
+//      100% -> 0% over the whole time limit. The browser animates it.
+//   2. The real COUNTDOWN is setInterval, which runs the arrow function once
+//      a second. That is what actually ends the question.
+// WHY the "transition:none" then requestAnimationFrame dance? To restart the
+// animation the bar must first jump back to 100% instantly. If we set 100%
+// and 0% in the same instant the browser merges them and nothing animates,
+// so we wait one frame (requestAnimationFrame) before starting the shrink.
+// stopTimer() MUST be called whenever a question ends or the screen changes;
+// a forgotten interval keeps ticking and fires timeUp() on the wrong screen.
 function startTimer(){
   const wrap=$("timer-wrap"),bar=$("timer-bar");
   wrap.style.display="block";
@@ -3359,6 +3392,10 @@ function startExam(sub){
   renderQ();
 }
 
+// WHY does this store a DEADLINE (a clock time) instead of counting down a
+// number like the per-question timer does? Browsers slow timers right down in
+// background tabs, so "subtract 1 every second" drifts. Recomputing
+// "deadline minus now" on each tick is always correct, however late the tick.
 function startExamClock(){
   stopExamClock();
   let clk=$("exam-clock");
@@ -3589,7 +3626,13 @@ function renderQ(){
     tip.textContent=`Select ALL that apply · ${correctSet.size} correct`;
     wrap.appendChild(tip);
   } else {
-    // Multiple choice (default) — shuffle answer order
+    // Multiple choice (default) — shuffle answer order.
+    // We do NOT shuffle the answer text itself. We shuffle a list of INDEXES:
+    // q.a.map((_,i)=>i) makes [0,1,2,3]; shuffled it might be [2,0,3,1],
+    // meaning "screen slot 0 shows q.a[2], slot 1 shows q.a[0], ...".
+    // The right answer is always q.a[q.c] in the bank, so its SCREEN slot is
+    // wherever q.c landed: order.indexOf(q.c). Keeping indexes (not text) is
+    // what lets us map a clicked button back to the original option.
     const order=shuffle(q.a.map((_,i)=>i));
     const correctPos=order.indexOf(q.c);
     S._correctPos=correctPos;
@@ -3721,6 +3764,9 @@ function pickFill(raw,q){
   grade(q,correct,q.answers[0]);
 }
 
+// Called after every graded answer. Note the NEXT handler does S.idx++ and
+// then renderQ(): renderQ() itself decides whether the game is over (no lives
+// or no questions left), so there is exactly one place that check lives.
 function showNext(){
   const ctrl=$("ctrl");
   // clear old hint btn if present and add next
