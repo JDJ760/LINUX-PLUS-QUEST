@@ -236,6 +236,24 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
   .app{padding:16px 20px calc(16px + var(--safe))}
   .diff-cards{display:grid;grid-template-columns:1fr 1fr}
 }
+/* Tags and the star sit on one row. (<main> is a flex column, which
+   stretches each direct child to full width, so they need their own row.) */
+.q-head{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:8px}
+.q-head .domain-tag,.q-head .lvl-tag{margin:0}
+.q-head .star-btn{margin-left:auto;float:none}
+/* ── Terminal lab ── */
+.term{background:#02040a;border:1px solid var(--border);border-radius:8px 8px 0 0;padding:10px 12px;min-height:120px;max-height:300px;overflow-y:auto;font-size:12px;line-height:1.5}
+.term-line{white-space:pre-wrap;word-break:break-word}
+.term-line.task{color:var(--yellow);margin-top:6px}
+.term-line.typed{color:var(--green)}
+.term-line.out{color:#b9c7e0}
+.term-line.err{color:var(--red)}
+.term-row{display:flex;align-items:center;gap:8px;background:#02040a;border:1px solid var(--cyan);border-top:none;border-radius:0 0 8px 8px;padding:8px 12px}
+.term-prompt{color:var(--cyan);font-size:12px;flex-shrink:0}
+.term-input{flex:1;min-width:0;background:transparent;border:none;color:var(--green);font-family:inherit;font-size:14px}
+.term-input:focus-visible{outline:none}
+.term-row:focus-within{box-shadow:0 0 0 2px rgba(0,229,255,.35)}
+@media(max-width:480px){.term-prompt{display:none}}
 .dash-table{width:100%;border-collapse:collapse;font-size:12px}
 .dash-table th{color:var(--dim);font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:normal}
 .dash-table th,.dash-table td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--border)}
@@ -2810,6 +2828,99 @@ const BANK = [
  a:["It only removes a source of reconnaissance; the underlying flaw is still exploitable blind","It fully prevents injection","It breaks parameterized queries","Errors are never useful to attackers"],c:0,
  e:"Verbose errors leak table names and column counts, so suppressing them slows an attacker down. But blind and time-based techniques work without any error output, so the query itself must be parameterized."},
 
+// ══ Linux+ — TERMINAL LAB (type:"cmd") ══
+// The user types real commands. Each question has one or more `steps`:
+//   ask    — what to do, in words
+//   accept — every command form we take as correct (see cmdKey() for what is
+//            treated as "the same command": flag order, -la vs -l -a, sudo)
+//   out    — fake terminal output shown when the step is solved ("" = silent)
+//   hint   — shown after the second wrong try
+// Nothing is executed. This checks what you typed against `accept`.
+{sub:"linux",lvl:1,d:"Terminal",type:"cmd",
+ q:"You just logged in to a server and want to see everything in the current directory.",
+ steps:[{ask:"List ALL files, including hidden ones, in long format.",accept:["ls -la"],hint:"Two flags: one for 'all', one for 'long'.",
+  out:"total 20\ndrwxr-xr-x 3 alice alice 4096 Nov 16 09:12 .\ndrwxr-xr-x 5 root  root  4096 Nov 10 14:01 ..\n-rw-r--r-- 1 alice alice  220 Nov 10 14:01 .bash_logout\n-rw-r--r-- 1 alice alice 3771 Nov 10 14:01 .bashrc\n-rwxr-x--- 1 alice alice  512 Nov 16 09:12 deploy.sh"}],
+ e:"`-l` is long format (permissions, owner, size, date). `-a` includes dotfiles. Flags can be combined (`-la`) or separate (`-l -a`), in any order."},
+{sub:"linux",lvl:1,d:"Terminal",type:"cmd",
+ q:"A log file is thousands of lines long and you only care about the newest entries.",
+ steps:[{ask:"Print the last 20 lines of /var/log/syslog.",accept:["tail -n 20 /var/log/syslog","tail -20 /var/log/syslog"],hint:"The opposite of `head`.",
+  out:"Nov 16 09:10:01 web01 CRON[2101]: (root) CMD (run-parts /etc/cron.hourly)\n…\nNov 16 09:12:44 web01 systemd[1]: Started Session 14 of user alice."}],
+ e:"`tail -n 20 file` prints the last 20 lines. `tail -f file` keeps the file open and prints new lines as they arrive."},
+{sub:"linux",lvl:1,d:"Terminal",type:"cmd",
+ q:"deploy.sh exists but running ./deploy.sh says 'Permission denied'.",
+ steps:[{ask:"Using symbolic mode, give ONLY the file's owner execute permission on deploy.sh.",accept:["chmod u+x deploy.sh"],hint:"who + what: u=user(owner), g=group, o=others; x=execute.",out:""}],
+ e:"`chmod u+x` adds execute for the owner and leaves every other bit alone. Plain `chmod +x` would add it for owner, group AND others."},
+{sub:"linux",lvl:2,d:"Terminal",type:"cmd",
+ q:"backup.sh should be fully usable by its owner, readable and runnable by its group, and closed to everyone else.",
+ steps:[{ask:"Set those permissions on backup.sh using octal (numeric) mode.",accept:["chmod 750 backup.sh","chmod 0750 backup.sh"],hint:"r=4, w=2, x=1. Add them up for owner, then group, then others.",out:""}],
+ e:"Owner rwx = 4+2+1 = 7. Group r-x = 4+1 = 5. Others --- = 0. So 750."},
+{sub:"linux",lvl:2,d:"Terminal",type:"cmd",
+ q:"You suspect someone is guessing SSH passwords on this server.",
+ steps:[{ask:"Search /var/log/auth.log for lines containing 'Failed password', ignoring upper/lower case.",accept:["grep -i 'Failed password' /var/log/auth.log"],hint:"grep, one flag for case-insensitive, and quote the two-word pattern.",
+  out:"Nov 16 03:14:07 web01 sshd[1881]: Failed password for root from 203.0.113.9 port 51122 ssh2\nNov 16 03:14:09 web01 sshd[1881]: Failed password for root from 203.0.113.9 port 51122 ssh2\nNov 16 03:14:12 web01 sshd[1883]: Failed password for invalid user admin from 203.0.113.9 port 51140 ssh2"}],
+ e:"`-i` ignores case. The quotes matter: without them the shell passes `password` as a second argument and grep treats it as a file name."},
+{sub:"linux",lvl:2,d:"Terminal",type:"cmd",
+ q:"User alice needs to run containers, which on this host requires membership of the docker group. She must keep her existing groups.",
+ steps:[{ask:"Add alice to the supplementary group docker WITHOUT removing her from other groups.",accept:["usermod -aG docker alice"],hint:"usermod with -G sets groups; one more flag makes it append.",out:""}],
+ e:"`-G` alone REPLACES the user's supplementary groups. `-a` (append) is what keeps the existing ones. Forgetting `-a` is a classic way to lock someone out of sudo."},
+{sub:"linux",lvl:2,d:"Terminal",type:"cmd",
+ q:"You need a compressed backup of the website before making changes.",
+ steps:[{ask:"Create a gzip-compressed tar archive called site.tar.gz containing the directory /var/www.",accept:["tar -czf site.tar.gz /var/www","tar czf site.tar.gz /var/www","tar -czvf site.tar.gz /var/www","tar czvf site.tar.gz /var/www"],hint:"c = create, z = gzip, f = file name comes next.",
+  out:"tar: Removing leading `/' from member names"}],
+ e:"`-c` create, `-z` gzip, `-f` the archive file name (so `f` must come right before the name). Extract with `tar -xzf site.tar.gz`."},
+{sub:"linux",lvl:3,d:"Terminal",type:"cmd",
+ q:"SCENARIO — Users report the website is down. The web server is nginx, managed by systemd. Diagnose and fix it.",
+ steps:[
+  {ask:"Check the current state of the nginx service.",accept:["systemctl status nginx","systemctl status nginx.service"],hint:"systemctl + the verb that reports state.",
+   out:"× nginx.service - A high performance web server and a reverse proxy server\n     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled)\n     Active: failed (Result: exit-code) since Mon 2026-11-16 09:02:11 UTC; 4min ago\n    Process: 2217 ExecStart=/usr/sbin/nginx -g daemon on; (code=exited, status=1/FAILURE)"},
+  {ask:"'failed' doesn't say why. Show the log entries for the nginx unit.",accept:["journalctl -u nginx","journalctl -u nginx.service","journalctl -u nginx -e","journalctl -xeu nginx","journalctl -xeu nginx.service","journalctl -u nginx -x"],hint:"journalctl, with the flag that filters by unit.",
+   out:"Nov 16 09:02:11 web01 nginx[2217]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)\nNov 16 09:02:11 web01 systemd[1]: nginx.service: Failed with result 'exit-code'."},
+  {ask:"Something else already holds port 80. List listening TCP sockets with numeric ports and the owning process.",accept:["ss -tlnp","lsof -i :80","ss -tlnp | grep :80","ss -tlnp | grep 80","netstat -tlnp"],hint:"ss with four flags: tcp, listening, numeric, process.",
+   out:"State   Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process\nLISTEN  0       511           0.0.0.0:80         0.0.0.0:*      users:((\"apache2\",pid=1042,fd=4))\nLISTEN  0       128           0.0.0.0:22         0.0.0.0:*      users:((\"sshd\",pid=811,fd=3))"},
+  {ask:"apache2 was started by mistake. Stop it.",accept:["systemctl stop apache2","systemctl stop apache2.service"],hint:"Same tool as step 1, different verb.",out:""},
+  {ask:"Start nginx AND make sure it starts at every boot, in a single command.",accept:["systemctl enable --now nginx","systemctl enable --now nginx.service"],hint:"`enable` handles boot; one long flag makes it also start right now.",
+   out:"Synchronizing state of nginx.service with SysV service script.\nCreated symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service."}],
+ e:"The pattern for any 'service won't start' problem: status (what state?) → journalctl -u (why?) → fix the cause → start. Here the cause was a port conflict, found with `ss -tlnp`. To stop apache2 coming back at boot you would also run `systemctl disable apache2`."},
+{sub:"linux",lvl:3,d:"Terminal",type:"cmd",
+ q:"SCENARIO — Applications are failing with 'No space left on device'. Find what filled the disk and free space safely.",
+ steps:[
+  {ask:"Show free space on every mounted filesystem, in human-readable units.",accept:["df -h"],hint:"df = disk free.",
+   out:"Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda2        40G   12G   26G  32% /\n/dev/sda3        20G   20G     0 100% /var\ntmpfs           2.0G     0  2.0G   0% /dev/shm"},
+  {ask:"/var is full. Show the total size of each item directly under /var/log, human-readable.",accept:["du -sh /var/log/*"],hint:"du = disk usage; -s summarises each argument; the * expands to every item.",
+   out:"4.0K\t/var/log/alternatives.log\n1.2M\t/var/log/auth.log\n18G\t/var/log/journal\n96M\t/var/log/nginx"},
+  {ask:"The systemd journal is 18G. Shrink it so it keeps at most 200M of old logs.",accept:["journalctl --vacuum-size=200M"],hint:"journalctl has a --vacuum-… family of options.",
+   out:"Vacuuming done, freed 17.8G of archived journals from /var/log/journal/3f1c…"}],
+ e:"`df` answers 'which filesystem is full?', `du` answers 'what is using it?'. Never just `rm` live log files: a running service keeps the deleted file open and the space is not freed. To cap the journal permanently set SystemMaxUse= in /etc/systemd/journald.conf."},
+{sub:"linux",lvl:3,d:"Terminal",type:"cmd",
+ q:"Security policy says alice must choose a new password the next time she logs in.",
+ steps:[{ask:"Force alice to change her password at next login.",accept:["chage -d 0 alice","passwd -e alice","passwd --expire alice","chage --lastday 0 alice"],hint:"chage edits password ageing; set the 'last changed' date to day 0.",out:"passwd: password expiry information changed."}],
+ e:"`chage -d 0` sets the last-change date to day 0 (1 Jan 1970), so the password is immediately considered expired. `passwd -e` does the same thing."},
+{sub:"linux",lvl:3,d:"Terminal",type:"cmd",
+ q:"After copying files into /var/www/html, Apache returns 403 Forbidden on an SELinux-enforcing host. File permissions look correct.",
+ steps:[{ask:"Recursively reset the SELinux labels under /var/www/html to the policy defaults.",accept:["restorecon -R /var/www/html","restorecon -Rv /var/www/html","restorecon -r /var/www/html","restorecon -rv /var/www/html"],hint:"The tool that 'restores' a file's security 'con'text.",
+  out:"Relabeled /var/www/html/index.html from unconfined_u:object_r:user_home_t:s0 to unconfined_u:object_r:httpd_sys_content_t:s0"}],
+ e:"Files moved with `mv` keep their old SELinux label (here user_home_t), which httpd is not allowed to read. `restorecon` re-applies the label the policy expects. `ls -Z` shows labels."},
+{sub:"linux",lvl:4,d:"Terminal",type:"cmd",
+ q:"SCENARIO — The logical volume /dev/vg0/data (ext4, mounted on /data) is nearly full. The volume group has free space.",
+ steps:[
+  {ask:"Grow the logical volume /dev/vg0/data by 10 GiB.",accept:["lvextend -L +10G /dev/vg0/data","lvextend --size +10G /dev/vg0/data"],hint:"lvextend, -L for size, and a + means 'add' rather than 'set to'.",
+   out:"  Size of logical volume vg0/data changed from 20.00 GiB (5120 extents) to 30.00 GiB (7680 extents).\n  Logical volume vg0/data successfully resized."},
+  {ask:"`df -h /data` still shows 20G. Grow the ext4 filesystem to fill the bigger volume.",accept:["resize2fs /dev/vg0/data"],hint:"The ext2/3/4 resize tool. (XFS would use xfs_growfs.)",
+   out:"resize2fs 1.47.0 (5-Feb-2023)\nFilesystem at /dev/vg0/data is mounted on /data; on-line resizing required\nThe filesystem on /dev/vg0/data is now 7864320 (4k) blocks long."}],
+ e:"A logical volume is just a block device; the filesystem inside it has its own size. Growing storage is always two steps: the container (lvextend), then the filesystem (resize2fs for ext4, xfs_growfs for XFS). `lvextend -r` does both at once."},
+{sub:"linux",lvl:4,d:"Terminal",type:"cmd",
+ q:"SCENARIO — A new app listens on TCP 8080 but remote clients time out. The host runs firewalld.",
+ steps:[
+  {ask:"Add a rule allowing TCP port 8080 that will survive a reboot.",accept:["firewall-cmd --permanent --add-port=8080/tcp"],hint:"firewall-cmd with --add-port=PORT/PROTO, plus the flag that writes it to disk.",out:"success"},
+  {ask:"Clients still time out: --permanent only wrote the saved config. Load it into the running firewall.",accept:["firewall-cmd --reload"],hint:"One long flag.",out:"success"}],
+ e:"firewalld has two configurations: runtime (active now) and permanent (on disk). `--permanent` changes only the disk copy, so you must `--reload`. Without `--permanent` the rule works immediately but is lost at reboot."},
+{sub:"linux",lvl:4,d:"Terminal",type:"cmd",
+ q:"A backup script hangs. Its PID is 4312 and it ignores a normal terminate request.",
+ steps:[
+  {ask:"First ask it politely: send PID 4312 the default terminate signal.",accept:["kill 4312","kill -15 4312","kill -TERM 4312","kill -SIGTERM 4312","kill -s TERM 4312","kill -s SIGTERM 4312"],hint:"kill with no signal option sends SIGTERM.",out:""},
+  {ask:"It is still running. Force-kill it with the signal that cannot be caught or ignored.",accept:["kill -9 4312","kill -KILL 4312","kill -SIGKILL 4312","kill -s KILL 4312","kill -s SIGKILL 4312"],hint:"Signal number 9.",out:"[1]+  Killed                  /usr/local/bin/backup.sh"}],
+ e:"Always try SIGTERM (15) first: it lets the process clean up (close files, remove locks). SIGKILL (9) is handled by the kernel, the process never sees it, so no cleanup happens."},
+
 ]; // end BANK
 
 // ─────────────────────────────────────────────────────────────
@@ -3040,7 +3151,7 @@ function timeUp(){
 // the flags by hand, and a timed-out exam left S.examExpired=true forever, so
 // the next normal game was scored as a failed exam.
 function resetMode(){
-  S.exam=false;S.review=false;S.flash=false;S.examExpired=false;S.due=false;
+  S.exam=false;S.review=false;S.flash=false;S.examExpired=false;S.due=false;S.lab=false;
   stopTimer();stopExamClock();
   const clk=$("exam-clock");if(clk)clk.remove();
 }
@@ -3085,6 +3196,7 @@ function showDifficultySelect(sub){
   $("footer").textContent="Choose how tough you want it";
   const weakCount=getWeakQuestions(sub).length;
   const dueCount=getDueQuestions(sub).length;
+  const labCount=getLabQuestions(sub).length;
   const starCount=getStarredQuestions(sub).length;
   const ss=subjectStats(sub);
   $("main").innerHTML=`
@@ -3128,6 +3240,18 @@ function showDifficultySelect(sub){
           </div>
         </div>
       </div>`:""}
+      ${labCount>0?`
+      <div class="diff-card lvl1" id="lab-card" role="button" tabindex="0">
+        <div class="diff-icon">⌨️</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--green)">TERMINAL LAB</div>
+          <div class="diff-desc">Type real commands and fix broken systems step by step — like the exam's performance-based questions.</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--green);border-color:var(--green)">${labCount} tasks</span>
+            <span class="badge">no lives · no timer</span>
+          </div>
+        </div>
+      </div>`:""}
       <div class="diff-card flash-card" id="flash-card-btn" role="button" tabindex="0">
         <div class="diff-icon">🎴</div>
         <div class="diff-info">
@@ -3156,6 +3280,7 @@ function showDifficultySelect(sub){
     </div>`;
   $("back-btn").addEventListener("click",showSubjectSelect);
   if(dueCount>0)$("due-card").addEventListener("click",()=>startDue(sub));
+  if(labCount>0)$("lab-card").addEventListener("click",()=>startLab(sub));
   if(weakCount>0){
     $("review-card").addEventListener("click",()=>startReview(sub));
   }
@@ -3297,6 +3422,7 @@ function startFlashcards(sub){
 // The correct answer as display text, for any question type.
 // Used by flashcards and by the timer-expiry reveal.
 function correctText(q){
+  if(q.type==="cmd")return (q.steps||[]).map(s=>s.accept[0]).join("   →   ");
   if(q.type==="fill")return (q.answers||[])[0]||"";
   if(q.type==="multi")return (q.correct||[]).map(i=>q.a[i]).join(" · ");
   return q.a[q.c];
@@ -3391,8 +3517,10 @@ function renderQ(){
   const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:q.type==="multi"?`<span class="lvl-tag l3" style="background:rgba(255,209,102,.12);color:var(--yellow);border-color:var(--yellow)">MULTI</span>`:"";
   const starred=isStarred(q);
   $("main").innerHTML=`
-    <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question" aria-label="Bookmark this question" aria-pressed="${starred}">${starred?"★":"☆"}</button>
-    <span class="domain-tag">${esc(q.d)}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
+    <div class="q-head">
+      <span class="domain-tag">${esc(q.d)}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
+      <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question" aria-label="Bookmark this question" aria-pressed="${starred}">${starred?"★":"☆"}</button>
+    </div>
     <div class="question">${esc(q.q)}</div>
     <div class="answers" id="ans"></div>
     <div class="feedback" id="fb" role="status" aria-live="polite"></div>
@@ -3411,7 +3539,9 @@ function renderQ(){
   });
   const wrap=$("ans");
 
-  if(q.type==="fill"){
+  if(q.type==="cmd"){
+    renderCmd(q,wrap);
+  } else if(q.type==="fill"){
     // Fill-in-the-blank
     wrap.innerHTML=`
       <div class="fill-wrap">
@@ -3485,7 +3615,10 @@ function renderQ(){
   }
   updateHud();
   $("footer").textContent=`${m.name} · ${m.pts}pts per correct${m.timer?` · ${m.timer}s timer`:""}`;
-  if(m.timer>0)startTimer();
+  // A multi-step terminal task does not fit a 30-second countdown, so "cmd"
+  // questions are untimed even in HARD mode.
+  if(m.timer>0&&q.type!=="cmd")startTimer();
+  else $("timer-wrap").style.display="none";
 }
 
 function useHint(correctPos){
@@ -3623,6 +3756,8 @@ function gameOver(){
     ?(examPassed
         ?{rank:"PASS",msg:`You scored ${Math.round(examPct*100)}% — above this app's ${Math.round((S.examPass||0.75)*100)}% practice bar. (Real exams are scaled and use a larger question pool, so treat this as a guide.)`}
         :{rank:"FAIL",msg:`You scored ${Math.round(examPct*100)}% — need ${Math.round((S.examPass||0.75)*100)}% to pass. Keep drilling.`})
+    :S.lab
+    ?{rank:`${S.correct} / ${S.queue.length} SOLVED`,msg:"Solved = finished without needing an answer revealed."}
     :S.review
     ?{rank:"DRILL DONE",msg:"Keep hammering — repetition builds mastery."}
     :pct>=.95?{rank:"ROOT GOD",msg:"You own this material."}
@@ -3634,7 +3769,7 @@ function gameOver(){
   const isNew=!S.review&&!wasExam&&S.score>prevHi;
   const ss=subjectStats(S.sub);
   const remainingWeak=getWeakQuestions(S.sub).length;
-  const hdr=wasExam?(examPassed?"> EXAM PASSED":S.examExpired?"> TIME EXPIRED":"> EXAM FAILED"):S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER";
+  const hdr=wasExam?(examPassed?"> EXAM PASSED":S.examExpired?"> TIME EXPIRED":"> EXAM FAILED"):S.lab?"> LAB COMPLETE":S.review?"> REVIEW COMPLETE":won?"> SESSION COMPLETE":"> GAME OVER";
   const rankColor=wasExam?(examPassed?"var(--green)":"var(--red)"):"var(--green)";
   $("main").innerHTML=`
     <div class="over-screen">
@@ -3661,7 +3796,7 @@ function gameOver(){
   const retakeSub=S.sub;const wasExamClick=wasExam;
   $("btn-retry").addEventListener("click",()=>{
     if(wasExamClick){startExam(retakeSub);return;}
-    if(S.due){showDifficultySelect(S.sub);return;}
+    if(S.due||S.lab){showDifficultySelect(S.sub);return;}
     if(S.review){
       if(getWeakQuestions(S.sub).length>0)startReview(S.sub);
       else showDifficultySelect(S.sub);
@@ -3846,6 +3981,113 @@ function importProgress(text){
   allKeys().forEach(k=>store.del(k));
   Object.entries(clean).forEach(([k,v])=>store.set(k,v));
   return "";
+}
+
+// ─────────────────────────────────────────────────────────────
+// TERMINAL LAB  (question type "cmd")
+// ─────────────────────────────────────────────────────────────
+// Nothing is really executed. We compare what was typed with a list of
+// accepted commands. Comparing raw text would be far too strict
+// ("ls -la" vs "ls -al" vs "ls -l -a" are the same command), so both sides
+// are first reduced to a "key" and the KEYS are compared.
+//
+// cmdKey("sudo ls  -al /tmp")  ->  "ls /tmp #a,l"
+//   1. drop a leading "sudo" (so it is optional)
+//   2. split a pipeline on | and handle each part on its own
+//   3. split the part into words
+//   4. short flags (-la) are split into letters; long flags (--now) kept whole
+//   5. flags are SORTED, so their order no longer matters
+//   6. everything else (command name, file names, values) keeps its order
+// Known limit: a flag's VALUE is treated as a normal word, so
+// "tail -n 20 f" and "tail f -n 20" are different keys. When both orders are
+// reasonable, list both in the question's `accept` array.
+function cmdKey(s){
+  return String(s||"").trim().replace(/"/g,"'").replace(/^sudo\s+/,"").split("|").map(part=>{
+    const flags=[],words=[];
+    part.trim().split(/\s+/).filter(Boolean).forEach((w,i)=>{
+      if(i>0&&/^-[A-Za-z]+$/.test(w))flags.push(...w.slice(1)); // -la  -> "l","a"
+      else if(i>0&&w.startsWith("--"))flags.push(w);            // --now -> "--now"
+      else words.push(w);
+    });
+    return words.join(" ")+" #"+flags.sort().join(",");
+  }).join(" | ");
+}
+function cmdMatch(input,accept){
+  const k=cmdKey(input);
+  return (accept||[]).some(a=>cmdKey(a)===k);
+}
+const CMD_TRIES=3; // wrong tries allowed per step before the answer is shown
+
+function renderCmd(q,wrap){
+  wrap.innerHTML=`
+    <div class="term" id="term" aria-live="polite"></div>
+    <div class="term-row">
+      <label class="term-prompt" for="cmd-input">alice@web01:~$</label>
+      <input type="text" class="term-input" id="cmd-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type a command">
+    </div>
+    <div class="fill-tip">↵ ENTER to run · sudo is optional · flag order doesn't matter · ${CMD_TRIES} tries per step</div>`;
+  const term=$("term"),inp=$("cmd-input");
+  // Lines are added with textContent, never innerHTML, so whatever the user
+  // types is shown as plain text and can never be interpreted as HTML.
+  const line=(text,cls)=>{
+    const d=document.createElement("div");
+    d.className="term-line "+(cls||"");
+    d.textContent=text;
+    term.appendChild(d);
+    term.scrollTop=term.scrollHeight;
+  };
+  let step=0,tries=0,revealed=false; // revealed = at least one answer had to be shown
+  const showTask=()=>line(`# Task ${step+1}/${q.steps.length}: ${q.steps[step].ask}`,"task");
+  const nextStep=()=>{
+    step++;tries=0;
+    if(step<q.steps.length){showTask();return;}
+    // All steps done. The question counts as correct only if no answer was revealed.
+    S.answered=true;
+    inp.disabled=true;
+    grade(q,!revealed,correctText(q));
+  };
+  showTask();
+  setTimeout(()=>inp.focus(),50);
+  inp.addEventListener("keydown",e=>{
+    if(e.key!=="Enter")return;
+    e.preventDefault();
+    const typed=inp.value.trim();
+    if(!typed||S.answered)return;
+    inp.value="";
+    const st=q.steps[step];
+    line("$ "+typed,"typed");
+    if(cmdMatch(typed,st.accept)){
+      line(st.out?st.out:"(no output — on Linux, silence means success)","out");
+      nextStep();
+      return;
+    }
+    tries++;
+    if(tries>=CMD_TRIES){
+      revealed=true;
+      line("✗ Not that one. A correct command is:","err");
+      line("$ "+st.accept[0],"typed");
+      if(st.out)line(st.out,"out");
+      nextStep();
+    } else {
+      line(`✗ That doesn't do the task. ${CMD_TRIES-tries} ${CMD_TRIES-tries===1?"try":"tries"} left.`+(tries>=2&&st.hint?"  Hint: "+st.hint:""),"err");
+    }
+  });
+}
+function getLabQuestions(sub){return BANK.filter(q=>q.sub===sub&&q.type==="cmd");}
+function startLab(sub){
+  const lab=getLabQuestions(sub);
+  if(!lab.length)return;
+  resetMode();
+  S.sub=sub;S.lvl=0;S.review=true;S.lab=true;
+  S.mode={lvl:0,name:"TERMINAL LAB",icon:"⌨️",lives:999,pts:150,timer:0,hint:false,hintCost:0,desc:"Type real commands"};
+  // Not shuffled: sorted easy -> hard so the multi-step scenarios come last.
+  S.queue=lab.slice().sort((a,b)=>a.lvl-b.lvl);
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=999;
+  S.answered=false;S.hintUsed=false;
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · ⌨️ TERMINAL LAB`;
+  updateHud();
+  renderQ();
 }
 
 // ─────────────────────────────────────────────────────────────
