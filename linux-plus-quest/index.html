@@ -376,7 +376,7 @@ const BANK = [
 {sub:"linux",lvl:2,d:"Text Processing",
  q:"`grep 'ERROR' app.log` — what does it output?",
  a:["Lines containing ERROR","Deletes matching lines","Counts of ERROR occurrences","Replaces ERROR with nothing"],c:0,
- e:"`grep` searches for patterns. `-i` case-insensitive, `-r` recursive through dirs, `-n` shows line numbers, `-c` counts matches."},
+ e:"`grep` searches for patterns. `-i` case-insensitive, `-r` recursive through dirs, `-n` shows line numbers, `-c` counts matching LINES (not total matches)."},
 
 {sub:"linux",lvl:2,d:"Shell",
  q:"What does the pipe `|` do in `ls -l | grep .txt`?",
@@ -411,7 +411,7 @@ const BANK = [
 {sub:"linux",lvl:2,d:"Users",
  q:"How do you change the owner of file.txt to user alice?",
  a:["chown alice file.txt","chmod alice file.txt","usermod alice file.txt","chgrp alice file.txt"],c:0,
- e:"`chown user:group file` changes owner and optionally group. `chgrp` changes group only. Both require root/sudo."},
+ e:"`chown user:group file` changes owner and optionally group. `chgrp` changes group only. Changing the owner needs root; a file's owner may change its group to another group they belong to."},
 
 {sub:"linux",lvl:2,d:"Shell",
  q:"What does `history` show?",
@@ -469,7 +469,7 @@ const BANK = [
 {sub:"linux",lvl:3,d:"Logging",
  q:"`journalctl -u nginx --since '1 hour ago'` shows:",
  a:["nginx service logs from the past hour","All system logs from 1 hour ago","nginx config file","Network traffic logs"],c:0,
- e:"-u filters by unit (service). --since limits time range. `journalctl -f` follows live. Replaces tailing /var/log files."},
+ e:"-u filters by unit (service). --since limits time range. `journalctl -f` follows live, like `tail -f` on a log file. Many services still also write text logs under /var/log."},
 
 {sub:"linux",lvl:3,d:"Troubleshooting",
  q:"Which command shows all open files and which processes hold them?",
@@ -547,7 +547,7 @@ const BANK = [
 {sub:"linux",lvl:4,d:"Networking",
  q:"`ip route add 192.168.10.0/24 via 10.0.0.1` — what does this configure?",
  a:["A static route sending that subnet's traffic via gateway 10.0.0.1","A firewall rule blocking 192.168.10.0/24","A VPN tunnel endpoint","A secondary IP address"],c:0,
- e:"Adds to the kernel routing table. This change is not persistent — to survive reboots add it to interface config or sysctl."},
+ e:"Adds to the kernel routing table. This change is not persistent — to survive reboots save it in the network configuration (e.g. `nmcli connection modify <conn> +ipv4.routes ...`, or netplan on Ubuntu)."},
 
 {sub:"linux",lvl:4,d:"Troubleshooting",
  q:"`df -h` shows /var at 100% but `du -sh /var` reports only 2 GB. Why?",
@@ -577,7 +577,7 @@ const BANK = [
 {sub:"linux",lvl:4,d:"Security",
  q:"`chattr +i /etc/hosts` does what?",
  a:["Makes the file immutable — root cannot modify or delete it until `chattr -i` is run","Hides the file from ls","Encrypts the file","Enables audit logging"],c:0,
- e:"The immutable attribute is enforced by the filesystem driver, not permissions — even root and sudo can't bypass it."},
+ e:"The immutable attribute is enforced by the filesystem, not by permissions — even root is blocked while it is set. Root CAN remove the flag with `chattr -i`; view flags with `lsattr`."},
 
 // ══════════════════════════════════════════
 //  C++  BEGINNER  (lvl 1)
@@ -3125,7 +3125,7 @@ function showDifficultySelect(sub){
           <div class="diff-name" style="color:var(--cyan)">EXAM SIMULATION</div>
           <div class="diff-desc">Mixed questions across all levels · 60 min total · pass at 75%</div>
           <div class="diff-badges">
-            <span class="badge" style="color:var(--cyan);border-color:var(--cyan)">60 questions</span>
+            <span class="badge" style="color:var(--cyan);border-color:var(--cyan)">${Math.min(60,BANK.filter(q=>q.sub===sub).length)} questions</span>
             <span class="badge hot">⏱ 60:00 total</span>
             <span class="badge">Pass ≥ 75%</span>
           </div>
@@ -3597,7 +3597,7 @@ function gameOver(){
   const examPassed=wasExam&&examPct>=(S.examPass||0.75);
   const {rank,msg}=wasExam
     ?(examPassed
-        ?{rank:"PASS",msg:`You scored ${Math.round(examPct*100)}% — you'd pass the real exam.`}
+        ?{rank:"PASS",msg:`You scored ${Math.round(examPct*100)}% — above this app's ${Math.round((S.examPass||0.75)*100)}% practice bar. (Real exams are scaled and use a larger question pool, so treat this as a guide.)`}
         :{rank:"FAIL",msg:`You scored ${Math.round(examPct*100)}% — need ${Math.round((S.examPass||0.75)*100)}% to pass. Keep drilling.`})
     :S.review
     ?{rank:"DRILL DONE",msg:"Keep hammering — repetition builds mastery."}
