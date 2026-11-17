@@ -2848,8 +2848,37 @@ const $=id=>document.getElementById(id);
 function esc(s){return String(s==null?"":s)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
-function hi(sub,lvl){return parseInt(localStorage.getItem(`tq_${sub}_${lvl}`)||"0");}
-function saveHi(sub,lvl,score){if(score>hi(sub,lvl))localStorage.setItem(`tq_${sub}_${lvl}`,score);}
+// ── Safe storage ──
+// localStorage is the browser's small per-site key/value store. It can THROW:
+// when the user blocks site data, in some private modes, or when it is full.
+// An uncaught throw here used to crash the app mid-question. Every read/write
+// goes through `store`, which never throws and keeps an in-memory copy (`mem`)
+// so the current session still works even if nothing can be saved to disk.
+const mem={};
+const store={
+  get(k){
+    if(k in mem)return mem[k];
+    try{return localStorage.getItem(k);}catch(e){return null;}
+  },
+  set(k,v){
+    mem[k]=String(v);
+    try{localStorage.setItem(k,mem[k]);return true;}catch(e){return false;}
+  },
+  del(k){
+    delete mem[k];
+    try{localStorage.removeItem(k);}catch(e){}
+  },
+  // Read a key that should hold a JSON object. Anything else (missing, corrupt,
+  // hand-edited to a string or array) comes back as an empty object.
+  obj(k){
+    try{
+      const v=JSON.parse(this.get(k)||"{}");
+      return v&&typeof v==="object"&&!Array.isArray(v)?v:{};
+    }catch(e){return {};}
+  }
+};
+function hi(sub,lvl){return parseInt(store.get(`tq_${sub}_${lvl}`),10)||0;}
+function saveHi(sub,lvl,score){if(score>hi(sub,lvl))store.set(`tq_${sub}_${lvl}`,score);}
 
 // ── Per-question stats (for Weak Spots review) ──
 // Each question gets a stable id from a 32-bit hash of its text.
@@ -2859,8 +2888,8 @@ function qid(q){
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
   return (h>>>0).toString(36);
 }
-function loadStats(){try{return JSON.parse(localStorage.getItem("tq_stats")||"{}");}catch(e){return {};}}
-function saveStats(s){localStorage.setItem("tq_stats",JSON.stringify(s));}
+function loadStats(){return store.obj("tq_stats");}
+function saveStats(s){store.set("tq_stats",JSON.stringify(s));}
 function recordStat(q,correct){
   const stats=loadStats();
   const id=qid(q);
@@ -2888,8 +2917,8 @@ function getWeakQuestions(sub){
   });
 }
 // ── Bookmarks / Starred questions ──
-function loadStarred(){try{return JSON.parse(localStorage.getItem("tq_starred")||"{}");}catch(e){return {};}}
-function saveStarred(s){localStorage.setItem("tq_starred",JSON.stringify(s));}
+function loadStarred(){return store.obj("tq_starred");}
+function saveStarred(s){store.set("tq_starred",JSON.stringify(s));}
 function isStarred(q){return !!loadStarred()[qid(q)];}
 function toggleStar(q){const s=loadStarred();const id=qid(q);if(s[id])delete s[id];else s[id]=1;saveStarred(s);return !!s[id];}
 function getStarredQuestions(sub){const s=loadStarred();return BANK.filter(q=>q.sub===sub&&s[qid(q)]);}
@@ -3106,7 +3135,7 @@ function showDifficultySelect(sub){
   const cs=$("clear-stats-btn");
   if(cs){cs.addEventListener("click",()=>{
     if(confirm("Reset ALL question-level stats? (High scores are kept.)")){
-      localStorage.removeItem("tq_stats");
+      store.del("tq_stats");
       showDifficultySelect(sub);
     }
   });}
