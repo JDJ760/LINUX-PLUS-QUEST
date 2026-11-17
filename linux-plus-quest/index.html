@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self';"/>
 <meta name="referrer" content="no-referrer"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#39ff14"/>
@@ -236,6 +236,9 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
   .app{padding:16px 20px calc(16px + var(--safe))}
   .diff-cards{display:grid;grid-template-columns:1fr 1fr}
 }
+.dash-table{width:100%;border-collapse:collapse;font-size:12px}
+.dash-table th{color:var(--dim);font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:normal}
+.dash-table th,.dash-table td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--border)}
 /* ── Accessibility ── */
 /* A clear ring on whatever the keyboard is focused on. :focus-visible means
    it shows for keyboard users but not after a mouse click. */
@@ -2908,6 +2911,9 @@ function recordStat(q,correct){
   cur.seen++;
   cur.lastSeen=now;
   if(!correct){cur.wrong++;cur.lastMissed=now;}
+  // Spaced repetition: up a box when right, back to box 0 when wrong.
+  cur.box=correct?Math.min((cur.box||0)+1,BOX_DAYS.length-1):0;
+  cur.due=now+BOX_DAYS[cur.box]*DAY;
   stats[id]=cur;
   saveStats(stats);
 }
@@ -3034,7 +3040,7 @@ function timeUp(){
 // the flags by hand, and a timed-out exam left S.examExpired=true forever, so
 // the next normal game was scored as a failed exam.
 function resetMode(){
-  S.exam=false;S.review=false;S.flash=false;S.examExpired=false;
+  S.exam=false;S.review=false;S.flash=false;S.examExpired=false;S.due=false;
   stopTimer();stopExamClock();
   const clk=$("exam-clock");if(clk)clk.remove();
 }
@@ -3064,10 +3070,12 @@ function showSubjectSelect(){
       <h2>&gt; SELECT SUBJECT</h2>
       <p>Pick your study focus. Each subject has 4 difficulty levels with tailored question banks.</p>
       <div class="subject-cards ${SUB_ORDER.length%2?"odd-count":""}">${cards}</div>
+      <button class="cmd cyan" id="dash-btn">📊 PROGRESS · 🔥 ${currentStreak()}-day streak · ${getDueQuestions().length} due</button>
     </div>`;
   SUB_ORDER.forEach(key=>{
     $("btn-"+key).addEventListener("click",()=>showDifficultySelect(key));
   });
+  $("dash-btn").addEventListener("click",showDashboard);
 }
 
 function showDifficultySelect(sub){
@@ -3076,12 +3084,25 @@ function showDifficultySelect(sub){
   $("subtitle").textContent=`${info.icon} ${info.name} — Select difficulty`;
   $("footer").textContent="Choose how tough you want it";
   const weakCount=getWeakQuestions(sub).length;
+  const dueCount=getDueQuestions(sub).length;
   const starCount=getStarredQuestions(sub).length;
   const ss=subjectStats(sub);
   $("main").innerHTML=`
     <div class="diff-screen">
       <div class="back-row"><button class="back-btn" id="back-btn">&lt; back</button></div>
       <h2>&gt; SELECT DIFFICULTY</h2>
+      ${dueCount>0?`
+      <div class="diff-card flash-card" id="due-card" role="button" tabindex="0">
+        <div class="diff-icon">🧠</div>
+        <div class="diff-info">
+          <div class="diff-name" style="color:var(--green)">DAILY REVIEW</div>
+          <div class="diff-desc">Spaced repetition — questions come back just before you'd forget them. Missed ones return sooner.</div>
+          <div class="diff-badges">
+            <span class="badge" style="color:var(--green);border-color:var(--green)">${dueCount} due</span>
+            <span class="badge">up to 20 per session</span>
+          </div>
+        </div>
+      </div>`:""}
       ${weakCount>0?`
       <div class="diff-card review-card" id="review-card" role="button" tabindex="0">
         <div class="diff-icon">⚠️</div>
@@ -3134,6 +3155,7 @@ function showDifficultySelect(sub){
       ${ss.seen>0?`<div style="text-align:center;margin-top:6px"><button class="cmd small" id="clear-stats-btn" style="font-size:10px;padding:6px 10px;opacity:.7">reset stats</button></div>`:""}
     </div>`;
   $("back-btn").addEventListener("click",showSubjectSelect);
+  if(dueCount>0)$("due-card").addEventListener("click",()=>startDue(sub));
   if(weakCount>0){
     $("review-card").addEventListener("click",()=>startReview(sub));
   }
@@ -3503,10 +3525,12 @@ function grade(q,correct,answerText){
     const bonus=S.streak>=3?50:0;
     const pts=m.pts+bonus;
     S.score+=pts;
+    bumpMeta(pts);
     fb.className="feedback good";
     fb.innerHTML=`✓ <b>Correct!</b> +${pts}${bonus?` <span style="color:var(--yellow)">🔥 Streak!</span>`:""}\n\n<strong>Why:</strong> ${esc(q.e)}`;
   } else {
     S.streak=0;S.lives--;
+    bumpMeta(0); // still counts as studying today, for the day streak
     fb.className="feedback bad";
     fb.innerHTML=`✗ <b>Wrong.</b> Answer: <b style="color:var(--green)">${esc(answerText)}</b>\n\n<strong>Why:</strong> ${esc(q.e)}`;
   }
@@ -3637,6 +3661,7 @@ function gameOver(){
   const retakeSub=S.sub;const wasExamClick=wasExam;
   $("btn-retry").addEventListener("click",()=>{
     if(wasExamClick){startExam(retakeSub);return;}
+    if(S.due){showDifficultySelect(S.sub);return;}
     if(S.review){
       if(getWeakQuestions(S.sub).length>0)startReview(S.sub);
       else showDifficultySelect(S.sub);
@@ -3644,6 +3669,183 @@ function gameOver(){
   });
   $("btn-change").addEventListener("click",showSubjectSelect);
   $("btn-retry").focus();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SPACED REPETITION (Leitner boxes)
+// ─────────────────────────────────────────────────────────────
+// Every question you have answered sits in a "box" numbered 0–5.
+//   right answer -> moves up one box   -> you see it again after a LONGER gap
+//   wrong answer -> drops back to box 0 -> it is due again immediately
+// BOX_DAYS[box] is the gap in days. So material you know fades into the
+// background, and material you miss keeps coming back until it sticks.
+// The box and due date are stored on the same per-question record as
+// seen/wrong (see recordStat), under the tq_stats key.
+const DAY=86400000; // milliseconds in a day
+const BOX_DAYS=[0,1,3,7,14,30];
+function getDueQuestions(sub){
+  const stats=loadStats(),now=Date.now();
+  // Records saved before this feature have no `due`: treat ever-missed ones as due.
+  const dueAt=st=>typeof st.due==="number"?st.due:(st.wrong>0?0:Infinity);
+  return BANK.filter(q=>{
+    if(sub&&q.sub!==sub)return false;
+    const st=stats[qid(q)];
+    return !!st&&dueAt(st)<=now;
+  }).sort((a,b)=>dueAt(stats[qid(a)])-dueAt(stats[qid(b)])); // most overdue first
+}
+function startDue(sub){
+  const due=getDueQuestions(sub).slice(0,20); // cap a session so it stays doable
+  if(!due.length)return;
+  resetMode();
+  S.sub=sub;S.lvl=0;S.review=true;S.due=true;
+  S.mode={lvl:0,name:"DAILY REVIEW",icon:"🧠",lives:999,pts:100,timer:0,hint:false,hintCost:0,desc:"Spaced repetition"};
+  S.queue=due;
+  S.idx=0;S.score=0;S.correct=0;S.streak=0;S.best=0;S.lives=999;
+  S.answered=false;S.hintUsed=false;
+  $("hud").style.display="grid";
+  $("subtitle").textContent=`${SUBS[sub].icon} ${SUBS[sub].name} · 🧠 DAILY REVIEW`;
+  updateHud();
+  renderQ();
+}
+
+// ── XP and day streak (tq_meta) ──
+function dayKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function loadMeta(){
+  const m=store.obj("tq_meta");
+  // The unary + turns whatever was stored into a number, so a corrupt or
+  // imported value can never end up on screen as text.
+  return {xp:+m.xp||0,streak:+m.streak||0,best:+m.best||0,day:typeof m.day==="string"?m.day:""};
+}
+function bumpMeta(xp){
+  const m=loadMeta(),today=dayKey(new Date());
+  if(m.day!==today){
+    const yesterday=dayKey(new Date(Date.now()-DAY));
+    m.streak=m.day===yesterday?m.streak+1:1; // missed a day -> start over at 1
+    m.best=Math.max(m.best,m.streak);
+    m.day=today;
+  }
+  m.xp+=xp;
+  store.set("tq_meta",JSON.stringify(m));
+}
+function currentStreak(){
+  const m=loadMeta();
+  const live=m.day===dayKey(new Date())||m.day===dayKey(new Date(Date.now()-DAY));
+  return live?m.streak:0;
+}
+
+// ─────────────────────────────────────────────────────────────
+// PROGRESS DASHBOARD
+// ─────────────────────────────────────────────────────────────
+// Everything here is CALCULATED from tq_stats each time the screen opens —
+// nothing extra is stored, so the dashboard can never disagree with the data.
+function subjectReport(sub){
+  const stats=loadStats();
+  const qs=BANK.filter(q=>q.sub===sub);
+  let seenQ=0,attempts=0,wrong=0;
+  const dom={};
+  qs.forEach(q=>{
+    const st=stats[qid(q)];if(!st)return;
+    seenQ++;attempts+=+st.seen||0;wrong+=+st.wrong||0;
+    const d=dom[q.d]||(dom[q.d]={name:q.d,attempts:0,wrong:0});
+    d.attempts+=+st.seen||0;d.wrong+=+st.wrong||0;
+  });
+  const coverage=qs.length?seenQ/qs.length:0;          // how much of the bank you've tried
+  const accuracy=attempts?(attempts-wrong)/attempts:0; // how often you were right
+  // Readiness = accuracy x coverage. 90% right on 10% of the bank is not
+  // "90% ready", so both have to be high for this number to be high.
+  return {total:qs.length,seenQ,coverage,accuracy,readiness:Math.round(accuracy*coverage*100),
+    domains:Object.values(dom).filter(d=>d.attempts>0).map(d=>({sub,name:d.name,attempts:d.attempts,acc:(d.attempts-d.wrong)/d.attempts}))};
+}
+function showDashboard(){
+  resetMode();
+  $("hud").style.display="none";
+  $("subtitle").textContent="📊 Progress";
+  $("footer").textContent="Readiness = accuracy × coverage of the question bank";
+  const meta=loadMeta();
+  const reps=SUB_ORDER.map(k=>({k,r:subjectReport(k)}));
+  const pc=x=>Math.round(x*100)+"%";
+  const rows=reps.map(({k,r})=>`<tr><td style="text-align:left">${SUBS[k].icon} ${SUBS[k].name}</td><td>${r.seenQ}/${r.total}</td><td>${r.seenQ?pc(r.accuracy):"–"}</td><td style="color:var(--green)">${r.readiness}%</td></tr>`).join("");
+  // Weakest topics: need at least 3 attempts so one unlucky miss doesn't rank.
+  const weak=reps.flatMap(x=>x.r.domains).filter(d=>d.attempts>=3).sort((a,b)=>a.acc-b.acc).slice(0,5);
+  const weakHtml=weak.length
+    ?weak.map(d=>`<div class="badge" style="display:block;margin:4px 0;font-size:11px">${SUBS[d.sub].icon} ${esc(d.name)} — <b style="color:var(--red)">${pc(d.acc)}</b> over ${d.attempts} attempts</div>`).join("")
+    :`<div class="rank-msg">Answer a few more questions and your weakest topics will show here.</div>`;
+  $("main").innerHTML=`
+    <div class="diff-screen">
+      <div class="back-row"><button class="back-btn" id="back-btn">&lt; back</button></div>
+      <h2>&gt; PROGRESS</h2>
+      <div class="stat-grid" style="max-width:none;margin:4px 0">
+        <div class="stat-box"><div class="sv">🔥 ${currentStreak()}</div><div class="sl">Day streak (best ${meta.best})</div></div>
+        <div class="stat-box"><div class="sv">${meta.xp}</div><div class="sl">Total XP</div></div>
+        <div class="stat-box"><div class="sv">${getDueQuestions().length}</div><div class="sl">Due for review</div></div>
+      </div>
+      <table class="dash-table">
+        <thead><tr><th style="text-align:left">Subject</th><th>Seen</th><th>Accuracy</th><th>Ready</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <h2 style="margin-top:8px">&gt; WEAKEST TOPICS</h2>
+      <div>${weakHtml}</div>
+      <h2 style="margin-top:8px">&gt; BACKUP</h2>
+      <div class="rank-msg" style="text-align:center">Progress lives only in this browser. Export a backup file so clearing browser data or changing device doesn't lose it.</div>
+      <div class="controls" style="justify-content:center">
+        <button class="cmd" id="exp-btn">&gt; EXPORT</button>
+        <button class="cmd cyan" id="imp-btn">&gt; IMPORT</button>
+        <input type="file" id="imp-file" accept="application/json,.json" hidden>
+      </div>
+      <div class="feedback" id="imp-msg" role="status" aria-live="polite"></div>
+    </div>`;
+  $("back-btn").addEventListener("click",showSubjectSelect);
+  $("exp-btn").addEventListener("click",exportProgress);
+  $("imp-btn").addEventListener("click",()=>$("imp-file").click());
+  $("imp-file").addEventListener("change",async e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(!confirm("Importing REPLACES all progress in this browser with the file's contents. Continue?"))return;
+    const err=importProgress(await f.text());
+    if(err){const m=$("imp-msg");m.className="feedback bad";m.textContent=err;}
+    else showDashboard();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// EXPORT / IMPORT
+// ─────────────────────────────────────────────────────────────
+// Every key this app saves starts with "tq_". Export bundles them into one
+// JSON file; import puts them back.
+function allKeys(){
+  const ks=new Set(Object.keys(mem));
+  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("tq_"))ks.add(k);}}catch(e){}
+  return [...ks];
+}
+function exportProgress(){
+  const data={app:"techquest",version:1,exported:new Date().toISOString(),keys:{}};
+  allKeys().forEach(k=>data.keys[k]=store.get(k));
+  // Build the file in memory (a Blob) and click a temporary download link.
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:"application/json"}));
+  a.download="techquest-progress-"+dayKey(new Date())+".json";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+// Returns "" on success or an error message. SECURITY: an imported file is
+// untrusted input — it could be hand-edited or come from someone else. So we
+// accept only keys that look like ours and values of the expected shape, and
+// silently drop everything else rather than writing it into storage.
+function importProgress(text){
+  let d;
+  try{d=JSON.parse(text);}catch(e){return "That file is not valid JSON.";}
+  if(!d||d.app!=="techquest"||!d.keys||typeof d.keys!=="object")return "That is not a TechQuest backup file.";
+  const clean={};
+  for(const [k,v] of Object.entries(d.keys)){
+    if(!/^tq_[a-z0-9_]{1,40}$/.test(k)||typeof v!=="string"||v.length>2000000)continue;
+    if(k==="tq_stats"||k==="tq_starred"||k==="tq_meta"){
+      try{const o=JSON.parse(v);if(!o||typeof o!=="object"||Array.isArray(o))continue;}catch(e){continue;}
+    } else if(!/^\d{1,9}$/.test(v))continue; // high scores are plain whole numbers
+    clean[k]=v;
+  }
+  if(!Object.keys(clean).length)return "No usable progress found in that file.";
+  allKeys().forEach(k=>store.del(k));
+  Object.entries(clean).forEach(([k,v])=>store.set(k,v));
+  return "";
 }
 
 // ─────────────────────────────────────────────────────────────
