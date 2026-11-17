@@ -3,13 +3,30 @@
 Written 2026-11-16 at the end of an audit-and-fix session. Read this first if you
 are picking the project up (a person or an AI model).
 
-**Where the work is:** branch `fixes-and-upgrades`, 9 commits ahead of `main`.
-**Nothing has been pushed.** The live site (GitHub Pages, deployed from `main`)
-is still the old version until this branch is merged and pushed.
+**Where the work is:** the first batch (`fixes-and-upgrades`) is merged into
+`main` and pushed. A second batch is on branch `terminal-lab-and-docs` and is
+**not merged or pushed yet**: the terminal lab, code comments,
+`ARCHITECTURE.md` and `DEBUGGING.md`.
 
 The session followed a four-phase plan: 1 Audit, 2 Fix, 3 Upgrade, 4 Teach the
-owner the codebase. Phases 1 and 2 are done, Phase 3 is partly done, Phase 4 was
-not started.
+owner the codebase. All four are done except the items listed in section 2.
+
+**Update, second batch.** Sections 1–6 below were written after the first
+batch. What changed since:
+- **Terminal lab added.** New question type `"cmd"` (`cmdKey`, `cmdMatch`,
+  `renderCmd`, `startLab`) with 14 Linux tasks, five of them multi-step
+  scenarios. Tested in a browser: all 73 Linux questions grade correctly.
+- **Layout fix.** Question tags and the star button share one row (`.q-head`).
+- **Comments added** to `shuffle`, `qid`, the timers, the answer-order mapping,
+  `showNext` and `esc`.
+- **`ARCHITECTURE.md` and `DEBUGGING.md` written** (repo root).
+- So in section 2, "Terminal simulator" and the Phase 4 documents are now done,
+  and in section 4, tasks 2 and 5 are done.
+- Still not done: XK0-006 retarget, per-option "why wrong" explanations,
+  content packs, an automated test file, updating `PROJECT_NOTES.md`.
+- Terminal lab limits: nothing is executed, and a command only passes if it
+  matches a listed form. A valid command that is not listed (for example
+  `ls -la .`) is rejected; add it to that step's `accept` array.
 
 ---
 
