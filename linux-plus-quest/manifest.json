@@ -1,7 +1,7 @@
 {
-  "name": "Linux+ Quest",
-  "short_name": "Linux+ Quest",
-  "description": "CompTIA Linux+ XK0-005 study game",
+  "name": "TechQuest",
+  "short_name": "TechQuest",
+  "description": "Study game for IT certifications and CS coursework",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,8 @@
   "theme_color": "#39ff14",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
