@@ -10,12 +10,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="TechQuest"/>
 <link rel="manifest" href="manifest.json"/>
-<title>TechQuest — Linux+ & C++ Study</title>
+<title>TechQuest — IT Cert &amp; CS Study</title>
 <style>
 :root{
   --bg:#05070f;--panel:#0f1730;--fg:#d7f7d7;
   --green:#39ff14;--cyan:#00e5ff;--red:#ff4d6d;
-  --yellow:#ffd166;--dim:#5a7f5a;--border:#1a3050;
+  --yellow:#ffd166;--dim:#8fb08f;--border:#1a3050;
   --purple:#b388ff;--orange:#ff9f43;--pink:#ff6ec7;
   --blue:#4d9fff;--mint:#5eead4;--tan:#d4a373;
   --safe:env(safe-area-inset-bottom,0px);
@@ -236,6 +236,16 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
   .app{padding:16px 20px calc(16px + var(--safe))}
   .diff-cards{display:grid;grid-template-columns:1fr 1fr}
 }
+/* ── Accessibility ── */
+/* A clear ring on whatever the keyboard is focused on. :focus-visible means
+   it shows for keyboard users but not after a mouse click. */
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.cmd:disabled{opacity:.45;cursor:default}
+/* Respect the OS "reduce motion" setting: no blinking cursor, no pulsing. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
 /* ── Phase 5a: bookmarks + flashcards ── */
 .star-btn{float:right;background:transparent;border:1px solid var(--border);color:var(--dim);font-size:18px;line-height:1;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s ease}
 .star-btn:hover{border-color:var(--yellow);color:var(--yellow)}
@@ -261,7 +271,7 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
 <div class="app">
   <header>
     <h1>&gt;&nbsp;TECHQUEST<span class="cursor"></span></h1>
-    <div class="subtitle" id="subtitle">Linux+ · C++ Fundamentals · CMPR 121 — Select a subject</div>
+    <div class="subtitle" id="subtitle">Select a subject</div>
     <div class="hud" id="hud" style="display:none">
       <div class="chip"><span class="chip-label">Score</span><span class="chip-val" id="h-score">0</span></div>
       <div class="chip"><span class="chip-label">Streak</span><span class="chip-val" id="h-streak">0</span></div>
@@ -273,12 +283,12 @@ footer{margin-top:7px;text-align:center;color:var(--dim);font-size:10px;flex-shr
     <div class="timer-bar-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
   </header>
   <main id="main"></main>
-  <footer id="footer">Tap A–D · keyboard 1–4 or A–D · Enter to advance</footer>
+  <footer id="footer">Choose a subject to begin</footer>
 </div>
 
 <script>
 // ─────────────────────────────────────────────────────────────
-// QUESTION BANK  sub: linux|cs  lvl: 1–4  c: index of correct answer
+// QUESTION BANK  sub: a key of SUBS  lvl: 1–4  c: index of correct answer
 // ─────────────────────────────────────────────────────────────
 const BANK = [
 
@@ -3041,8 +3051,8 @@ function showSubjectSelect(){
     const s=SUBS[key];
     const n=BANK.filter(q=>q.sub===key).length;
     return `
-        <div class="subject-card ${key}" id="btn-${key}">
-          <span class="icon">${s.icon}</span>
+        <div class="subject-card ${key}" id="btn-${key}" role="button" tabindex="0">
+          <span class="icon" aria-hidden="true">${s.icon}</span>
           <div class="card-title">${s.name}</div>
           <div class="card-sub">${s.desc}</div>
           <div class="card-count">${n} question${n===1?"":"s"}</div>
@@ -3073,7 +3083,7 @@ function showDifficultySelect(sub){
       <div class="back-row"><button class="back-btn" id="back-btn">&lt; back</button></div>
       <h2>&gt; SELECT DIFFICULTY</h2>
       ${weakCount>0?`
-      <div class="diff-card review-card" id="review-card">
+      <div class="diff-card review-card" id="review-card" role="button" tabindex="0">
         <div class="diff-icon">⚠️</div>
         <div class="diff-info">
           <div class="diff-name" style="color:var(--red)">REVIEW WEAK SPOTS</div>
@@ -3086,7 +3096,7 @@ function showDifficultySelect(sub){
         </div>
       </div>`:""}
       ${starCount>0?`
-      <div class="diff-card star-card" id="star-card">
+      <div class="diff-card star-card" id="star-card" role="button" tabindex="0">
         <div class="diff-icon">⭐</div>
         <div class="diff-info">
           <div class="diff-name" style="color:var(--yellow)">STARRED QUESTIONS</div>
@@ -3097,7 +3107,7 @@ function showDifficultySelect(sub){
           </div>
         </div>
       </div>`:""}
-      <div class="diff-card flash-card" id="flash-card-btn">
+      <div class="diff-card flash-card" id="flash-card-btn" role="button" tabindex="0">
         <div class="diff-icon">🎴</div>
         <div class="diff-info">
           <div class="diff-name" style="color:var(--cyan)">FLASHCARDS</div>
@@ -3109,7 +3119,7 @@ function showDifficultySelect(sub){
         </div>
       </div>
       <div class="diff-cards" id="diff-cards"></div>
-      <div class="diff-card exam-card" id="exam-card">
+      <div class="diff-card exam-card" id="exam-card" role="button" tabindex="0">
         <div class="diff-icon">🎯</div>
         <div class="diff-info">
           <div class="diff-name" style="color:var(--cyan)">EXAM SIMULATION</div>
@@ -3145,6 +3155,7 @@ function showDifficultySelect(sub){
     const best=hi(sub,m.lvl);
     const el=document.createElement("div");
     el.className=`diff-card lvl${m.lvl}`;
+    el.setAttribute("role","button");el.tabIndex=0;
     el.innerHTML=`
       <div class="diff-icon">${m.icon}</div>
       <div class="diff-info">
@@ -3296,10 +3307,10 @@ function renderFlashcard(){
   $("main").innerHTML=`
     <div class="flash-screen">
       <div class="flash-star-row">
-        <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this card">${starred?"★":"☆"}</button>
+        <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this card" aria-label="Bookmark this card" aria-pressed="${starred}">${starred?"★":"☆"}</button>
       </div>
       <span class="domain-tag">${esc(q.d)}</span>
-      <div class="flash-card-box" id="flash-box">
+      <div class="flash-card-box" id="flash-box" role="button" tabindex="0" aria-label="Flashcard. Press Enter to flip.">
         <div class="flash-side" id="flash-side">QUESTION · tap to flip</div>
         <div class="flash-q" id="flash-content">${esc(q.q)}</div>
       </div>
@@ -3312,7 +3323,7 @@ function renderFlashcard(){
     </div>`;
   $("star-btn").addEventListener("click",()=>{
     const on=toggleStar(q);
-    const b=$("star-btn");b.classList.toggle("on",on);b.textContent=on?"★":"☆";
+    const b=$("star-btn");b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",on);
   });
   $("flash-box").addEventListener("click",()=>{
     S.flashRevealed=!S.flashRevealed;
@@ -3358,11 +3369,11 @@ function renderQ(){
   const typeTag=q.type==="fill"?`<span class="lvl-tag l2" style="background:rgba(124,201,255,.12);color:var(--cyan);border-color:var(--cyan)">FILL</span>`:q.type==="multi"?`<span class="lvl-tag l3" style="background:rgba(255,209,102,.12);color:var(--yellow);border-color:var(--yellow)">MULTI</span>`:"";
   const starred=isStarred(q);
   $("main").innerHTML=`
-    <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question">${starred?"★":"☆"}</button>
+    <button class="star-btn ${starred?"on":""}" id="star-btn" title="Bookmark this question" aria-label="Bookmark this question" aria-pressed="${starred}">${starred?"★":"☆"}</button>
     <span class="domain-tag">${esc(q.d)}</span><span class="lvl-tag l${q.lvl}">${lvlNames[q.lvl]}</span>${typeTag}
     <div class="question">${esc(q.q)}</div>
     <div class="answers" id="ans"></div>
-    <div class="feedback" id="fb"></div>
+    <div class="feedback" id="fb" role="status" aria-live="polite"></div>
     <div class="controls" id="ctrl"></div>
     <div style="text-align:center;margin-top:10px"><button class="cmd" id="quit-btn" style="font-size:10px;padding:6px 10px;opacity:.7">quit to menu</button></div>`;
   $("quit-btn").addEventListener("click",()=>{
@@ -3374,6 +3385,7 @@ function renderQ(){
     const b=$("star-btn");
     b.classList.toggle("on",on);
     b.textContent=on?"★":"☆";
+    b.setAttribute("aria-pressed",on);
   });
   const wrap=$("ans");
 
@@ -3402,12 +3414,13 @@ function renderQ(){
     order.forEach((origIdx,pos)=>{
       const b=document.createElement("button");
       b.className="answer-btn multi-btn";
+      b.setAttribute("aria-pressed","false");
       b.dataset.pos=pos;
       b.innerHTML=`<span class="key-hint">${labels[pos]}</span><span class="chk">☐</span> ${esc(q.a[origIdx])}`;
       b.addEventListener("click",()=>{
         if(S.answered)return;
-        if(pickedSet.has(pos)){pickedSet.delete(pos);b.classList.remove("selected");b.querySelector(".chk").textContent="☐";}
-        else{pickedSet.add(pos);b.classList.add("selected");b.querySelector(".chk").textContent="☑";}
+        if(pickedSet.has(pos)){pickedSet.delete(pos);b.classList.remove("selected");b.querySelector(".chk").textContent="☐";b.setAttribute("aria-pressed","false");}
+        else{pickedSet.add(pos);b.classList.add("selected");b.querySelector(".chk").textContent="☑";b.setAttribute("aria-pressed","true");}
       });
       wrap.appendChild(b);
     });
@@ -3639,6 +3652,19 @@ function gameOver(){
 document.addEventListener("keydown",e=>{
   // Don't hijack keys when typing in a fill-in-blank input
   if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;
+  // The subject/difficulty cards and the flashcard are <div role="button">.
+  // A real <button> responds to Enter and Space for free; a div does not, so
+  // we forward those two keys to a click ourselves.
+  if(e.target&&e.target.getAttribute&&e.target.getAttribute("role")==="button"&&(e.key==="Enter"||e.key===" ")){
+    e.preventDefault();e.target.click();return;
+  }
+  if(S.flash){
+    const go=id=>{const b=$(id);if(b&&!b.disabled)b.click();};
+    if(e.key==="ArrowRight")go("flash-next");
+    else if(e.key==="ArrowLeft")go("flash-prev");
+    else if(e.key===" "){e.preventDefault();go("flash-box");}
+    return;
+  }
   if(e.key==="Enter"){
     // A focused button already "clicks" itself on Enter. Clicking NEXT/RETRY
     // here as well made Enter on the CHANGE button restart the round instead.
@@ -3650,7 +3676,7 @@ document.addEventListener("keydown",e=>{
     const hb=$("hint-btn");if(hb&&!hb.disabled)hb.click();return;
   }
   if(!S.answered){
-    const map={a:0,b:1,c:2,d:3,"1":0,"2":1,"3":2,"4":3};
+    const map={a:0,b:1,c:2,d:3,e:4,f:5,"1":0,"2":1,"3":2,"4":3,"5":4,"6":5};
     const idx=map[e.key.toLowerCase()];
     if(idx!==undefined){
       const allBtns=document.querySelectorAll(".answer-btn");
